@@ -1,0 +1,17 @@
+{
+  "name": "strategy-doctor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI 策略体检与优化引擎 — Bitget AI Base Camp Hackathon · Track 2 Trading Infra",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc",
+    "demo": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^24.0.0"
+  }
+}
