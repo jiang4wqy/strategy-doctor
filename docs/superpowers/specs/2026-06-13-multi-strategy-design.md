@@ -1,8 +1,7 @@
 # Strategy Doctor Multi-Strategy Design
 
 **Status:** Approved on 2026-06-13. The shared contract, MA adapter,
-immutable registry, and registry-backed parser are merged on the integration
-branch.
+immutable registry, and registry-backed parser are merged on `main`.
 
 **Goal:** Add a second strategy archetype behind a small typed adapter registry
 while preserving the existing `ma-cross` behavior and the offline diagnostic

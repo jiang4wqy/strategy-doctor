@@ -2,6 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Historical note:** This plan records the completed contract rollout. Its
+> integration-branch commands have been superseded by the simpler `main` plus
+> four member branches model in `CONTRIBUTING.md`.
+
 **Goal:** Merge the shared multi-strategy type contract, immutable adapter registry, and registered MA adapter without changing existing runtime results.
 
 **Architecture:** Define the closed two-archetype discriminated union in `contracts.ts`, while explicitly narrowing the still-MA-only execution and prescription code to `MaCrossParams`. Add a complete `maCrossAdapter` and registry, then make runtime strategy parsing delegate parameter validation and strategy construction to that registry. RSI execution remains unsupported until the strategy branch registers its adapter.

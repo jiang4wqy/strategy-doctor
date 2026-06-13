@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-截至 2026-06-13，仓库已完成五维离线闭环、候选搜索、Bitget 公共数据、可选 LLM、CLI、CI 和提交材料。当前开发分支为 `codex/complete-hackathon-submission`。
+截至 2026-06-13，仓库已完成五维离线闭环、候选搜索、Bitget 公共数据、可选 LLM、CLI、CI、提交材料和多策略公共契约。`main` 是唯一公共基线，团队只使用 `CONTRIBUTING.md` 中列出的四个成员分支。
 
 | 里程碑 | 状态 |
 |---|---|

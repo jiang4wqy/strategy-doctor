@@ -1,41 +1,35 @@
 # Strategy Doctor 多人协作规范
 
-本规范是仓库内可执行的协作基线。扩展说明见
-`docs/Strategy-Doctor-团队协同分工方案.docx`，多策略接口以
+本规范是仓库内当前有效的协作基线。扩展说明见
+`docs/Strategy-Doctor-团队协同分工方案.docx`，但其中旧分支命令仅作历史参考；
+实际分支操作以本文件为准。多策略接口以
 `docs/superpowers/specs/2026-06-13-multi-strategy-design.md` 为准。
 
 ## 1. 分支与 worktree
 
-- `main`：稳定分支，不直接开发。
-- `codex/complete-hackathon-submission`：黑客松提交版冻结基线。
-- `feat/multi-strategy-integration`：P0 多策略集成分支，只由 A 合并。
-- 每位成员必须使用独立功能分支和独立 worktree。
+- `main`：唯一公共基线和 PR 目标，不直接开发。
+- P0 只保留四个成员分支：
+  - A：`feat/ma-adapter-integration`
+  - B：`feat/rsi-bollinger-adapter`
+  - C：`feat/generic-risk-engine`
+  - D：`test/multi-strategy-acceptance`
+- 每位成员只在分配给自己的一个分支中修改和提交。
+- 除非 A 明确批准，不再创建额外长期分支。
+- 所有成员 PR 都直接合入 `main`。
 - 禁止多人共享同一个工作目录，禁止在他人的 checkout 中切分支。
 - 共享分支禁止 force-push、rebase 和历史重写。
 
-Windows PowerShell 示例：
+新成员首次开始时只需：
 
 ```powershell
-# A：契约与集成
-git worktree add ..\strategy-doctor-contract `
-  -b feat/strategy-adapter-contract `
-  feat/multi-strategy-integration
-
-# B：RSI + Bollinger
-git worktree add ..\strategy-doctor-rsi `
-  -b feat/rsi-bollinger-adapter `
-  feat/multi-strategy-integration
-
-# C：公共执行与处方
-git worktree add ..\strategy-doctor-risk `
-  -b feat/generic-risk-engine `
-  feat/multi-strategy-integration
-
-# D：双策略验收与材料
-git worktree add ..\strategy-doctor-qa `
-  -b test/multi-strategy-acceptance `
-  feat/multi-strategy-integration
+git clone https://github.com/jiang4wqy/strategy-doctor.git
+cd strategy-doctor
+git switch <分配给自己的分支>
+git pull
 ```
+
+不要执行 `git switch main` 后直接修改。需要同步公共进展时，在自己的分支执行
+`git fetch origin`，再执行 `git merge origin/main`。
 
 ## 2. 文件 ownership
 
@@ -51,7 +45,7 @@ git worktree add ..\strategy-doctor-qa `
 
 ## 3. 契约冻结规则
 
-以下内容先于并行实现合并：
+以下内容已经冻结并进入 `main`：
 
 1. `Strategy` discriminated union。
 2. 公共风险参数。
@@ -60,18 +54,17 @@ git worktree add ..\strategy-doctor-qa `
 5. prescription changes 的跨策略表达。
 6. `ma-cross` 基线兼容条件。
 
-契约 PR 必须包含类型、runtime parser、契约测试、示例 JSON 和迁移说明。
-契约合并前，B/C/D 不得依赖未冻结字段。
+如确需修改这些契约，必须由 A 发起或明确批准，并补齐 runtime parser、
+契约测试、示例 JSON 和迁移说明。
 
 ## 4. 合并顺序
 
-固定顺序如下：
+公共契约和 MA adapter 基线已经进入 `main`。剩余建议合并顺序：
 
-1. 契约和 registry。
-2. MA adapter 迁移。
-3. 公共执行引擎和处方框架。
-4. RSI/Bollinger adapter。
-5. 双策略集成测试、CLI、示例和文档。
+1. C：公共执行引擎和处方框架。
+2. B：RSI/Bollinger adapter。
+3. A：跨模块接线、CLI 和 MA 兼容性收口。
+4. D：双策略集成测试、示例和文档。
 
 后序 PR 必须明确前置 commit 或 PR。不得通过同时修改共享文件绕过顺序。
 
@@ -83,7 +76,8 @@ git worktree add ..\strategy-doctor-qa `
 - 修改共享契约时，必须由 A 和受影响模块 owner 审查。
 - 普通模块 PR 至少由 A 和相邻模块 owner 审查。
 - 冲突由文件 owner 与 A 共同解决，禁止直接选择整文件 ours/theirs。
-- 合并前同步 integration；只允许在个人分支 rebase。
+- PR 的 base branch 必须是 `main`。
+- 合并前在个人分支合并最新 `origin/main`，禁止对已共享分支 rebase。
 
 仓库当前使用 `@jiang4wqy` 作为集成 owner。其他成员的 GitHub 用户名确认后，
 再追加到 `.github/CODEOWNERS` 对应路径，不以虚构账号占位。

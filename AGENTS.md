@@ -45,7 +45,7 @@ The integration owner has exclusive control of:
 - `src/strategy/registry.ts`
 - `src/cli.ts`
 - `package.json`
-- integration-branch merges
+- pull-request merges into `main`
 
 Other ownership lanes are defined in `CONTRIBUTING.md`. A worker must not edit
 another lane's files without recording the cross-lane dependency in the PR.
