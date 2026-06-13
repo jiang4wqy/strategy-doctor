@@ -2,7 +2,10 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
-import type { Strategy, StrategyParams } from '../../src/contracts.ts';
+import type {
+  MaCrossParams,
+  Strategy,
+} from '../../src/contracts.ts';
 import {
   buildBaseScenarioSet,
   loadDefaultSnapshotBundle,
@@ -62,7 +65,7 @@ test('five-dimensional doctor cycle is deterministic and only patches death-rela
   assert.ok(Number.isFinite(first.tradeoff.robustnessGain));
   assert.ok(Number.isFinite(first.tradeoff.returnCost));
 
-  const allowed = new Set<keyof StrategyParams>();
+  const allowed = new Set<keyof MaCrossParams>();
   for (const death of first.deaths) {
     if (death.cause === 'liquidation') {
       allowed.add('leverage');
@@ -77,6 +80,6 @@ test('five-dimensional doctor cycle is deterministic and only patches death-rela
 
   assert.ok(
     Object.keys(first.prescription.changes)
-      .every(key => allowed.has(key as keyof StrategyParams)),
+      .every(key => allowed.has(key as keyof MaCrossParams)),
   );
 });

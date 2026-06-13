@@ -1,4 +1,4 @@
-import type { Strategy, StrategyParams } from '../contracts.ts';
+import type { MaCrossParams, MaCrossStrategy } from '../contracts.ts';
 
 function fail(message: string): never {
   throw new Error(`invalid strategy: ${message}`);
@@ -25,7 +25,7 @@ function finiteNumber(value: unknown, field: string): number {
   return value;
 }
 
-function parseParams(value: unknown): StrategyParams {
+function parseParams(value: unknown): MaCrossParams {
   const params = object(value, 'params');
   const fastMA = finiteNumber(params.fastMA, 'params.fastMA');
   const slowMA = finiteNumber(params.slowMA, 'params.slowMA');
@@ -52,7 +52,7 @@ function parseParams(value: unknown): StrategyParams {
   return { fastMA, slowMA, leverage, stopLossPct, positionPct };
 }
 
-export function parseStrategy(value: unknown): Strategy {
+export function parseStrategy(value: unknown): MaCrossStrategy {
   const strategy = object(value, 'strategy');
   if (strategy.archetype !== 'ma-cross') {
     fail('archetype must be ma-cross');

@@ -1,9 +1,9 @@
 import type {
   BacktestAdapter,
+  MaCrossParams,
   Metrics,
   Scenario,
   Strategy,
-  StrategyParams,
 } from '../contracts.ts';
 import { generatePath } from './path.ts';
 
@@ -23,7 +23,7 @@ function simpleMovingAverage(
   return sum / period;
 }
 
-export function runOnPrices(params: StrategyParams, prices: number[]): Metrics {
+export function runOnPrices(params: MaCrossParams, prices: number[]): Metrics {
   if (
     prices.length < 2
     || prices.some(price => !Number.isFinite(price) || price <= 0)
@@ -99,6 +99,9 @@ export function runOnPrices(params: StrategyParams, prices: number[]): Metrics {
 
 export class MockBacktester implements BacktestAdapter {
   async run(strategy: Strategy, scenario: Scenario): Promise<Metrics> {
+    if (strategy.archetype !== 'ma-cross') {
+      throw new Error(`unsupported strategy archetype: ${strategy.archetype}`);
+    }
     return runOnPrices(strategy.params, generatePath(scenario.shock));
   }
 }

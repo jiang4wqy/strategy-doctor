@@ -2,7 +2,10 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
-import type { Scenario, Strategy } from '../../src/contracts.ts';
+import type {
+  MaCrossStrategy,
+  Scenario,
+} from '../../src/contracts.ts';
 import { validateOnHeldOut } from '../../src/prescribe/validate.ts';
 import {
   buildSentimentScenario,
@@ -17,8 +20,10 @@ import { getProfile } from '../../src/scoring/styles.ts';
 const loadJson = (relativePath: string): unknown =>
   JSON.parse(readFileSync(new URL(relativePath, import.meta.url), 'utf8'));
 
-const original = loadJson('../../examples/trend-follower.json') as Strategy;
-const patched: Strategy = {
+const original = loadJson(
+  '../../examples/trend-follower.json',
+) as MaCrossStrategy;
+const patched: MaCrossStrategy = {
   ...original,
   id: `${original.id}-rx`,
   params: {

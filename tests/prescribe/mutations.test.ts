@@ -1,14 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
-import type { StrategyParams } from '../../src/contracts.ts';
+import type { MaCrossParams } from '../../src/contracts.ts';
 import {
   diffParams,
   jitterParams,
   targetedPatch,
 } from '../../src/prescribe/mutations.ts';
 
-const base: StrategyParams = {
+const base: MaCrossParams = {
   fastMA: 8,
   slowMA: 30,
   leverage: 10,

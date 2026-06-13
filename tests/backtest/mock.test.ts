@@ -1,7 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester, runOnPrices } from '../../src/backtest/mock.ts';
-import type { Scenario, Strategy, StrategyParams } from '../../src/contracts.ts';
+import type {
+  MaCrossParams,
+  Scenario,
+  Strategy,
+} from '../../src/contracts.ts';
 
 const upTrend = (length: number, start = 100) =>
   Array.from({ length }, (_, index) => start * 1.01 ** index);
@@ -12,7 +16,7 @@ const gapCrash = () => {
   return [...rising, peak * 0.85, peak * 0.83, peak * 0.81];
 };
 
-const baseParams: StrategyParams = {
+const baseParams: MaCrossParams = {
   fastMA: 3,
   slowMA: 10,
   leverage: 10,

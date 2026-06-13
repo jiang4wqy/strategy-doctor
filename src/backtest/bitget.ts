@@ -142,6 +142,9 @@ export class BitgetBacktester implements BacktestAdapter {
   }
 
   async run(strategy: Strategy, scenario: Scenario): Promise<Metrics> {
+    if (strategy.archetype !== 'ma-cross') {
+      throw new Error(`unsupported strategy archetype: ${strategy.archetype}`);
+    }
     const symbol = strategy.universe[0];
     if (!symbol) {
       throw new Error('strategy universe must contain a Bitget symbol');

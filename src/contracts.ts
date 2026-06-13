@@ -12,23 +12,62 @@
 export type Dimension = 'sentiment' | 'macro' | 'market-intel' | 'news' | 'technical';
 export type StyleName = 'conservative' | 'aggressive' | 'trend';
 
-/** 可进化的"基因"——处方层只允许改这里 */
-export interface StrategyParams {
-  fastMA: number;        // 快线周期（bar 数，≥2）
-  slowMA: number;        // 慢线周期（> fastMA）
+export interface CommonRiskParams {
   leverage: number;      // 杠杆倍数（≥1）
   stopLossPct: number;   // 止损幅度（0.05 = 5%）
   positionPct: number;   // 单仓占权益比例（0~1]
 }
 
-export interface Strategy {
+/** 均线策略可进化的"基因" */
+export interface MaCrossParams extends CommonRiskParams {
+  fastMA: number;        // 快线周期（bar 数，≥2）
+  slowMA: number;        // 慢线周期（> fastMA）
+}
+
+/** RSI + Bollinger 均值回归策略可进化的"基因" */
+export interface RsiBollingerParams extends CommonRiskParams {
+  rsiPeriod: number;
+  rsiOversold: number;
+  rsiOverbought: number;
+  bollingerPeriod: number;
+  bollingerStdDev: number;
+}
+
+export interface StrategyBase {
   id: string;
   name: string;
-  archetype: 'ma-cross';   // MVP 仅一种原型；扩展时加联合成员
-  params: StrategyParams;
   universe: string[];      // e.g. ['BTCUSDT']
   timeframe: string;       // e.g. '1h'
 }
+
+export interface MaCrossStrategy extends StrategyBase {
+  archetype: 'ma-cross';
+  params: MaCrossParams;
+}
+
+export interface RsiBollingerStrategy extends StrategyBase {
+  archetype: 'rsi-bollinger-mean-reversion';
+  params: RsiBollingerParams;
+}
+
+export type Strategy = MaCrossStrategy | RsiBollingerStrategy;
+export type StrategyParams = Strategy['params'];
+export type StrategyArchetype = Strategy['archetype'];
+
+export interface ParamsByArchetype {
+  'ma-cross': MaCrossParams;
+  'rsi-bollinger-mean-reversion': RsiBollingerParams;
+}
+
+export type StrategyByArchetype<A extends StrategyArchetype> =
+  Extract<Strategy, { archetype: A }>;
+
+export type StrategyParamKey =
+  | keyof MaCrossParams
+  | keyof RsiBollingerParams;
+
+export type ParameterChanges =
+  Partial<Record<StrategyParamKey, number>>;
 
 export interface MarketShock {
   kind: 'crash' | 'whipsaw' | 'squeeze' | 'grind' | 'gap';
@@ -62,6 +101,42 @@ export interface BacktestAdapter {
 }
 
 export type DeathCause = 'liquidation' | 'drawdown-breach' | 'stop-loss-bleed' | 'survived';
+export type PositionDirection = -1 | 0 | 1;
+export type StrategyDecision = 'hold' | 'flat' | 'long' | 'short';
+
+export interface DecisionContext {
+  prices: readonly number[];
+  index: number;
+  position: PositionDirection;
+  entryPrice: number;
+}
+
+export interface TargetedPatch<P> {
+  patch: Partial<P>;
+  rationale: string[];
+}
+
+export interface StrategyAdapter<A extends StrategyArchetype> {
+  readonly archetype: A;
+  parseParams(value: unknown): ParamsByArchetype[A];
+  decide(
+    params: ParamsByArchetype[A],
+    context: DecisionContext,
+  ): StrategyDecision;
+  targetedPatch(
+    params: ParamsByArchetype[A],
+    causes: readonly DeathCause[],
+  ): TargetedPatch<ParamsByArchetype[A]>;
+  targetedFields(
+    causes: ReadonlySet<DeathCause>,
+  ): readonly (keyof ParamsByArchetype[A])[];
+  jitterParams(
+    params: ParamsByArchetype[A],
+    random: () => number,
+    fields: readonly (keyof ParamsByArchetype[A])[],
+  ): ParamsByArchetype[A];
+  paramLabel(key: keyof ParamsByArchetype[A]): string;
+}
 
 export interface Death {
   scenarioId: string;
@@ -95,7 +170,7 @@ export interface StyleScore {
 }
 
 export interface Prescription {
-  changes: Partial<StrategyParams>;   // 相对原参数的改动
+  changes: ParameterChanges;          // 相对原参数的改动
   rationale: string;                  // 每项改动对应哪条死因
   patchedStrategy: Strategy;
 }

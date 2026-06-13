@@ -2,11 +2,12 @@ import type {
   BacktestAdapter,
   Death,
   DeathCause,
+  MaCrossParams,
+  MaCrossStrategy,
   Metrics,
   Prescription,
   Scenario,
   Strategy,
-  StrategyParams,
 } from '../contracts.ts';
 import { mulberry32 } from '../backtest/path.ts';
 import { scoreStyle } from '../scoring/scorecard.ts';
@@ -23,7 +24,7 @@ export interface PrescribeOptions {
 }
 
 interface CandidateEvaluation {
-  params: StrategyParams;
+  params: MaCrossParams;
   score: number;
   survived: boolean;
   liquidations: number;
@@ -36,7 +37,7 @@ const DEFAULT_OPTIONS: PrescribeOptions = {
   seed: 7,
 };
 
-const PARAM_LABELS: Record<keyof StrategyParams, string> = {
+const PARAM_LABELS: Record<keyof MaCrossParams, string> = {
   fastMA: '快均线',
   slowMA: '慢均线',
   leverage: '杠杆',
@@ -44,8 +45,8 @@ const PARAM_LABELS: Record<keyof StrategyParams, string> = {
   positionPct: '仓位比例',
 };
 
-function targetedFields(causes: Set<DeathCause>): (keyof StrategyParams)[] {
-  const fields = new Set<keyof StrategyParams>();
+function targetedFields(causes: Set<DeathCause>): (keyof MaCrossParams)[] {
+  const fields = new Set<keyof MaCrossParams>();
   if (causes.has('liquidation')) {
     fields.add('leverage');
     fields.add('stopLossPct');
@@ -61,17 +62,17 @@ function targetedFields(causes: Set<DeathCause>): (keyof StrategyParams)[] {
 }
 
 function summarizeChanges(
-  before: StrategyParams,
-  changes: Partial<StrategyParams>,
+  before: MaCrossParams,
+  changes: Partial<MaCrossParams>,
 ): string {
-  return (Object.keys(changes) as (keyof StrategyParams)[])
+  return (Object.keys(changes) as (keyof MaCrossParams)[])
     .map(key => `${PARAM_LABELS[key]} ${before[key]}→${changes[key]}`)
     .join('，');
 }
 
 function preservesTargetedIntent(
-  candidate: StrategyParams,
-  base: StrategyParams,
+  candidate: MaCrossParams,
+  base: MaCrossParams,
   causes: Set<DeathCause>,
 ): boolean {
   if (causes.has('liquidation')) {
@@ -124,13 +125,13 @@ function isBetter(
 }
 
 async function evaluateCandidate(
-  strategy: Strategy,
-  params: StrategyParams,
+  strategy: MaCrossStrategy,
+  params: MaCrossParams,
   treatment: Scenario[],
   backtest: BacktestAdapter,
   profile: StyleProfile,
 ): Promise<CandidateEvaluation> {
-  const trial: Strategy = {
+  const trial: MaCrossStrategy = {
     ...strategy,
     id: `${strategy.id}-rx`,
     params,
@@ -158,6 +159,9 @@ export async function prescribe(
   profile: StyleProfile,
   options: PrescribeOptions = DEFAULT_OPTIONS,
 ): Promise<Prescription> {
+  if (strategy.archetype !== 'ma-cross') {
+    throw new Error(`unsupported strategy archetype: ${strategy.archetype}`);
+  }
   const causes = new Set(
     deaths
       .map(death => death.cause)
@@ -181,13 +185,13 @@ export async function prescribe(
     strategy.params,
     [...causes],
   );
-  const base: StrategyParams = {
+  const base: MaCrossParams = {
     ...strategy.params,
     ...patch,
   };
   const random = mulberry32(options.seed);
   const fields = targetedFields(causes);
-  const candidates: StrategyParams[] = [base];
+  const candidates: MaCrossParams[] = [base];
   for (let index = 1; index < options.candidates; index++) {
     const candidate = jitterParams(base, random, fields);
     if (preservesTargetedIntent(candidate, base, causes)) {

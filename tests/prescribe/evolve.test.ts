@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
 import type {
   Death,
+  MaCrossStrategy,
   Metrics,
   Scenario,
   Strategy,
@@ -24,7 +25,9 @@ import { getProfile } from '../../src/scoring/styles.ts';
 const loadJson = (relativePath: string): unknown =>
   JSON.parse(readFileSync(new URL(relativePath, import.meta.url), 'utf8'));
 
-const fragile = loadJson('../../examples/trend-follower.json') as Strategy;
+const fragile = loadJson(
+  '../../examples/trend-follower.json',
+) as MaCrossStrategy;
 
 const treatmentScenarios = (): Scenario[] => [
   buildSentimentScenario(
@@ -93,6 +96,10 @@ test('prescribe lowers leverage and does not reduce treatment risk score', async
     profile,
   );
 
+  assert.equal(prescription.patchedStrategy.archetype, 'ma-cross');
+  if (prescription.patchedStrategy.archetype !== 'ma-cross') {
+    assert.fail('expected a moving-average prescription');
+  }
   assert.ok(
     prescription.patchedStrategy.params.leverage < fragile.params.leverage,
   );

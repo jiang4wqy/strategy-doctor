@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
 import type {
   Death,
+  MaCrossStrategy,
   Metrics,
   Scenario,
   Strategy,
@@ -76,7 +77,7 @@ const diagnose = (
 test('frozen snapshots complete diagnosis, prescription, and held-out validation offline', async () => {
   const strategy = loadJson(
     '../../examples/trend-follower.json',
-  ) as Strategy;
+  ) as MaCrossStrategy;
   const { treatment, heldOut } = buildScenarioSets();
   const backtest = new MockBacktester();
   const profile = getProfile('conservative');
@@ -112,6 +113,10 @@ test('frozen snapshots complete diagnosis, prescription, and held-out validation
     profile,
   );
 
+  assert.equal(prescription.patchedStrategy.archetype, 'ma-cross');
+  if (prescription.patchedStrategy.archetype !== 'ma-cross') {
+    assert.fail('expected a moving-average prescription');
+  }
   assert.equal(
     prescription.patchedStrategy.params.fastMA,
     strategy.params.fastMA,

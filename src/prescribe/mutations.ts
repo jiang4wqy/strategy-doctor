@@ -1,13 +1,13 @@
-import type { DeathCause, StrategyParams } from '../contracts.ts';
+import type { DeathCause, MaCrossParams } from '../contracts.ts';
 
 export function targetedPatch(
-  params: StrategyParams,
+  params: MaCrossParams,
   causes: DeathCause[],
 ): {
-  patch: Partial<StrategyParams>;
+  patch: Partial<MaCrossParams>;
   rationale: string[];
 } {
-  const patch: Partial<StrategyParams> = {};
+  const patch: Partial<MaCrossParams> = {};
   const rationale: string[] = [];
   const uniqueCauses = new Set(causes);
 
@@ -35,16 +35,16 @@ export function targetedPatch(
 }
 
 export function jitterParams(
-  params: StrategyParams,
+  params: MaCrossParams,
   random: () => number,
-  fields: readonly (keyof StrategyParams)[] = [
+  fields: readonly (keyof MaCrossParams)[] = [
     'fastMA',
     'slowMA',
     'leverage',
     'stopLossPct',
     'positionPct',
   ],
-): StrategyParams {
+): MaCrossParams {
   const selected = new Set(fields);
   const jitter = (value: number) => value * (0.8 + random() * 0.4);
   const fastMA = selected.has('fastMA')
@@ -76,11 +76,11 @@ export function jitterParams(
 }
 
 export function diffParams(
-  before: StrategyParams,
-  after: StrategyParams,
-): Partial<StrategyParams> {
-  const changes: Partial<StrategyParams> = {};
-  for (const key of Object.keys(after) as (keyof StrategyParams)[]) {
+  before: MaCrossParams,
+  after: MaCrossParams,
+): Partial<MaCrossParams> {
+  const changes: Partial<MaCrossParams> = {};
+  for (const key of Object.keys(after) as (keyof MaCrossParams)[]) {
     if (before[key] !== after[key]) {
       changes[key] = after[key];
     }
