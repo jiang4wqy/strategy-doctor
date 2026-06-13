@@ -31,6 +31,8 @@ export interface RsiBollingerParams extends CommonRiskParams {
   rsiOverbought: number;
   bollingerPeriod: number;
   bollingerStdDev: number;
+  trendFilterPeriod: number;
+  trendFilterThreshold: number;
 }
 
 export interface StrategyBase {
