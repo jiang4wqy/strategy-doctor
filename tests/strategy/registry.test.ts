@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
-import type { MaCrossParams } from '../../src/contracts.ts';
+import type {
+  MaCrossParams,
+  StrategyArchetype,
+} from '../../src/contracts.ts';
 import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
 import {
   createStrategyRegistry,
@@ -91,6 +94,23 @@ test('moving-average adapter exposes its prescription policy', () => {
     maCrossAdapter.targetedPatch(params, ['drawdown-breach']).patch,
     { positionPct: 0.7 },
   );
+  const combined = maCrossAdapter.targetedPatch(params, [
+    'liquidation',
+    'drawdown-breach',
+    'stop-loss-bleed',
+  ]);
+  assert.deepEqual(combined.patch, {
+    leverage: 5,
+    stopLossPct: 0.08,
+    positionPct: 0.7,
+    fastMA: 3,
+    slowMA: 5,
+  });
+  assert.deepEqual(combined.rationale, [
+    '清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内',
+    '回撤击穿 → 降低仓位暴露',
+    '震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音',
+  ]);
   assert.equal(maCrossAdapter.paramLabel('fastMA'), '快均线');
 
   const first = maCrossAdapter.jitterParams(
@@ -106,6 +126,13 @@ test('moving-average adapter exposes its prescription policy', () => {
   assert.deepEqual(first, second);
   assert.equal(first.fastMA, params.fastMA);
   assert.equal(first.slowMA, params.slowMA);
+
+  const allFields = maCrossAdapter.jitterParams(
+    params,
+    mulberry32(9),
+    ['fastMA', 'slowMA', 'leverage', 'stopLossPct', 'positionPct'],
+  );
+  assert.doesNotThrow(() => maCrossAdapter.parseParams(allFields));
 });
 
 test('registry constructs a typed strategy through its adapter', () => {
@@ -123,4 +150,22 @@ test('registry constructs a typed strategy through its adapter', () => {
     Object.keys(strategy),
     ['id', 'name', 'archetype', 'params', 'universe', 'timeframe'],
   );
+});
+
+test('registry preserves discrimination for a runtime archetype', () => {
+  const registry = createStrategyRegistry([maCrossAdapter]);
+  const parseRuntimeArchetype = (archetype: StrategyArchetype) => {
+    return registry.parse(archetype, {
+      id: 'runtime',
+      name: 'runtime strategy',
+      universe: ['BTCUSDT'],
+      timeframe: '1h',
+    }, params);
+  };
+
+  const strategy = parseRuntimeArchetype('ma-cross');
+  assert.equal(strategy.archetype, 'ma-cross');
+  if (strategy.archetype === 'ma-cross') {
+    assert.equal(strategy.params.fastMA, params.fastMA);
+  }
 });

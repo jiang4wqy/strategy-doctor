@@ -7,7 +7,17 @@ import type {
   Scenario,
   Scorecard,
   Strategy,
+  StrategyArchetype,
+  StrategyByArchetype,
 } from '../src/contracts.ts';
+
+function signalPeriod(
+  strategy: StrategyByArchetype<StrategyArchetype>,
+): number {
+  return strategy.archetype === 'ma-cross'
+    ? strategy.params.fastMA
+    : strategy.params.rsiPeriod;
+}
 
 test('契约：四大核心类型可构造且字段齐全', () => {
   const movingAverage: MaCrossStrategy = {
@@ -61,4 +71,6 @@ test('契约：四大核心类型可构造且字段齐全', () => {
     strategies.map(strategy => strategy.archetype),
     ['ma-cross', 'rsi-bollinger-mean-reversion'],
   );
+  assert.equal(signalPeriod(movingAverage), 8);
+  assert.equal(signalPeriod(meanReversion), 14);
 });

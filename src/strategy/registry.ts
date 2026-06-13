@@ -53,7 +53,7 @@ export function createStrategyRegistry(
         params: adapter.parseParams(value),
         universe: base.universe,
         timeframe: base.timeframe,
-      };
+      } as unknown as StrategyByArchetype<A>;
     },
   };
   return Object.freeze(registry);

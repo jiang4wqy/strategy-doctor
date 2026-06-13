@@ -43,6 +43,14 @@ git pull
 一个文件同一时间只能有一个 owner。跨 ownership 修改必须在 PR 的
 “跨模块依赖”中写明，并由文件 owner 与 A 共同解决冲突。
 
+集成边界：
+
+- B 负责提交 RSI/Bollinger adapter，但不直接修改
+  `src/strategy/registry.ts`；adapter 通过审查后由 A 完成注册。
+- C 负责将 `src/prescribe/evolve.ts` 迁移为调用 adapter 的 mutation
+  policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
+- A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
+
 ## 3. 契约冻结规则
 
 以下内容已经冻结并进入 `main`：
@@ -59,12 +67,13 @@ git pull
 
 ## 4. 合并顺序
 
-公共契约和 MA adapter 基线已经进入 `main`。剩余建议合并顺序：
+公共契约和 MA adapter 基线已经进入 `main`。剩余建议分阶段合并：
 
-1. C：公共执行引擎和处方框架。
-2. B：RSI/Bollinger adapter。
-3. A：跨模块接线、CLI 和 MA 兼容性收口。
-4. D：双策略集成测试、示例和文档。
+1. A 基础收口：类型缩窄、通用 registry parser、MA policy ownership。
+2. C：公共执行引擎和 adapter-driven 处方框架。
+3. B：RSI/Bollinger adapter。
+4. A 最终接线：注册 RSI adapter、CLI 和 MA 兼容性复核。
+5. D：双策略集成测试、示例和文档。
 
 后序 PR 必须明确前置 commit 或 PR。不得通过同时修改共享文件绕过顺序。
 

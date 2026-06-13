@@ -5,10 +5,6 @@ import type {
   StrategyAdapter,
   StrategyDecision,
 } from '../../contracts.ts';
-import {
-  jitterParams,
-  targetedPatch,
-} from '../../prescribe/mutations.ts';
 
 const PARAM_LABELS: Record<keyof MaCrossParams, string> = {
   fastMA: '快均线',
@@ -105,6 +101,41 @@ function decide(
   return 'hold';
 }
 
+function targetedPatch(
+  params: MaCrossParams,
+  causes: readonly DeathCause[],
+): {
+  patch: Partial<MaCrossParams>;
+  rationale: string[];
+} {
+  const patch: Partial<MaCrossParams> = {};
+  const rationale: string[] = [];
+  const uniqueCauses = new Set(causes);
+
+  if (uniqueCauses.has('liquidation')) {
+    const leverage = Math.max(1, Math.round(params.leverage / 2));
+    patch.leverage = leverage;
+    patch.stopLossPct = Math.min(
+      params.stopLossPct,
+      Number((0.8 / leverage / 2).toFixed(3)),
+    );
+    rationale.push('清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内');
+  }
+
+  if (uniqueCauses.has('drawdown-breach')) {
+    patch.positionPct = Number((params.positionPct * 0.7).toFixed(2));
+    rationale.push('回撤击穿 → 降低仓位暴露');
+  }
+
+  if (uniqueCauses.has('stop-loss-bleed')) {
+    patch.fastMA = Math.round(params.fastMA * 1.5);
+    patch.slowMA = Math.round(params.slowMA * 1.5);
+    rationale.push('震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音');
+  }
+
+  return { patch, rationale };
+}
+
 function targetedFields(
   causes: ReadonlySet<DeathCause>,
 ): readonly (keyof MaCrossParams)[] {
@@ -123,13 +154,46 @@ function targetedFields(
   return [...fields];
 }
 
+function jitterParams(
+  params: MaCrossParams,
+  random: () => number,
+  fields: readonly (keyof MaCrossParams)[],
+): MaCrossParams {
+  const selected = new Set(fields);
+  const jitter = (value: number) => value * (0.8 + random() * 0.4);
+  const fastMA = selected.has('fastMA')
+    ? Math.max(2, Math.round(jitter(params.fastMA)))
+    : params.fastMA;
+  const slowMA = selected.has('slowMA')
+    ? Math.max(fastMA + 2, Math.round(jitter(params.slowMA)))
+    : params.slowMA;
+
+  return {
+    fastMA,
+    slowMA,
+    leverage: selected.has('leverage')
+      ? Math.max(1, Math.round(jitter(params.leverage)))
+      : params.leverage,
+    stopLossPct: selected.has('stopLossPct')
+      ? Math.min(
+        0.99,
+        Math.max(0.01, Number(jitter(params.stopLossPct).toFixed(3))),
+      )
+      : params.stopLossPct,
+    positionPct: selected.has('positionPct')
+      ? Math.min(
+        1,
+        Math.max(0.1, Number(jitter(params.positionPct).toFixed(2))),
+      )
+      : params.positionPct,
+  };
+}
+
 export const maCrossAdapter: StrategyAdapter<'ma-cross'> = {
   archetype: 'ma-cross',
   parseParams,
   decide,
-  targetedPatch(params, causes) {
-    return targetedPatch(params, [...causes]);
-  },
+  targetedPatch,
   targetedFields,
   jitterParams,
   paramLabel(key) {

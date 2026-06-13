@@ -60,10 +60,7 @@ export interface ParamsByArchetype {
 }
 
 export type StrategyByArchetype<A extends StrategyArchetype> =
-  StrategyBase & {
-    archetype: A;
-    params: ParamsByArchetype[A];
-  };
+  Extract<Strategy, { archetype: A }>;
 
 export type StrategyParamKey =
   | keyof MaCrossParams
