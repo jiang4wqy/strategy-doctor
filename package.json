@@ -7,8 +7,13 @@
   "engines": { "node": ">=24" },
   "scripts": {
     "test": "node --test \"tests/**/*.test.ts\"",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=90 --test-coverage-branches=80 --test-coverage-functions=95 \"tests/**/*.test.ts\"",
     "typecheck": "tsc",
-    "demo": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42"
+    "demo": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6",
+    "demo:json": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --format json",
+    "demo:live": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --backtest bitget",
+    "snapshots:refresh": "node src/scripts/refresh-snapshots.ts",
+    "verify": "npm run test:coverage && npm run typecheck && npm run demo"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

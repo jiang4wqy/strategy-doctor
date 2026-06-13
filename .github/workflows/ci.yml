@@ -16,5 +16,7 @@ jobs:
           node-version: '24'
           cache: 'npm'
       - run: npm ci
-      - run: npm test
+      - run: npm run test:coverage
       - run: npm run typecheck
+      - run: npm run demo
+      - run: git diff --check
