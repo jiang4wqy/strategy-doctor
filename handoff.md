@@ -4,67 +4,172 @@
 
 ## 当前结论
 
-黑客松提交版代码和仓库内材料已经完成。剩余项需要账号持有人参与：录屏、上传、填写视频 URL、推送和提交表单。
+黑客松提交版仍以 `7cc19fb` 为稳定基线。多策略实现代码尚未开始。
 
-## Git
+本轮已经完成多策略开发前置：
 
-- 分支：`codex/complete-hackathon-submission`
-- 基线：`04f4d81`
-- 核心实现：`51fcc58`
-- CI：`93b45cb`
-- 尚未推送、创建 PR 或打 tag。
+- 建立独立 integration worktree。
+- 验证基线测试与覆盖率。
+- 恢复团队协作 Word 文档。
+- 落地仓库级多人开发约束。
+- 写好多策略正式设计规格。
 
-## 已实现
+下一步不是直接改 `src/**`，而是团队先审阅并确认设计规格。确认后再编写
+逐任务实施计划，并按 ownership 分支并行开发。
 
-- 五维快照、候选搜索和最坏场景选择。
-- 完整 `ScenarioEvaluation[]`，survivor 可见。
-- 策略、价格、场景集合和 seed 校验。
-- Mock 与 Bitget 公共 K 线回测。
-- 三风格评分、死因定向处方和 held-out 验证。
-- Markdown/JSON CLI、文件输出和帮助。
-- 可选 Anthropic 叙事与 fallback。
-- MCP JSON/SSE、并发初始化和在线快照刷新。
-- 覆盖率门槛、CI、README、演示和提交材料。
-- 当前正式支持 `ma-cross`；多策略扩展留到下一里程碑的 `StrategyAdapter` 注册表和 RSI 均值回归参考实现。
+## 工作区与分支
+
+### 当前使用
+
+- 路径：`C:\Users\lenovo\Documents\GitHub\strategy-doctor-integration`
+- 分支：`feat/multi-strategy-integration`
+- 基线：`7cc19fb docs: finalize hackathon submission materials`
+- 类型：独立 Git worktree
+
+### 不再用于本阶段开发
+
+- 路径：`C:\Users\lenovo\Documents\GitHub\strategy-doctor`
+- 当前被外部进程切到 `main`
+- 不要在该共享 checkout 中继续多策略开发
+
+2026-06-13 18:05:00 至 18:05:07，原 checkout 的 reflog 记录了外部
+`reset`、切到 `feat/backtest`、再切到 `main`。这不是本轮执行的操作，并导致
+未提交的 `handoff.md` 修改和未跟踪 Word 文件从原工作区消失。
+
+处理结果：
+
+- 未回滚或覆盖外部改动。
+- 从 `codex/complete-hackathon-submission` 建立新 worktree。
+- 从当天 Codex 会话日志恢复 handoff 内容和 Word 生成脚本。
+- 后续工作全部在 integration worktree 中进行。
+
+## 多人开发规范状态
+
+仓库级规范已经写好：
+
+- `AGENTS.md`
+  - 约束代理范围、worktree 隔离、ownership、TDD、验证和安全边界。
+- `CONTRIBUTING.md`
+  - 定义 A/B/C/D 分工、文件 owner、分支命名、固定合并顺序、PR 规则和 DoD。
+- `.github/CODEOWNERS`
+  - 当前使用已验证的仓库 owner `@jiang4wqy` 作为中央集成 owner。
+- `.github/pull_request_template.md`
+  - 强制记录范围、接口变化、依赖顺序、测试数量、coverage 和安全检查。
+- `docs/Strategy-Doctor-团队协同分工方案.docx`
+  - 详细 4 人方案、3/5 人调整、worktree 命令、P0-P4 清单和策略路线。
+
+当前本地约束已完整。GitHub 远端是否启用 branch protection、required review 和
+required CODEOWNERS review 尚未配置或验证，需要仓库账号持有人在 push 后设置。
+
+## Word 文档恢复与 QA
+
+文件：
+
+- `docs/Strategy-Doctor-团队协同分工方案.docx`
+- 大小：50,066 bytes
+
+恢复方式：
+
+- 从 `2026-06-13` Codex 会话日志提取原始生成脚本。
+- 在内存中重放，不保留临时生成脚本。
+- 应用原会话最后一次表格 indent 修订。
+
+结构审计结果：
+
+- 69 个正文段落。
+- 14 张表。
+- Letter 页面和 1 英寸页边距。
+- Heading 1/2/3 字号与段距符合原 preset。
+- 必需章节完整。
+- 无 `TODO`、`TBD`、`<填写>` 或“待补充”。
+- 真实 bullet/decimal numbering 存在。
+- 多页表头 repeat 属性存在。
+- 无固定表格行高。
+- 14 张表的 `tblW`、`tblInd`、`tblGrid` 和 `tcW` 全部一致。
+
+视觉 QA 未完成：
+
+- 标准 `render_docx.py` 仍因本机没有 LibreOffice/`soffice` 报
+  `FileNotFoundError: [WinError 2]`。
+- 因此不能声称逐页 PNG 已检查。
+
+## 多策略设计规格
+
+文件：
+
+- `docs/superpowers/specs/2026-06-13-multi-strategy-design.md`
+
+已冻结的设计：
+
+- 闭合的两策略 registry，不做动态插件或 DSL。
+- `Strategy` discriminated union。
+- 公共风险参数与策略专属信号参数分离。
+- adapter 负责 parser、decision、mutation 和参数标签。
+- 公共 engine 负责持仓、止损、清算、equity 和 drawdown。
+- 保留 `runOnPrices(MaCrossParams, prices)` 兼容入口。
+- MA 决策语义保持现状。
+- RSI 使用 Wilder RSI；Bollinger 使用 SMA 和 population standard deviation。
+- RSI/Bollinger 明确多空入场和中轨/RSI 50 退出规则。
+- prescription `changes` 保持 JSON key/value object 兼容。
+- 固定合并顺序和完整测试矩阵。
+
+当前状态：
+
+- 规格已完成自审。
+- 等待用户/团队确认。
+- 未创建实施代码或 `examples/rsi-bollinger.json`。
 
 ## 最近验证
 
-`npm.cmd run verify`：
-
-- 116 passed，1 skipped live smoke，0 failed。
-- Lines 95.52%，branches 86.47%，functions 98.94%。
-- Typecheck 和 offline demo 通过。
-- `git diff --check` 通过。
-
-快照时间：`2026-06-13T04:15:45.396Z`。
-
-当前 seed 42：
-
-- conservative 6，aggressive 21，trend 15。
-- leverage `10 -> 5`
-- stopLossPct `0.5 -> 0.072`
-- positionPct `1 -> 0.6`
-- held-out 风险分 `+2`
-- held-out 平均收益 `+37.1%`
-
-## 最终操作
+在 integration worktree 基线执行：
 
 ```powershell
 npm.cmd ci
 npm.cmd run verify
-npm.cmd run demo:json
-$env:BITGET_MCP_SMOKE='1'
-node --test tests/integration/bitget-live.test.ts
-npm.cmd run demo:live
-git diff --check
-git status --short
 ```
 
-然后按 `docs/DEMO.md` 录屏，把 URL 填入 `docs/SUBMISSION.md`，推送分支并创建 PR。合并后再打 `mvp-m3`。
+结果：
 
-## 安全约束
+- 117 tests。
+- 116 passed。
+- 1 skipped（默认跳过真实 Bitget smoke）。
+- 0 failed。
+- Lines 95.52%。
+- Branches 86.47%。
+- Functions 98.94%。
+- TypeScript typecheck 通过。
+- 离线 demo 通过。
 
-- 不添加账户、持仓或下单功能。
-- 不提交 Bitget 或 Anthropic 凭证。
-- 默认 demo 和 CI 保持离线。
-- 快照更新后允许场景存活，不修改 shock 强制死亡。
+## 下一步
+
+1. 团队审阅：
+   - `docs/superpowers/specs/2026-06-13-multi-strategy-design.md`
+2. 人工用 Word 打开协作方案，检查：
+   - 分页和跨页表头。
+   - 长路径换行。
+   - P0-P4 大表密度。
+3. 设计确认后，使用 `superpowers:writing-plans` 编写逐任务实施计划。
+4. 按固定顺序开发：
+   - 契约/registry。
+   - MA adapter 迁移。
+   - 公共执行/处方。
+   - RSI/Bollinger adapter。
+   - 双策略集成测试和材料。
+
+## P0 验收标准
+
+- 原 `ma-cross` seed 42 结果无意外变化。
+- 新增 `examples/rsi-bollinger.json`。
+- 同一 CLI 可以运行两个 archetype。
+- 两种策略均输出五维 evaluations、deaths/survivors、prescription 和 held-out trade-off。
+- 两种策略对相同压力场景产生可解释的不同诊断。
+- `npm.cmd run verify` 全部通过且不降低 coverage 门槛。
+- 默认仍离线，不连接账户或下单。
+
+## 黑客松发布仍需账号持有人完成
+
+- 按 `docs/DEMO.md` 录屏。
+- 上传视频。
+- 将 URL 填入 `docs/SUBMISSION.md`。
+- push 分支并创建 PR。
+- 合并并最终验收后再打 `mvp-m3` tag。

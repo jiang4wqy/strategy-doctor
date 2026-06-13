@@ -1,0 +1,8 @@
+# Central integration ownership. Add verified module owners as team accounts join.
+* @jiang4wqy
+
+/src/contracts.ts @jiang4wqy
+/src/strategy/parse.ts @jiang4wqy
+/src/strategy/registry.ts @jiang4wqy
+/src/cli.ts @jiang4wqy
+/package.json @jiang4wqy
