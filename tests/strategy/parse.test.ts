@@ -20,6 +20,18 @@ const validStrategy = {
 test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
+
+test('parseStrategy rejects a known but unregistered strategy', () => {
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      archetype: 'rsi-bollinger-mean-reversion',
+      params: {},
+    }),
+    /unsupported strategy archetype/i,
+  );
+});
+
 test('parseStrategy rejects malformed identity and market fields', () => {
   for (const invalid of [
     { ...validStrategy, id: ' ' },

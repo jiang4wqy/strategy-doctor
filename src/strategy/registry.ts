@@ -47,9 +47,12 @@ export function createStrategyRegistry(
     ): StrategyByArchetype<A> {
       const adapter = registry.get(archetype);
       return {
-        ...base,
+        id: base.id,
+        name: base.name,
         archetype,
         params: adapter.parseParams(value),
+        universe: base.universe,
+        timeframe: base.timeframe,
       };
     },
   };

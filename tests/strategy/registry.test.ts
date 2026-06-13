@@ -119,4 +119,8 @@ test('registry constructs a typed strategy through its adapter', () => {
 
   assert.equal(strategy.archetype, 'ma-cross');
   assert.deepEqual(strategy.params, params);
+  assert.deepEqual(
+    Object.keys(strategy),
+    ['id', 'name', 'archetype', 'params', 'universe', 'timeframe'],
+  );
 });

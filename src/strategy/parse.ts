@@ -1,4 +1,9 @@
-import type { MaCrossParams, MaCrossStrategy } from '../contracts.ts';
+import type {
+  Strategy,
+  StrategyArchetype,
+  StrategyBase,
+} from '../contracts.ts';
+import { strategyRegistry } from './registry.ts';
 
 function fail(message: string): never {
   throw new Error(`invalid strategy: ${message}`);
@@ -18,45 +23,19 @@ function nonEmptyString(value: unknown, field: string): string {
   return value;
 }
 
-function finiteNumber(value: unknown, field: string): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    fail(`${field} must be a finite number`);
+function parseArchetype(value: unknown): StrategyArchetype {
+  if (
+    value !== 'ma-cross'
+    && value !== 'rsi-bollinger-mean-reversion'
+  ) {
+    fail(`unsupported strategy archetype: ${String(value)}`);
   }
   return value;
 }
 
-function parseParams(value: unknown): MaCrossParams {
-  const params = object(value, 'params');
-  const fastMA = finiteNumber(params.fastMA, 'params.fastMA');
-  const slowMA = finiteNumber(params.slowMA, 'params.slowMA');
-  const leverage = finiteNumber(params.leverage, 'params.leverage');
-  const stopLossPct = finiteNumber(params.stopLossPct, 'params.stopLossPct');
-  const positionPct = finiteNumber(params.positionPct, 'params.positionPct');
-
-  if (!Number.isInteger(fastMA) || fastMA < 2) {
-    fail('params.fastMA must be an integer greater than or equal to 2');
-  }
-  if (!Number.isInteger(slowMA) || slowMA <= fastMA) {
-    fail('params.slowMA must be an integer greater than params.fastMA');
-  }
-  if (leverage < 1) {
-    fail('params.leverage must be greater than or equal to 1');
-  }
-  if (stopLossPct <= 0 || stopLossPct > 0.99) {
-    fail('params.stopLossPct must be in (0, 0.99]');
-  }
-  if (positionPct <= 0 || positionPct > 1) {
-    fail('params.positionPct must be in (0, 1]');
-  }
-
-  return { fastMA, slowMA, leverage, stopLossPct, positionPct };
-}
-
-export function parseStrategy(value: unknown): MaCrossStrategy {
+export function parseStrategy(value: unknown): Strategy {
   const strategy = object(value, 'strategy');
-  if (strategy.archetype !== 'ma-cross') {
-    fail('archetype must be ma-cross');
-  }
+  const archetype = parseArchetype(strategy.archetype);
   if (
     !Array.isArray(strategy.universe)
     || strategy.universe.length === 0
@@ -67,12 +46,28 @@ export function parseStrategy(value: unknown): MaCrossStrategy {
     fail('universe must contain non-empty symbols');
   }
 
-  return {
+  const base: StrategyBase = {
     id: nonEmptyString(strategy.id, 'id'),
     name: nonEmptyString(strategy.name, 'name'),
-    archetype: strategy.archetype,
-    params: parseParams(strategy.params),
     universe: [...strategy.universe],
     timeframe: nonEmptyString(strategy.timeframe, 'timeframe'),
   };
+
+  try {
+    return archetype === 'ma-cross'
+      ? strategyRegistry.parse('ma-cross', base, strategy.params)
+      : strategyRegistry.parse(
+        'rsi-bollinger-mean-reversion',
+        base,
+        strategy.params,
+      );
+  } catch (error) {
+    if (
+      error instanceof Error
+      && error.message.startsWith('unsupported strategy archetype:')
+    ) {
+      fail(error.message);
+    }
+    throw error;
+  }
 }
