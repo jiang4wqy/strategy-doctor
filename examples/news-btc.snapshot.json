@@ -1,0 +1,85 @@
+{
+  "sourceSkill": "news-briefing",
+  "symbol": "BTCUSDT",
+  "observedAt": "2026-06-13T03:27:49.7341566Z",
+  "items": [
+    {
+      "title": "Bitcoin hit bottom at $59,000, marking end to crypto winter: Standard Chartered analyst",
+      "publishedAt": "2026-06-12T18:09:06Z",
+      "url": "https://www.coindesk.com/markets/2026/06/12/bitcoin-hit-bottom-at-usd59-000-marking-end-to-the-crypto-winter-says-standard-chartered-analyst",
+      "riskTags": ["positive", "market", "high-impact"]
+    },
+    {
+      "title": "VanEck bets BNB's real-world usage can stand out in crypto ETF market",
+      "publishedAt": "2026-06-12T16:05:31Z",
+      "url": "https://www.coindesk.com/markets/2026/06/12/vaneck-bets-bnb-s-real-world-usage-can-stand-out-in-a-crowded-crypto-etf-market",
+      "riskTags": ["positive", "institutional"]
+    },
+    {
+      "title": "SpaceX soars 20% in blockbuster Nasdaq debut",
+      "publishedAt": "2026-06-12T15:55:42Z",
+      "url": "https://www.coindesk.com/markets/2026/06/12/spacex-opens-at-usdtk-in-blockbuster-nasdaq-debut",
+      "riskTags": ["positive", "macro", "high-impact"]
+    },
+    {
+      "title": "Most Bitcoin ETF investors stayed put despite outflows: Bloomberg analyst",
+      "publishedAt": "2026-06-12T15:49:36Z",
+      "url": "https://www.coindesk.com/markets/2026/06/08/bloomberg-analyst-most-bitcoin-etf-investors-have-stayed-put-despite-outflows",
+      "riskTags": ["positive", "institutional"]
+    },
+    {
+      "title": "UK economy shrank 0.1% in April as Iran conflict weighed on growth",
+      "publishedAt": "2026-06-12T07:01:15Z",
+      "url": "https://www.cnbc.com/2026/06/12/uk-gdp-april-iran-war-growth.html",
+      "riskTags": ["negative", "macro", "high-impact"]
+    },
+    {
+      "title": "US wholesale prices rose 1.1% in May, more than expected",
+      "publishedAt": "2026-06-11T16:25:00Z",
+      "url": "https://www.cnbc.com/2026/06/11/producer-price-index-may-2026-.html",
+      "riskTags": ["negative", "macro", "high-impact"]
+    },
+    {
+      "title": "ECB hikes rates for first time since 2023 as Iran war raises energy costs",
+      "publishedAt": "2026-06-11T13:57:33Z",
+      "url": "https://www.cnbc.com/2026/06/11/ecb-hikes-interest-rates.html",
+      "riskTags": ["negative", "macro", "high-impact"]
+    },
+    {
+      "title": "Federal Reserve finalizes data standards for certain information collections",
+      "publishedAt": "2026-06-11T15:00:00Z",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases.htm",
+      "riskTags": ["neutral", "regulatory"]
+    },
+    {
+      "title": "Federal Reserve schedules annual bank stress test results for June 24",
+      "publishedAt": "2026-06-09T20:00:00Z",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases.htm",
+      "riskTags": ["neutral", "regulatory"]
+    },
+    {
+      "title": "House testimony focuses on digital asset taxation",
+      "publishedAt": "2026-06-09T17:37:49Z",
+      "url": "https://coincenter.org/testimony-on-digital-asset-taxation-before-the-house-ways-means-committee/",
+      "riskTags": ["neutral", "regulatory"]
+    },
+    {
+      "title": "BRCA is ready to become law",
+      "publishedAt": "2026-06-03T16:39:01Z",
+      "url": "https://coincenter.org/the-brca-is-ready-to-become-law/",
+      "riskTags": ["positive", "regulatory"]
+    },
+    {
+      "title": "Iran says a deal to end fighting would reopen Hormuz",
+      "publishedAt": "2026-06-13T00:51:20Z",
+      "url": "https://www.bbc.com/news/articles/c39y02x98k8o",
+      "riskTags": ["positive", "macro", "high-impact"]
+    }
+  ],
+  "riskSignals": {
+    "negativeHeadlineShare": 0.25,
+    "highImpactShare": 0.5,
+    "regulatoryShare": 0.333333,
+    "macroShockShare": 0.416667
+  }
+}

@@ -5,13 +5,19 @@
 | 依赖 | 版本 | 说明 |
 |---|---|---|
 | Node.js | **≥ 24** | 直接原生运行 TypeScript（类型擦除），零构建。本项目唯一硬依赖 |
-| Python | 3.x + `pandas` `numpy` | **仅** Bitget `technical-analysis` Skill 需要：`pip install pandas numpy` |
+| Python | **≥ 3.10** + `pandas` `numpy` | **仅** Bitget `technical-analysis` Skill 需要；其类型标注语法不兼容 Python 3.9 |
 
 ```bash
 git clone https://github.com/jiang4wqy/strategy-doctor.git
 cd strategy-doctor
 npm install        # 仅装 dev 依赖（typescript / @types/node）
 npm test           # 验证环境
+```
+
+Windows 若安装了多个 Python 版本，显式选择 3.10+：
+
+```powershell
+py -3.12 -c "import pandas, numpy; print('OK')"
 ```
 
 > TS 原生运行的两条约束（写代码时注意）：相对 import **必须带 `.ts` 后缀**；不要用 `enum` / `namespace`（不可擦除语法，会报错）。

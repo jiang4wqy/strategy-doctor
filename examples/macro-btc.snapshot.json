@@ -1,0 +1,19 @@
+{
+  "sourceSkill": "macro-analyst",
+  "symbol": "BTCUSDT",
+  "observedAt": "2026-06-13T03:27:49.7341566Z",
+  "fedFundsUpperPct": 3.75,
+  "fedFundsLowerPct": 3.5,
+  "treasury2yPct": 4.05,
+  "treasury10yPct": 4.45,
+  "yieldSpread10y2yPct": 0.39,
+  "breakeven10yPct": 2.31,
+  "highYieldSpreadPct": 2.78,
+  "dxy": 99.806999,
+  "vix": 17.68,
+  "btc90dCorrelation": {
+    "dxy": -0.2114,
+    "nasdaq100": 0.4745,
+    "vix": -0.447
+  }
+}
