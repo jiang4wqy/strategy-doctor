@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
-import type { MaCrossParams } from '../../src/contracts.ts';
+import type {
+  MaCrossParams,
+  StrategyArchetype,
+} from '../../src/contracts.ts';
 import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
 import {
   createStrategyRegistry,
@@ -123,4 +126,22 @@ test('registry constructs a typed strategy through its adapter', () => {
     Object.keys(strategy),
     ['id', 'name', 'archetype', 'params', 'universe', 'timeframe'],
   );
+});
+
+test('registry preserves discrimination for a runtime archetype', () => {
+  const registry = createStrategyRegistry([maCrossAdapter]);
+  const parseRuntimeArchetype = (archetype: StrategyArchetype) => {
+    return registry.parse(archetype, {
+      id: 'runtime',
+      name: 'runtime strategy',
+      universe: ['BTCUSDT'],
+      timeframe: '1h',
+    }, params);
+  };
+
+  const strategy = parseRuntimeArchetype('ma-cross');
+  assert.equal(strategy.archetype, 'ma-cross');
+  if (strategy.archetype === 'ma-cross') {
+    assert.equal(strategy.params.fastMA, params.fastMA);
+  }
 });

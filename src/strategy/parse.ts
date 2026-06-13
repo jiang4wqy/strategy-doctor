@@ -54,13 +54,7 @@ export function parseStrategy(value: unknown): Strategy {
   };
 
   try {
-    return archetype === 'ma-cross'
-      ? strategyRegistry.parse('ma-cross', base, strategy.params)
-      : strategyRegistry.parse(
-        'rsi-bollinger-mean-reversion',
-        base,
-        strategy.params,
-      );
+    return strategyRegistry.parse(archetype, base, strategy.params);
   } catch (error) {
     if (
       error instanceof Error
