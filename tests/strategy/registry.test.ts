@@ -94,6 +94,23 @@ test('moving-average adapter exposes its prescription policy', () => {
     maCrossAdapter.targetedPatch(params, ['drawdown-breach']).patch,
     { positionPct: 0.7 },
   );
+  const combined = maCrossAdapter.targetedPatch(params, [
+    'liquidation',
+    'drawdown-breach',
+    'stop-loss-bleed',
+  ]);
+  assert.deepEqual(combined.patch, {
+    leverage: 5,
+    stopLossPct: 0.08,
+    positionPct: 0.7,
+    fastMA: 3,
+    slowMA: 5,
+  });
+  assert.deepEqual(combined.rationale, [
+    '清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内',
+    '回撤击穿 → 降低仓位暴露',
+    '震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音',
+  ]);
   assert.equal(maCrossAdapter.paramLabel('fastMA'), '快均线');
 
   const first = maCrossAdapter.jitterParams(
@@ -109,6 +126,13 @@ test('moving-average adapter exposes its prescription policy', () => {
   assert.deepEqual(first, second);
   assert.equal(first.fastMA, params.fastMA);
   assert.equal(first.slowMA, params.slowMA);
+
+  const allFields = maCrossAdapter.jitterParams(
+    params,
+    mulberry32(9),
+    ['fastMA', 'slowMA', 'leverage', 'stopLossPct', 'positionPct'],
+  );
+  assert.doesNotThrow(() => maCrossAdapter.parseParams(allFields));
 });
 
 test('registry constructs a typed strategy through its adapter', () => {
