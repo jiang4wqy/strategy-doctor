@@ -344,7 +344,7 @@ Generate seed 42 / six-candidate JSON and compare it byte-for-byte with
 60745EB1377E3B2160311C8101E72E1731329AA3DF173D75C4672616DD455E90
 ```
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```powershell
 git add CONTRIBUTING.md handoff.md docs/superpowers/plans/2026-06-13-role-b-enhanced-rsi-bollinger-plan.md
@@ -352,7 +352,7 @@ git commit -m "docs: record role b adapter handoff"
 git push origin feat/rsi-bollinger-adapter
 ```
 
-- [ ] **Step 5: Open a draft PR**
+- [x] **Step 5: Open a draft PR**
 
 Open a draft PR to `main` that declares dependencies on C for shared execution
 and A for global registration.
