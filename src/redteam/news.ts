@@ -152,7 +152,8 @@ export function buildNewsScenario(snapshot: NewsSnapshot, seed: number): Scenari
     name: 'News catalyst gap',
     dimension: 'news',
     sourceSkill: 'news-briefing',
-    narrative: `${snapshot.items.length} frozen headlines produced ${(signals.negativeHeadlineShare * 100).toFixed(1)}% negative, ${(signals.highImpactShare * 100).toFixed(1)}% high-impact, and ${(signals.regulatoryShare * 100).toFixed(1)}% regulatory signals.`,
+    sourceObservedAt: snapshot.observedAt,
+    narrative: `${snapshot.items.length} 条冻结新闻中，负面占比 ${(signals.negativeHeadlineShare * 100).toFixed(1)}%，高影响占比 ${(signals.highImpactShare * 100).toFixed(1)}%，监管相关占比 ${(signals.regulatoryShare * 100).toFixed(1)}%；场景模拟突发消息形成的跳空风险。`,
     severity: 1 + Math.round(risk * 4),
     shock: {
       kind: 'gap',

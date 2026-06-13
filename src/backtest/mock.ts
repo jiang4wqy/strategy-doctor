@@ -24,6 +24,13 @@ function simpleMovingAverage(
 }
 
 export function runOnPrices(params: StrategyParams, prices: number[]): Metrics {
+  if (
+    prices.length < 2
+    || prices.some(price => !Number.isFinite(price) || price <= 0)
+  ) {
+    throw new Error('prices must contain at least two finite positive values');
+  }
+
   const { fastMA, slowMA, leverage, stopLossPct, positionPct } = params;
   let equity = 1;
   const equityCurve = [equity];

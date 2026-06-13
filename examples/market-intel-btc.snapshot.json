@@ -1,16 +1,16 @@
 {
   "sourceSkill": "market-intel",
   "symbol": "BTCUSDT",
-  "observedAt": "2026-06-13T03:27:49.7341566Z",
-  "globalMarketCapUsd": 2260390169701.0386,
-  "btcDominancePct": 56.439481,
-  "marketCapChange24hPct": 0.102495,
-  "stablecoinSupplyUsd": 314229249865.7503,
-  "stablecoinChange1dPct": 0.135154,
-  "stablecoinChange7dPct": -0.275908,
-  "stablecoinChange30dPct": -1.886184,
-  "topTraderLongShare": 0.5445,
-  "openInterestStartBtc": 98217.07,
-  "openInterestEndBtc": 98278.776,
-  "openInterestChangePct": 0.062826
+  "observedAt": "2026-06-13T04:15:45.396Z",
+  "globalMarketCapUsd": 2254910906641.507,
+  "btcDominancePct": 56.42886361239828,
+  "marketCapChange24hPct": -0.3490509520347894,
+  "stablecoinSupplyUsd": 314270249872.1719,
+  "stablecoinChange1dPct": 0.14379718986436255,
+  "stablecoinChange7dPct": -0.2672347950999475,
+  "stablecoinChange30dPct": -1.8796205128177357,
+  "topTraderLongShare": 0.5411,
+  "openInterestStartBtc": 98322.844,
+  "openInterestEndBtc": 98605.89,
+  "openInterestChangePct": 0.287874097702058
 }

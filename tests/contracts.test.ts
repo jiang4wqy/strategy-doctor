@@ -21,7 +21,14 @@ test('契约：四大核心类型可构造且字段齐全', () => {
       aggressive: { style: 'aggressive', riskScore: 55, survived: true, worstDrawdownPct: 0.6, meanPnlPct: -0.4 },
       trend: { style: 'trend', riskScore: 40, survived: false, worstDrawdownPct: 0.6, meanPnlPct: -0.4 },
     },
+    evaluations: [{
+      scenarioId: scenario.id, scenarioName: scenario.name, dimension: scenario.dimension,
+      sourceSkill: scenario.sourceSkill, severity: scenario.severity, shock: scenario.shock,
+      metrics, cause: 'liquidation', damageScore: 1060, narrative: scenario.narrative,
+    }],
     deaths: [{ scenarioId: scenario.id, scenarioName: scenario.name, dimension: 'sentiment', cause: 'liquidation', metrics, narrative: scenario.narrative }],
+    prescription: { changes: {}, rationale: '', patchedStrategy: strategy },
+    tradeoff: { robustnessGain: 0, returnCost: 0 },
   };
   assert.equal(card.deaths[0].cause, 'liquidation');
   assert.equal(scenario.shock.kind, 'squeeze');

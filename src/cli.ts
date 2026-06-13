@@ -1,131 +1,89 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import type {
-  Scenario,
-  Strategy,
-  StyleName,
-} from './contracts.ts';
+import { BitgetBacktester } from './backtest/bitget.ts';
 import { MockBacktester } from './backtest/mock.ts';
+import type { BacktestAdapter } from './contracts.ts';
+import { loadDefaultSnapshotBundle } from './data/snapshots.ts';
 import { runDoctor } from './pipeline/doctor.ts';
-import {
-  buildMacroScenario,
-  parseMacroSnapshot,
-} from './redteam/macro.ts';
-import {
-  buildMarketIntelScenario,
-  parseMarketIntelSnapshot,
-} from './redteam/market-intel.ts';
-import {
-  buildNewsScenario,
-  parseNewsSnapshot,
-} from './redteam/news.ts';
-import {
-  buildSentimentScenario,
-  parseSentimentSnapshot,
-} from './redteam/sentiment.ts';
-import {
-  buildTechnicalScenario,
-  parseTechnicalSnapshot,
-} from './redteam/technical.ts';
+import { createAnthropicNarrator } from './redteam/narrate.ts';
+import { buildAdversarialScenarioSet } from './redteam/search.ts';
 import { renderScorecard } from './report/render.ts';
+import { parseStrategy } from './strategy/parse.ts';
+import { parseCliArgs, type BacktestMode } from './cli/args.ts';
 
-const STYLE_NAMES = new Set<StyleName>([
-  'conservative',
-  'aggressive',
-  'trend',
-]);
+const HELP = `Strategy Doctor
 
-function argument(name: string, fallback: string): string {
-  const index = process.argv.indexOf(`--${name}`);
-  return index >= 0 && process.argv[index + 1]
-    ? process.argv[index + 1]
-    : fallback;
+Usage:
+  node src/cli.ts <strategy.json> [options]
+
+Options:
+  --style conservative|aggressive|trend  Prescription profile (default: conservative)
+  --seed <integer>                      Treatment seed (default: 42)
+  --candidates <1-50>                   Candidates per dimension (default: 6)
+  --backtest mock|bitget                Backtest source (default: mock)
+  --format markdown|json                Output format (default: markdown)
+  --output <path>                       Write the report to a file
+  --help                                Show this help
+`;
+
+function backtester(mode: BacktestMode): BacktestAdapter {
+  return mode === 'bitget'
+    ? new BitgetBacktester()
+    : new MockBacktester();
 }
 
-function readJson(path: string | URL): unknown {
-  return JSON.parse(readFileSync(path, 'utf8'));
-}
-
-function parseStyle(value: string): StyleName {
-  if (!STYLE_NAMES.has(value as StyleName)) {
-    throw new Error(`unknown style: ${value}`);
+export async function runCli(args: string[]): Promise<void> {
+  const options = parseCliArgs(args);
+  if (options.help) {
+    process.stdout.write(HELP);
+    return;
   }
-  return value as StyleName;
-}
 
-function parseSeed(value: string): number {
-  const seed = Number(value);
-  if (!Number.isSafeInteger(seed)) {
-    throw new Error(`seed must be a safe integer: ${value}`);
-  }
-  return seed;
-}
-
-export function buildScenarioSet(seed: number): Scenario[] {
-  const macro = parseMacroSnapshot(
-    readJson(new URL('../examples/macro-btc.snapshot.json', import.meta.url)),
+  const strategy = parseStrategy(
+    JSON.parse(readFileSync(options.strategyPath!, 'utf8')),
   );
-  const marketIntel = parseMarketIntelSnapshot(
-    readJson(
-      new URL('../examples/market-intel-btc.snapshot.json', import.meta.url),
+  const adapter = backtester(options.backtest);
+  const snapshots = loadDefaultSnapshotBundle();
+  const heldOutSeed = options.seed + 100_000;
+  const [treatment, heldOut] = await Promise.all([
+    buildAdversarialScenarioSet(
+      strategy,
+      snapshots,
+      options.seed,
+      options.candidates,
+      adapter,
     ),
-  );
-  const news = parseNewsSnapshot(
-    readJson(new URL('../examples/news-btc.snapshot.json', import.meta.url)),
-  );
-  const sentiment = parseSentimentSnapshot(
-    readJson(new URL('../examples/sentiment-btc.snapshot.json', import.meta.url)),
-  );
-  const technical = parseTechnicalSnapshot(
-    readJson(
-      new URL('../examples/technical-btc-4h.snapshot.json', import.meta.url),
+    buildAdversarialScenarioSet(
+      strategy,
+      snapshots,
+      heldOutSeed,
+      options.candidates,
+      adapter,
     ),
-  );
+  ]);
+  const scorecard = await runDoctor(strategy, adapter, {
+    style: options.style,
+    treatment,
+    heldOut,
+    narrator: createAnthropicNarrator(),
+  });
+  const report = options.format === 'json'
+    ? JSON.stringify(scorecard, null, 2)
+    : renderScorecard(scorecard, strategy);
 
-  return [
-    buildMacroScenario(macro, seed),
-    buildMarketIntelScenario(marketIntel, seed),
-    buildNewsScenario(news, seed),
-    buildSentimentScenario(sentiment, seed),
-    buildTechnicalScenario(technical, seed),
-  ];
-}
-
-async function main(): Promise<void> {
-  const strategyPath = process.argv[2];
-  if (!strategyPath) {
-    throw new Error(
-      '用法: node src/cli.ts <strategy.json> '
-      + '[--style conservative|aggressive|trend] [--seed 42]',
-    );
+  if (options.outputPath) {
+    writeFileSync(options.outputPath, `${report}\n`, 'utf8');
+    process.stdout.write(`Strategy Doctor report written to ${options.outputPath}\n`);
+  } else {
+    process.stdout.write(`${report}\n`);
   }
-
-  const strategy = readJson(strategyPath) as Strategy;
-  const style = parseStyle(argument('style', 'conservative'));
-  const treatmentSeed = parseSeed(argument('seed', '42'));
-  const heldOutSeed = treatmentSeed + 100000;
-  if (!Number.isSafeInteger(heldOutSeed)) {
-    throw new Error('held-out seed exceeds the safe integer range');
-  }
-
-  const scorecard = await runDoctor(
-    strategy,
-    new MockBacktester(),
-    {
-      style,
-      treatment: buildScenarioSet(treatmentSeed),
-      heldOut: buildScenarioSet(heldOutSeed),
-    },
-  );
-
-  console.log(renderScorecard(scorecard, strategy));
 }
 
 if (
   process.argv[1]
   && import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  main().catch((error: unknown) => {
+  runCli(process.argv.slice(2)).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Strategy Doctor failed: ${message}`);
     process.exitCode = 1;

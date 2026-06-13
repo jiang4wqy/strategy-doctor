@@ -2,9 +2,15 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
-import { buildScenarioSet } from '../../src/cli.ts';
 import type { Strategy, StrategyParams } from '../../src/contracts.ts';
+import {
+  buildBaseScenarioSet,
+  loadDefaultSnapshotBundle,
+} from '../../src/data/snapshots.ts';
 import { runDoctor } from '../../src/pipeline/doctor.ts';
+
+const buildScenarioSet = (seed: number) =>
+  buildBaseScenarioSet(loadDefaultSnapshotBundle(), seed);
 
 const loadStrategy = (): Strategy =>
   JSON.parse(
@@ -49,6 +55,8 @@ test('five-dimensional doctor cycle is deterministic and only patches death-rela
   const second = await runDoctor(strategy, backtester, options);
 
   assert.deepEqual(first, second);
+  assert.equal(first.evaluations.length, 5);
+  assert.ok(first.evaluations.every(evaluation => evaluation.sourceObservedAt));
   assert.ok(first.prescription);
   assert.ok(first.tradeoff);
   assert.ok(Number.isFinite(first.tradeoff.robustnessGain));

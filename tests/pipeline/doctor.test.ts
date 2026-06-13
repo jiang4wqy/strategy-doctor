@@ -2,7 +2,12 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester } from '../../src/backtest/mock.ts';
-import type { Scenario, Strategy } from '../../src/contracts.ts';
+import type {
+  BacktestAdapter,
+  Metrics,
+  Scenario,
+  Strategy,
+} from '../../src/contracts.ts';
 import { runDoctor } from '../../src/pipeline/doctor.ts';
 import {
   buildSentimentScenario,
@@ -57,6 +62,16 @@ test('runDoctor returns a complete scorecard for frozen snapshot scenarios', asy
     Object.keys(card.perStyle).sort(),
     ['aggressive', 'conservative', 'trend'],
   );
+  assert.equal(card.evaluations.length, 2);
+  assert.deepEqual(
+    card.evaluations.map(evaluation => evaluation.dimension).sort(),
+    ['sentiment', 'technical'],
+  );
+  assert.ok(
+    card.evaluations.every(
+      evaluation => Number.isFinite(evaluation.damageScore),
+    ),
+  );
   assert.ok(card.deaths.length > 0);
   assert.ok(card.prescription);
   assert.ok(card.tradeoff);
@@ -76,4 +91,103 @@ test('runDoctor is deterministic for identical inputs', async () => {
   const second = await runDoctor(strategy, backtest, options);
 
   assert.deepEqual(first, second);
+});
+
+test('runDoctor can enrich evaluation narratives through an injected narrator', async () => {
+  const card = await runDoctor(strategy, new MockBacktester(), {
+    style: 'conservative',
+    treatment: buildScenarioSet(42),
+    heldOut: buildScenarioSet(100042),
+    narrator: async ({ scenario }) => `增强叙事：${scenario.dimension}`,
+  });
+
+  assert.ok(
+    card.evaluations.every(
+      evaluation => evaluation.narrative === `增强叙事：${evaluation.dimension}`,
+    ),
+  );
+  assert.ok(
+    card.deaths.every(death => death.narrative.startsWith('增强叙事：')),
+  );
+});
+
+test('runDoctor returns a zero-change prescription when every scenario survives', async () => {
+  const cleanMetrics: Metrics = {
+    pnlPct: 0.05,
+    maxDrawdownPct: 0.02,
+    liquidated: false,
+    numTrades: 2,
+    equityCurve: [1, 1.05],
+  };
+  const backtest: BacktestAdapter = {
+    async run() {
+      return cleanMetrics;
+    },
+  };
+
+  const card = await runDoctor(strategy, backtest, {
+    style: 'conservative',
+    treatment: buildScenarioSet(42),
+    heldOut: buildScenarioSet(100042),
+  });
+
+  assert.equal(card.deaths.length, 0);
+  assert.deepEqual(card.prescription?.changes, {});
+  assert.deepEqual(card.tradeoff, {
+    robustnessGain: 0,
+    returnCost: 0,
+  });
+});
+
+test('runDoctor rejects duplicate scenario ids and dimensions', async () => {
+  const treatment = buildScenarioSet(42);
+  const heldOut = buildScenarioSet(100042);
+
+  await assert.rejects(
+    runDoctor(strategy, new MockBacktester(), {
+      style: 'conservative',
+      treatment: [treatment[0], { ...treatment[1], id: treatment[0].id }],
+      heldOut,
+    }),
+    /duplicate.*id/i,
+  );
+  await assert.rejects(
+    runDoctor(strategy, new MockBacktester(), {
+      style: 'conservative',
+      treatment: [
+        treatment[0],
+        { ...treatment[1], dimension: treatment[0].dimension },
+      ],
+      heldOut,
+    }),
+    /duplicate.*dimension/i,
+  );
+});
+
+test('runDoctor rejects mismatched dimensions and invalid shocks', async () => {
+  const treatment = buildScenarioSet(42);
+  const heldOut = buildScenarioSet(100042);
+
+  await assert.rejects(
+    runDoctor(strategy, new MockBacktester(), {
+      style: 'conservative',
+      treatment,
+      heldOut: [heldOut[0]],
+    }),
+    /dimension/i,
+  );
+  await assert.rejects(
+    runDoctor(strategy, new MockBacktester(), {
+      style: 'conservative',
+      treatment: [
+        {
+          ...treatment[0],
+          shock: { ...treatment[0].shock, magnitude: Number.NaN },
+        },
+        treatment[1],
+      ],
+      heldOut,
+    }),
+    /magnitude/i,
+  );
 });

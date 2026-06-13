@@ -5,6 +5,10 @@ export function scoreStyle(
   results: Metrics[],
   profile: StyleProfile,
 ): StyleScore {
+  if (results.length === 0) {
+    throw new Error('results must not be empty');
+  }
+
   const liquidationRate = results.filter(result => result.liquidated).length
     / results.length;
   const nonLiquidated = results.filter(result => !result.liquidated);

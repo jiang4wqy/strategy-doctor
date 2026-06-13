@@ -2,13 +2,13 @@
   "sourceSkill": "technical-analysis",
   "symbol": "BTCUSDT",
   "timeframe": "4h",
-  "observedAt": "2026-06-12T14:40:55.521890Z",
+  "observedAt": "2026-06-13T04:15:45.396Z",
   "candlesCount": 200,
-  "adx": 26.850877,
-  "diPlus": 25.415234,
-  "diMinus": 12.03064,
-  "dmiCrosses20": 2,
-  "bollBandwidth": 0.056969,
-  "rsi": 55.966743,
-  "rsiCenterCrosses20": 3
+  "adx": 29.297004,
+  "diPlus": 27.23135,
+  "diMinus": 7.832783,
+  "dmiCrosses20": 1,
+  "bollBandwidth": 0.053598,
+  "rsi": 73.395081,
+  "rsiCenterCrosses20": 4
 }

@@ -84,6 +84,7 @@ export function buildSentimentScenario(snapshot: SentimentSnapshot, seed: number
     name: `情绪挤压·${crowdedSide}`,
     dimension: 'sentiment',
     sourceSkill: 'sentiment-analyst',
+    sourceObservedAt: snapshot.observedAt,
     narrative: `${crowdedSide}，恐惧贪婪指数 ${snapshot.fearGreed}，主动买方占比 ${(snapshot.takerBuySellRatio * 100).toFixed(1)}%。场景模拟${reversal}，检验高杠杆趋势策略的清算风险。`,
     severity: 1 + Math.round(risk * 4),
     shock: {

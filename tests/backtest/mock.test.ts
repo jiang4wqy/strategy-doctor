@@ -49,6 +49,19 @@ test('runOnPrices is deterministic', () => {
   );
 });
 
+test('runOnPrices rejects invalid price series', () => {
+  for (const prices of [
+    [],
+    [100],
+    [100, 0],
+    [100, -1],
+    [100, Number.NaN],
+    [100, Number.POSITIVE_INFINITY],
+  ]) {
+    assert.throws(() => runOnPrices(baseParams, prices), /prices/i);
+  }
+});
+
 test('MockBacktester implements the BacktestAdapter behavior', async () => {
   const strategy: Strategy = {
     id: 'strategy',

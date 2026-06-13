@@ -1,9 +1,9 @@
 {
   "sourceSkill": "sentiment-analyst",
   "symbol": "BTCUSDT",
-  "observedAt": "2026-06-12T14:21:50.123Z",
-  "fearGreed": 12,
-  "retailLongShare": 0.5987,
-  "topTraderLongShare": 0.6193,
-  "takerBuySellRatio": 0.51229
+  "observedAt": "2026-06-13T04:15:45.396Z",
+  "fearGreed": 13,
+  "retailLongShare": 0.6134,
+  "topTraderLongShare": 0.5411,
+  "takerBuySellRatio": 0.46157496251399294
 }

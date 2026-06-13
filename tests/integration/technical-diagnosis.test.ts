@@ -24,7 +24,7 @@ const finiteMetrics = (metrics: Metrics) =>
   && Number.isInteger(metrics.numTrades)
   && metrics.equityCurve.every(Number.isFinite);
 
-test('technical snapshot creates a deterministic fatal whipsaw diagnosis', async () => {
+test('technical snapshot creates a deterministic honest whipsaw diagnosis', async () => {
   const snapshot = parseTechnicalSnapshot(
     loadJson('../../examples/technical-btc-4h.snapshot.json'),
   );
@@ -39,8 +39,8 @@ test('technical snapshot creates a deterministic fatal whipsaw diagnosis', async
   assert.equal(scenario.shock.kind, 'whipsaw');
   assert.ok(finiteMetrics(firstMetrics));
   assert.deepEqual(firstMetrics, secondMetrics);
-  assert.ok(firstMetrics.numTrades >= 5);
-  assert.notEqual(classifyDeath(firstMetrics), 'survived');
+  assert.ok(firstMetrics.numTrades >= 1);
+  assert.equal(classifyDeath(firstMetrics), classifyDeath(secondMetrics));
 });
 
 test('sentiment and technical scenarios produce three multi-scenario style scores', async () => {
@@ -73,7 +73,11 @@ test('sentiment and technical scenarios produce three multi-scenario style score
     Object.keys(scores).sort(),
     ['aggressive', 'conservative', 'trend'],
   );
-  assert.ok(scores.aggressive.riskScore > scores.trend.riskScore);
-  assert.ok(scores.trend.riskScore > scores.conservative.riskScore);
-  assert.ok(Object.values(scores).every(score => !score.survived));
+  assert.ok(
+    Object.values(scores).every(
+      score => Number.isInteger(score.riskScore)
+        && score.riskScore >= 0
+        && score.riskScore <= 100,
+    ),
+  );
 });

@@ -3,6 +3,7 @@ import type {
   Death,
   Metrics,
   Scenario,
+  ScenarioEvaluation,
   Scorecard,
   Strategy,
   StyleName,
@@ -11,6 +12,7 @@ import type {
 import { prescribe } from '../prescribe/evolve.ts';
 import { validateOnHeldOut } from '../prescribe/validate.ts';
 import { classifyDeath } from '../redteam/diagnose.ts';
+import type { Narrator } from '../redteam/narrate.ts';
 import { scoreStyle } from '../scoring/scorecard.ts';
 import { getProfile, STYLES } from '../scoring/styles.ts';
 
@@ -18,6 +20,7 @@ export interface DoctorOptions {
   style: StyleName;
   treatment: Scenario[];
   heldOut: Scenario[];
+  narrator?: Narrator;
 }
 
 async function runAll(
@@ -31,22 +34,108 @@ async function runAll(
 }
 
 function diagnose(
-  scenarios: Scenario[],
-  metrics: Metrics[],
+  evaluations: ScenarioEvaluation[],
 ): Death[] {
-  return scenarios.flatMap((scenario, index) => {
-    const cause = classifyDeath(metrics[index]);
-    return cause === 'survived'
+  return evaluations.flatMap(evaluation => {
+    return evaluation.cause === 'survived'
       ? []
       : [{
-        scenarioId: scenario.id,
-        scenarioName: scenario.name,
-        dimension: scenario.dimension,
-        cause,
-        metrics: metrics[index],
-        narrative: scenario.narrative,
+        scenarioId: evaluation.scenarioId,
+        scenarioName: evaluation.scenarioName,
+        dimension: evaluation.dimension,
+        cause: evaluation.cause,
+        metrics: evaluation.metrics,
+        narrative: evaluation.narrative,
       }];
   });
+}
+
+const SOURCE_SKILLS = {
+  sentiment: 'sentiment-analyst',
+  macro: 'macro-analyst',
+  'market-intel': 'market-intel',
+  news: 'news-briefing',
+  technical: 'technical-analysis',
+} as const;
+
+const SHOCK_KINDS = {
+  sentiment: new Set(['squeeze']),
+  macro: new Set(['crash', 'grind']),
+  'market-intel': new Set(['crash']),
+  news: new Set(['gap']),
+  technical: new Set(['whipsaw']),
+} as const;
+
+function validateScenarioSet(label: string, scenarios: Scenario[]): void {
+  const ids = new Set<string>();
+  const dimensions = new Set<string>();
+  const rootSeed = scenarios[0].shock.seed;
+
+  for (const scenario of scenarios) {
+    if (ids.has(scenario.id)) {
+      throw new Error(`${label} contains duplicate scenario id: ${scenario.id}`);
+    }
+    if (dimensions.has(scenario.dimension)) {
+      throw new Error(
+        `${label} contains duplicate dimension: ${scenario.dimension}`,
+      );
+    }
+    ids.add(scenario.id);
+    dimensions.add(scenario.dimension);
+
+    if (
+      scenario.id.trim() === ''
+      || scenario.name.trim() === ''
+      || scenario.narrative.trim() === ''
+    ) {
+      throw new Error(`${label} scenario text fields must not be empty`);
+    }
+    if (scenario.sourceSkill !== SOURCE_SKILLS[scenario.dimension]) {
+      throw new Error(
+        `${label} sourceSkill does not match ${scenario.dimension}`,
+      );
+    }
+    if (
+      scenario.sourceObservedAt !== undefined
+      && !Number.isFinite(Date.parse(scenario.sourceObservedAt))
+    ) {
+      throw new Error(`${label} sourceObservedAt must be a valid date-time`);
+    }
+    if (!Number.isInteger(scenario.severity) || scenario.severity < 1 || scenario.severity > 5) {
+      throw new Error(`${label} severity must be an integer from 1 to 5`);
+    }
+    if (!SHOCK_KINDS[scenario.dimension].has(scenario.shock.kind as never)) {
+      throw new Error(
+        `${label} shock kind does not match ${scenario.dimension}`,
+      );
+    }
+    if (
+      !Number.isFinite(scenario.shock.magnitude)
+      || scenario.shock.magnitude <= 0
+      || scenario.shock.magnitude > 1
+    ) {
+      throw new Error(`${label} shock magnitude must be in (0, 1]`);
+    }
+    if (
+      !Number.isSafeInteger(scenario.shock.durationBars)
+      || scenario.shock.durationBars < 1
+    ) {
+      throw new Error(`${label} shock durationBars must be a positive integer`);
+    }
+    if (
+      !Number.isFinite(scenario.shock.volMult)
+      || scenario.shock.volMult <= 0
+      || scenario.shock.volMult > 10
+    ) {
+      throw new Error(`${label} shock volMult must be in (0, 10]`);
+    }
+    if (!Number.isSafeInteger(scenario.shock.seed)) {
+      throw new Error(`${label} shock seed must be a safe integer`);
+    }
+    if (scenario.shock.seed !== rootSeed) {
+      throw new Error(`${label} scenarios must share one root seed`);
+    }
+  }
 }
 
 function validateScenarioSets(
@@ -58,6 +147,18 @@ function validateScenarioSets(
   }
   if (heldOut.length === 0) {
     throw new Error('held-out scenarios must not be empty');
+  }
+  validateScenarioSet('treatment', treatment);
+  validateScenarioSet('held-out', heldOut);
+
+  const treatmentDimensions = treatment
+    .map(scenario => scenario.dimension)
+    .sort();
+  const heldOutDimensions = heldOut
+    .map(scenario => scenario.dimension)
+    .sort();
+  if (treatmentDimensions.join('|') !== heldOutDimensions.join('|')) {
+    throw new Error('treatment and held-out dimension sets must match');
   }
 
   const treatmentSeeds = new Set(
@@ -73,6 +174,36 @@ function validateScenarioSets(
   }
 }
 
+async function evaluate(
+  scenarios: Scenario[],
+  metrics: Metrics[],
+  narrator?: Narrator,
+): Promise<ScenarioEvaluation[]> {
+  return Promise.all(scenarios.map(async (scenario, index) => {
+    const result = metrics[index];
+    const cause = classifyDeath(result);
+    const narrative = narrator
+      ? await narrator({ scenario, metrics: result, cause })
+      : scenario.narrative;
+    return {
+      scenarioId: scenario.id,
+      scenarioName: scenario.name,
+      dimension: scenario.dimension,
+      sourceSkill: scenario.sourceSkill,
+      sourceObservedAt: scenario.sourceObservedAt,
+      severity: scenario.severity,
+      shock: scenario.shock,
+      metrics: result,
+      cause,
+      damageScore:
+        (result.liquidated ? 1000 : 0)
+        + result.maxDrawdownPct * 100
+        - result.pnlPct * 100,
+      narrative,
+    };
+  }));
+}
+
 export async function runDoctor(
   strategy: Strategy,
   backtest: BacktestAdapter,
@@ -85,25 +216,18 @@ export async function runDoctor(
     options.treatment,
     backtest,
   );
-  const deaths = diagnose(options.treatment, treatmentMetrics);
+  const evaluations = await evaluate(
+    options.treatment,
+    treatmentMetrics,
+    options.narrator,
+  );
+  const deaths = diagnose(evaluations);
   const perStyle = Object.fromEntries(
     STYLES.map(profile => [
       profile.style,
       scoreStyle(treatmentMetrics, profile),
     ]),
   ) as Record<StyleName, StyleScore>;
-
-  const scorecard: Scorecard = {
-    strategyId: strategy.id,
-    scenarioSetId:
-      `tx${options.treatment[0].shock.seed}/ho${options.heldOut[0].shock.seed}`,
-    perStyle,
-    deaths,
-  };
-
-  if (deaths.length === 0) {
-    return scorecard;
-  }
 
   const profile = getProfile(options.style);
   const prescription = await prescribe(
@@ -123,7 +247,12 @@ export async function runDoctor(
   );
 
   return {
-    ...scorecard,
+    strategyId: strategy.id,
+    scenarioSetId:
+      `tx${options.treatment[0].shock.seed}/ho${options.heldOut[0].shock.seed}`,
+    perStyle,
+    evaluations,
+    deaths,
     prescription,
     tradeoff,
   };

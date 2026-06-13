@@ -85,3 +85,10 @@ test('scoreStyle reports the arithmetic mean return', () => {
 
   assert.ok(Math.abs(score.meanPnlPct - 0.05) < 1e-12);
 });
+
+test('scoreStyle rejects an empty result set', () => {
+  assert.throws(
+    () => scoreStyle([], getProfile('conservative')),
+    /results/i,
+  );
+});

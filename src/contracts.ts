@@ -45,6 +45,7 @@ export interface Scenario {
   sourceSkill: string;     // 对应的 Bitget 官方 Skill（用官方真名）
   narrative: string;       // 自然语言剧情（死亡报告素材）
   severity: number;        // 1~5
+  sourceObservedAt?: string;
   shock: MarketShock;
 }
 
@@ -71,6 +72,20 @@ export interface Death {
   narrative: string;
 }
 
+export interface ScenarioEvaluation {
+  scenarioId: string;
+  scenarioName: string;
+  dimension: Dimension;
+  sourceSkill: string;
+  sourceObservedAt?: string;
+  severity: number;
+  shock: MarketShock;
+  metrics: Metrics;
+  cause: DeathCause;
+  damageScore: number;
+  narrative: string;
+}
+
 export interface StyleScore {
   style: StyleName;
   riskScore: number;        // 0（必死）~100（稳健）
@@ -94,7 +109,8 @@ export interface Scorecard {
   strategyId: string;
   scenarioSetId: string;    // 形如 'tx42/ho100042'，体现两套种子分离
   perStyle: Record<StyleName, StyleScore>;
+  evaluations: ScenarioEvaluation[];
   deaths: Death[];
-  prescription?: Prescription;
-  tradeoff?: Tradeoff;
+  prescription: Prescription;
+  tradeoff: Tradeoff;
 }
