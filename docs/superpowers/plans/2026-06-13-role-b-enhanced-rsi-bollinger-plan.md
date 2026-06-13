@@ -16,7 +16,7 @@
 - Modify: `tests/contracts.test.ts`
 - Modify: `src/contracts.ts`
 
-- [ ] **Step 1: Add trend-filter fields to the typed contract fixture**
+- [x] **Step 1: Add trend-filter fields to the typed contract fixture**
 
 Add:
 
@@ -27,7 +27,7 @@ trendFilterThreshold: 0.03,
 
 to the `RsiBollingerStrategy` fixture and assert both values.
 
-- [ ] **Step 2: Run typecheck and verify RED**
+- [x] **Step 2: Run typecheck and verify RED**
 
 Run:
 
@@ -38,7 +38,7 @@ npm.cmd run typecheck
 Expected: FAIL because the two fields are not defined on
 `RsiBollingerParams`.
 
-- [ ] **Step 3: Extend `RsiBollingerParams`**
+- [x] **Step 3: Extend `RsiBollingerParams`**
 
 Add:
 
@@ -47,7 +47,7 @@ trendFilterPeriod: number;
 trendFilterThreshold: number;
 ```
 
-- [ ] **Step 4: Verify the contract**
+- [x] **Step 4: Verify the contract**
 
 Run:
 
@@ -58,7 +58,7 @@ npm.cmd run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add src/contracts.ts tests/contracts.test.ts
@@ -71,7 +71,7 @@ git commit -m "feat: extend mean reversion contract"
 - Create: `tests/strategy/indicators.test.ts`
 - Create: `src/strategy/indicators.ts`
 
-- [ ] **Step 1: Write failing indicator tests**
+- [x] **Step 1: Write failing indicator tests**
 
 Cover:
 
@@ -96,7 +96,7 @@ assert.ok(
 assert.equal(wilderRsi([1, 2, 3], 3, 2), null);
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run:
 
@@ -106,7 +106,7 @@ node --test tests/strategy/indicators.test.ts
 
 Expected: FAIL because `src/strategy/indicators.ts` does not exist.
 
-- [ ] **Step 3: Implement the pure indicators**
+- [x] **Step 3: Implement the pure indicators**
 
 Export:
 
@@ -133,7 +133,7 @@ wilderRsi(
 Wilder RSI uses the first `period` deltas as the initial simple averages and
 then recursively smooths all later deltas. Flat windows return 50.
 
-- [ ] **Step 4: Run tests and typecheck**
+- [x] **Step 4: Run tests and typecheck**
 
 Run:
 
@@ -144,7 +144,7 @@ npm.cmd run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add src/strategy/indicators.ts tests/strategy/indicators.test.ts
@@ -157,7 +157,7 @@ git commit -m "feat: add deterministic strategy indicators"
 - Create: `tests/strategy/rsi-bollinger.test.ts`
 - Create: `src/strategy/adapters/rsi-bollinger.ts`
 
-- [ ] **Step 1: Write failing adapter tests**
+- [x] **Step 1: Write failing adapter tests**
 
 Use this compact decision fixture:
 
@@ -190,7 +190,7 @@ Tests must cover:
 - targeted fields and Chinese labels are stable;
 - identical jitter seeds return identical valid parameters.
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run:
 
@@ -200,7 +200,7 @@ node --test tests/strategy/rsi-bollinger.test.ts
 
 Expected: FAIL because the adapter module does not exist.
 
-- [ ] **Step 3: Implement parsing**
+- [x] **Step 3: Implement parsing**
 
 Validate:
 
@@ -217,7 +217,7 @@ leverage >= 1
 0 < positionPct <= 1
 ```
 
-- [ ] **Step 4: Implement decisions**
+- [x] **Step 4: Implement decisions**
 
 Calculate Bollinger middle/deviation, Wilder RSI, trend SMA, and:
 
@@ -232,7 +232,7 @@ const strongDowntrend =
 Exit existing positions before considering new entries. The trend flags only
 block new entries.
 
-- [ ] **Step 5: Implement mutation policy**
+- [x] **Step 5: Implement mutation policy**
 
 Use the existing common formulas for liquidation and drawdown. For
 `stop-loss-bleed`:
@@ -254,7 +254,7 @@ Jitter uses the MA adapter's deterministic `0.8 + random() * 0.4` multiplier,
 clamps every parser bound, and preserves
 `trendFilterPeriod > bollingerPeriod`.
 
-- [ ] **Step 6: Run focused tests**
+- [x] **Step 6: Run focused tests**
 
 Run:
 
@@ -265,7 +265,7 @@ npm.cmd run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add src/strategy/adapters/rsi-bollinger.ts tests/strategy/rsi-bollinger.test.ts
@@ -277,7 +277,7 @@ git commit -m "feat: add trend-filtered mean reversion adapter"
 **Files:**
 - Modify: `tests/strategy/rsi-bollinger.test.ts`
 
-- [ ] **Step 1: Add a local registry test**
+- [x] **Step 1: Add a local registry test**
 
 Create a registry with:
 
@@ -288,7 +288,7 @@ createStrategyRegistry([maCrossAdapter, rsiBollingerAdapter])
 Parse a complete enhanced strategy and assert the discriminated
 `rsi-bollinger-mean-reversion` result.
 
-- [ ] **Step 2: Run focused tests**
+- [x] **Step 2: Run focused tests**
 
 Run:
 
@@ -299,7 +299,7 @@ npm.cmd run typecheck
 
 Expected: PASS. The default global registry remains unchanged for A.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```powershell
 git add tests/strategy/rsi-bollinger.test.ts
@@ -313,7 +313,7 @@ git commit -m "test: prove mean reversion registry compatibility"
 - Modify: `CONTRIBUTING.md`
 - Modify: `docs/superpowers/plans/2026-06-13-role-b-enhanced-rsi-bollinger-plan.md`
 
-- [ ] **Step 1: Record ownership status**
+- [x] **Step 1: Record ownership status**
 
 Document:
 
@@ -323,7 +323,7 @@ Document:
 - A must register the adapter after review;
 - C must execute `flat` and consume adapter mutation policy.
 
-- [ ] **Step 2: Run full verification**
+- [x] **Step 2: Run full verification**
 
 Run:
 
@@ -335,7 +335,7 @@ git status --short
 
 Expected: all tests, coverage, typecheck, and offline MA demo pass.
 
-- [ ] **Step 3: Verify MA golden compatibility**
+- [x] **Step 3: Verify MA golden compatibility**
 
 Generate seed 42 / six-candidate JSON and compare it byte-for-byte with
 `examples/demo-scorecard.json`. The SHA-256 must remain:

@@ -36,7 +36,7 @@ git pull
 | 角色 | 独占范围 | 交付 |
 |---|---|---|
 | A 架构/集成 | `src/contracts.ts`、`src/strategy/parse.ts`、`src/strategy/registry.ts`、`src/cli.ts`、`package.json` | 契约、registry、MA 迁移、最终集成 |
-| B 策略算法 | `src/strategy/indicators.ts`、`src/strategy/adapters/rsi-bollinger.ts`、对应策略测试 | 指标、均值回归 adapter、示例参数 |
+| B 策略算法 | `src/strategy/indicators.ts`、`src/strategy/adapters/rsi-bollinger.ts`、对应策略测试 | 指标、增强均值回归 adapter |
 | C 执行/风险 | `src/backtest/*`、`src/prescribe/*`、对应测试 | 公共执行引擎、策略专属 mutation |
 | D QA/材料 | `tests/integration/*`、`tests/cli.test.ts`、`examples/*`、`docs/*`、`README.md` | 双策略验收、CLI 回归、演示材料 |
 
@@ -50,6 +50,14 @@ git pull
 - C 负责将 `src/prescribe/evolve.ts` 迁移为调用 adapter 的 mutation
   policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
 - A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
+
+当前 B 状态：
+
+- 已完成 Wilder RSI、SMA、population standard deviation。
+- 已完成 RSI + Bollinger + 趋势过滤器 adapter。
+- 趋势过滤器只过滤新开仓，已有仓位仍按中轨或 RSI 50 退出。
+- B 分支不修改全局 registry、公共 engine、prescribe consumer、CLI 或示例。
+- C 完成公共执行/处方后，由 A 注册并接线；D 最后补示例与端到端验收。
 
 ## 3. 契约冻结规则
 
