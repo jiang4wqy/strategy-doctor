@@ -67,12 +67,13 @@ git pull
 
 ## 4. 合并顺序
 
-公共契约和 MA adapter 基线已经进入 `main`。剩余建议合并顺序：
+公共契约和 MA adapter 基线已经进入 `main`。剩余建议分阶段合并：
 
-1. C：公共执行引擎和处方框架。
-2. B：RSI/Bollinger adapter。
-3. A：注册 RSI adapter、跨模块接线、CLI 和 MA 兼容性收口。
-4. D：双策略集成测试、示例和文档。
+1. A 基础收口：类型缩窄、通用 registry parser、MA policy ownership。
+2. C：公共执行引擎和 adapter-driven 处方框架。
+3. B：RSI/Bollinger adapter。
+4. A 最终接线：注册 RSI adapter、CLI 和 MA 兼容性复核。
+5. D：双策略集成测试、示例和文档。
 
 后序 PR 必须明确前置 commit 或 PR。不得通过同时修改共享文件绕过顺序。
 
