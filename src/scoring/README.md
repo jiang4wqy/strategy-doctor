@@ -1,11 +1,5 @@
-# scoring — 评分层
+# scoring
 
-**目标：** 同一组回测结果，用稳健/激进/趋势三套权重+死亡阈值，给出三个不同的风险分——"失败是相对的"。
+`styles.ts` 定义 conservative、aggressive、trend 三种 profile。
 
-**对外接口（见 [`../contracts.ts`](../contracts.ts)）：** `scoreStyle(metrics[], profile) → StyleScore`
-
-**要建的文件：**
-- `styles.ts` — 三种投资者风格预设（权重 + 回撤阈值 + 清算容忍度）
-- `scorecard.ts` — 一组回测结果 → 单风格评分
-
-**对应开发计划任务：** Task 8　|　**负责人：** P4　|　**分支：** `feat/scoring-prescribe`
+`scoreStyle(metrics, profile)` 结合清算比例、非清算场景回撤和平均收益，输出 0-100 风险分。未满足 profile 阈值时，分数不会显示成通过状态；空结果集会被拒绝。

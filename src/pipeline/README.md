@@ -1,10 +1,11 @@
-# pipeline — 总编排
+# pipeline
 
-**目标：** 把红队、回测、评分、处方、复测串成一条 `runDoctor` 流水线——体检的入口。
+`runDoctor(strategy, backtest, options)` 完成：
 
-**对外接口（见 [`../contracts.ts`](../contracts.ts)）：** `runDoctor(strategy, backtest, options) → Promise<Scorecard>`
+1. 校验 ID、维度、Skill、shock 和 treatment/held-out seed。
+2. 回测选中场景并生成全部 `evaluations`。
+3. 生成三风格评分和 deaths 子集。
+4. 生成死因定向处方。
+5. 在独立 held-out 场景上计算风险分和收益变化。
 
-**要建的文件：**
-- `doctor.ts` — 诊断→评分→处方→held-out 复测的总编排（含"治疗集=验证集种子则抛错"的红线校验）
-
-**对应开发计划任务：** Task 12　|　**负责人：** P1　|　**分支：** `feat/demo`
+即使没有 death，也返回零改动处方和零 trade-off。

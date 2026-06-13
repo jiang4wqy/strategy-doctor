@@ -1,61 +1,176 @@
-# Strategy Doctor — AI 策略体检与优化引擎
+# Strategy Doctor
 
-> **TL;DR (EN):** Others build trading strategies — we build the engine that *stress-tests them to death*. Strategy Doctor uses Bitget's five official analyst Skills to evolve the nastiest market scenarios against any strategy, tells you **when and why** it dies, scores its risk per investor style, prescribes targeted fixes, and honestly reports the **robustness↔return tradeoff** on a held-out scenario set.
->
-> Bitget AI Base Camp Hackathon · **Track 2 — Trading Infra** · Stack: Node 24 native TypeScript, zero build, zero runtime deps.
+> 别人造交易策略，我们负责把策略压到极限，说明它为什么失败，并验证修补是否真的更稳。
 
-**一句话定位：** 别人造策略，我们造给策略做死亡测试的引擎——基于 Bitget 五大分析师 Skill 自动进化出最毒的市场剧情，告诉你任何策略会在什么时候、为什么死，并按你的风格开出处方，同时诚实给出"稳健性↔收益"的取舍。
+Strategy Doctor 是 Bitget AI Base Camp Hackathon Track 2 的交易基础设施项目。它读取参数化策略和五维公开市场快照，为每个维度生成一组确定性候选场景，选择伤害最大的场景，完成死因诊断、三风格评分、定向处方和独立 held-out 复测。
 
----
+- Node.js 24 原生 TypeScript
+- 零运行时依赖
+- 默认完全离线、确定性、可复现
+- 不连接交易账户，不包含任何下单能力
+- Bitget 公共 K 线和 Anthropic 叙事均为显式启用的增强功能
 
-## 产品闭环
+## 工作流
 
+```mermaid
+flowchart LR
+  A["Strategy JSON"] --> B["Runtime validation"]
+  S["5 audited snapshots"] --> C["5 base scenarios"]
+  C --> D["6 seeded candidates per dimension"]
+  B --> E["Mock or Bitget public-data backtest"]
+  D --> E
+  E --> F["Worst scenario per dimension"]
+  F --> G["Scenario evaluations and death diagnosis"]
+  G --> H["3 style scores"]
+  G --> I["Targeted prescription"]
+  I --> J["Independent held-out validation"]
+  H --> K["Markdown or JSON scorecard"]
+  J --> K
 ```
-策略 ──▶ 红队/对抗层 ──▶ 回测/执行层 ──▶ 评分层 ──▶ 进化/处方 ──▶ held-out 复测
-        (5个Skill=5攻击维度)  (复用Bitget        (3风格:稳健/     (定向修补)   (诚实取舍输出)
-         自动进化毒剧情)       Agent Hub)         激进/趋势)
+
+| Dimension | 官方 Skill 来源 | 场景 |
+|---|---|---|
+| `macro` | `macro-analyst` | `grind` / `crash` |
+| `market-intel` | `market-intel` | 流动性 `crash` |
+| `news` | `news-briefing` | 事件 `gap` |
+| `sentiment` | `sentiment-analyst` | 拥挤 `squeeze` |
+| `technical` | `technical-analysis` | 假突破 `whipsaw` |
+
+## 快速开始
+
+要求 Node.js 24 或更高版本。
+
+```powershell
+npm.cmd ci
+npm.cmd run verify
 ```
 
-**最短闭环 MVP**：一个真实策略 → 自动诊断死因 → 3 风格评分 → 单点处方 → 在**未参与治疗的** held-out 场景上复测 → 输出"稳健性↑X% / 收益−Y%"的诚实取舍。
+`verify` 会运行带门槛的覆盖率测试、TypeScript 检查和离线 demo。当前门槛为 lines 90%、branches 80%、functions 95%。
 
-## 快速开始（Node ≥ 24，零构建零运行时依赖）
-
-```bash
-npm install        # 仅 dev 依赖（typescript 类型检查用）
-npm test           # 全量测试
-npm run demo       # 体检示例策略：诊断→评分→处方→held-out 复测
-npm run typecheck  # 类型检查
+```powershell
+npm.cmd run demo
+npm.cmd run demo:json
 ```
 
-> 环境与官方 Skill 安装见 [docs/SETUP.md](docs/SETUP.md)。新人入队先读 [docs/TEAM.md](docs/TEAM.md)。
+## CLI
 
-## 模块一览
+```text
+node src/cli.ts <strategy.json> [options]
 
-| 目录 | 模块 | 干什么 | 负责分支 |
-|---|---|---|---|
-| `src/backtest` | 回测/执行层 | 给(策略+场景)→标准 metrics；Mock 引擎(主线) + Bitget 适配器(增强) | `feat/backtest` |
-| `src/redteam` | 红队/对抗层 | 5 个 Skill = 5 攻击维度，自动进化毒剧情 + 死因诊断 | `feat/redteam` |
-| `src/scoring` | 评分层 | 稳健/激进/趋势三套权重阈值，给风险分 | `feat/scoring-prescribe` |
-| `src/prescribe` | 进化/处方 | 死因驱动的定向修补 + held-out 复测取舍 | `feat/scoring-prescribe` |
-| `src/pipeline` | 总编排 | 串起整条诊断流水线 | `feat/demo` |
-| `src/report` | 报告/CLI | markdown 体检报告 + 命令行入口 | `feat/demo` |
+--style conservative|aggressive|trend
+--seed <safe-integer>
+--candidates <1-50>
+--backtest mock|bitget
+--format markdown|json
+--output <path>
+--help
+```
 
-每个目录下的 `README.md` 写明了该模块的目标、对外接口和对应任务编号。
+示例：
 
-## 三条红线（不可触碰）
+```powershell
+node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/trend-follower.json --format json --output examples/demo-scorecard.json
+```
 
-1. **防自我过拟合**：治疗集与验证集种子强制不同（代码抛错保证），输出永远带"稳健性↔收益"取舍，不做"一键变好"话术。
-2. **严禁实盘**：只读 API Key + 子账号，全程不下真实订单，仓库内不出现任何 key。
-3. **离线确定性**：一切随机经 seed 驱动，同 seed 同结果，无网络/无 key 时全链路照常跑（demo 不翻车）。
+策略 JSON 当前只支持 `ma-cross`。非法均线、杠杆、止损、仓位、symbol 或 timeframe 会在回测前被拒绝。
 
-## 致谢与底座
+```json
+{
+  "id": "tf-001",
+  "name": "高杠杆趋势跟随",
+  "archetype": "ma-cross",
+  "params": {
+    "fastMA": 8,
+    "slowMA": 30,
+    "leverage": 10,
+    "stopLossPct": 0.5,
+    "positionPct": 1
+  },
+  "universe": ["BTCUSDT"],
+  "timeframe": "1h"
+}
+```
 
-底层复用 [Bitget Agent Hub](https://github.com/Bitget-AI/agent_hub)（五大分析师 Skill + market-data MCP + 交易 API）。我们与 Bitget Playbook 互补——Playbook 负责"生策略"，Strategy Doctor 负责"体检 + 开方 + 加固"。
+## 离线与在线模式
 
-## 协作
+| 模式 | 命令 | 网络 | 凭证 |
+|---|---|---:|---|
+| 离线主路径 | `npm.cmd run demo` | 否 | 无 |
+| Bitget 公共 K 线 | `npm.cmd run demo:live` | 是 | 无 |
+| 刷新五维快照 | `npm.cmd run snapshots:refresh` | 是 | 无 |
+| Anthropic 叙事 | 见下方环境变量 | 是 | Anthropic key |
 
-仓库公开，欢迎参赛队友与社区共建。开发分支策略与任务认领见 [docs/TEAM.md](docs/TEAM.md) 和 [Issues](../../issues)。完整开发实施计划（含每个模块的代码与测试）见 [docs/开发实施计划.md](docs/开发实施计划.md)。
+Bitget 模式只调用公开 market-data MCP 的 `crypto_derivatives(action="klines", exchange="bitget")`。K 线按 symbol/timeframe 缓存，场景 shock 以确定性比例叠加到 OHLC，再复用本地回测核心。
+
+刷新快照：
+
+```powershell
+npm.cmd run snapshots:refresh
+```
+
+命令会在内存中完成五维采集、稳定币聚合、新闻元数据过滤和技术指标计算。只有整套数据通过 parser 后才替换 `examples/*.snapshot.json`。
+
+可选 Anthropic 叙事：
+
+```powershell
+$env:DOCTOR_LLM_NARRATE='1'
+$env:ANTHROPIC_API_KEY='<your-key>'
+$env:DOCTOR_LLM_MODEL='<available-model-id>'
+npm.cmd run demo
+```
+
+缺少任一配置、超时、非 2xx 或 malformed response 时，系统在 3 秒内回退到本地中文模板。CI 和默认 demo 不调用 Anthropic。
+
+## 输出与搜索规则
+
+每份 Scorecard 包含五维 `evaluations`、三风格评分、deaths 子集、参数处方和 held-out 结果。survivor 也会展示。
+
+```text
+damage = (liquidated ? 1000 : 0) + maxDrawdown * 100 - pnl * 100
+```
+
+同分候选按场景 ID 排序，保证确定性。held-out 场景针对原始策略选择，既不参与处方搜索，也不受 patched 策略影响。
+
+## 安全边界
+
+- 不实现交易、下单、账户、持仓或资金操作。
+- 不需要 Bitget API key、secret 或 passphrase。
+- 默认 demo、测试和 CI 均离线运行。
+- 新闻快照只保存标题、时间、URL 和风险标签，不保存正文。
+- 不人为提高 shock 来保证策略死亡，存活是合法结果。
+- 报告明确声明不承诺“一键变好”。
+
+## 项目结构
+
+| 路径 | 职责 |
+|---|---|
+| `src/data` | 快照读取、MCP client、在线刷新 |
+| `src/redteam` | 五维映射、候选搜索、死因和叙事 |
+| `src/backtest` | Mock 与 Bitget 公共数据回测 |
+| `src/scoring` | 三风格风险评分 |
+| `src/prescribe` | 定向修补和 held-out 验证 |
+| `src/pipeline` | `runDoctor` 总编排 |
+| `src/report` | Markdown 报告 |
+| `examples` | 示例策略、冻结快照和 demo 产物 |
+
+更多资料：
+
+- [环境与运行](docs/SETUP.md)
+- [3 分钟演示](docs/DEMO.md)
+- [提交材料](docs/SUBMISSION.md)
+- [Bitget MCP 验证记录](docs/bitget-hub-notes.md)
+- [团队协作](docs/TEAM.md)
+
+## 当前限制
+
+- 仅支持 `ma-cross` 策略原型和单 symbol 回测。
+- Mock 模型不包含手续费、滑点、资金费率和订单簿冲击。
+- 处方是参数级风险修补，不是投资建议或收益保证。
+- CLI 是本次黑客松的正式界面，不包含 Web UI。
+
+下一里程碑会先抽出 `StrategyAdapter`/策略注册表，再增加 RSI 均值回归作为第二个参考实现。这样可以验证多策略扩展能力，同时避免在提交版中引入尚未定义执行语义的“任意策略”接口。
 
 ## License
 
-MIT — 见 [LICENSE](LICENSE)。
+MIT，见 [LICENSE](LICENSE)。

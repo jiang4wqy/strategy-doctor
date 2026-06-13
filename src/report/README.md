@@ -1,12 +1,12 @@
-# report — 报告渲染
+# report
 
-**目标：** 把 `Scorecard` 渲染成 markdown 体检报告（三风格评分表 / 死因清单 / 处方 / held-out 取舍 + 诚实声明）。CLI 入口 `src/cli.ts` 调用它。
+`renderScorecard(card, strategy)` 输出：
 
-**对外接口（见 [`../contracts.ts`](../contracts.ts)）：** `renderScorecard(card, strategy) → string`
+- 五维压力覆盖表，包括 survivors。
+- 三风格评分。
+- deaths 与中文风险叙事。
+- 参数处方。
+- held-out 风险分和平均收益变化。
+- 不承诺“一键变好”的明确声明。
 
-**要建的文件：**
-- `render.ts` — Scorecard → markdown
-
-**对应开发计划任务：** Task 13　|　**负责人：** P1/P5　|　**分支：** `feat/demo`
-
-**红线：** 报告必含"本报告不承诺一键变好"与量化代价。
+结构化输出由 CLI 的 `--format json` 提供。

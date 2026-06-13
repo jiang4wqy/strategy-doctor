@@ -1,54 +1,54 @@
-# 团队分工与协作指南（队友先读这一份）
+# 团队协作与发布状态
 
-> 目标：每个人看完这份就知道**自己做哪块、往哪个目录写、走哪个分支、做到什么程度算完成**。
-> 项目背景与产品闭环见 [README](../README.md)；环境与官方 Skill 安装见 [SETUP](SETUP.md)；
-> 想看每块的完整代码与测试，去 [开发实施计划.md](开发实施计划.md)（16 个任务，照着写就行）。
+## 当前状态
 
-## 截止与里程碑
+截至 2026-06-13，仓库已完成五维离线闭环、候选搜索、Bitget 公共数据、可选 LLM、CLI、CI 和提交材料。当前开发分支为 `codex/complete-hackathon-submission`。
 
-| 里程碑 | 日期 | 达成标志 |
-|---|---|---|
-| **M1** | 6/16 | 诊断→评分跑通：真策略→红队场景→回测→3 风格评分，打印诊断报告 |
-| **M2** | 6/20 | 端到端 MVP：诊断→评分→处方→held-out 复测全自动跑通一个真实例子 |
-| **M3** | 6/23 | demo 彩排计时 ≤ 3 分钟，断网也能演 |
-| **提交** | 6/24 | 留 1 天 buffer，不卡 6/25 截止点 |
-
-## 五人分工
-
-> 角色按强项可互换。**P1 的接口契约必须最先冻结**——它是所有人并行的脊柱，已在 `src/contracts.ts` 写好 v0.1。
-
-| 角色 | 谁 | 负责目录 | 分支 | 对应任务 | 目标（做到什么算完成） |
-|---|---|---|---|---|---|
-| **P1 架构/集成** | jiang4wqy（队长） | `src/contracts.ts`、`src/pipeline`、`src/cli.ts`、`src/report` | `feat/demo` | Task 1-2, 12-13, 16 | 契约冻结；把各模块串成 `runDoctor` 流水线；CLI 跑通 `npm run demo`；防演示翻车的 fallback |
-| **P2 回测/接入** | 待认领 | `src/backtest` | `feat/backtest` | Task 3-4, 15 | Mock 回测引擎（确定性，必交）；Bitget Agent Hub 适配器（spike 后增强）；申请只读 key + 子账号 |
-| **P3 红队/对抗** | 待认领 | `src/redteam` | `feat/redteam` | Task 5-7, 14 | 5 维攻击场景库 + 采样器 + 对抗搜索 + 死因分类；LLM 死亡报告（模板兜底）。**这是项目最不可替代的活** |
-| **P4 评分/处方** | 待认领 | `src/scoring`、`src/prescribe` | `feat/scoring-prescribe` | Task 8-11 | 三风格评分卡；死因→定向修补 + 邻域搜索；held-out 复测与诚实取舍 |
-| **P5 产品/Demo** | 待认领 | `docs`、demo 录屏、`examples/` | （在 `feat/demo` 协作） | Task 16 + pitch | 3 分钟 demo 脚本与录屏；明星案例挑选；提交材料；架构图 |
-
-> 谁认领哪块，去 [Issues](../../issues) 把对应的里程碑 Issue assign 给自己，并在这张表把"待认领"改成你的名字。
-
-## 模块依赖顺序（避免互相等）
-
-```
-Task 1-2 (契约/脚手架, 已完成) ──┬──▶ Task 3-4  回测   ┐
-                                  ├──▶ Task 5-7  红队   ├──▶ Task 9-13 处方+流水线 ──▶ Task 16 收尾
-                                  └──▶ Task 8    评分   ┘
-```
-- 契约冻结后，**回测 / 红队 / 评分三块文件无交叉，可三人完全并行**。
-- 处方（Task 9-11）依赖评分；流水线（Task 12-13）依赖前面全部完成。
-- Bitget 适配器（Task 15）的 **spike 验证请在 6/13 前做掉**，结果写进 `docs/bitget-hub-notes.md`，别拖到后期才发现接不通。
+| 里程碑 | 状态 |
+|---|---|
+| 五维离线闭环 | 完成 |
+| 对抗搜索与在线增强 | 完成 |
+| 文档和 demo 产物 | 完成 |
+| 录屏、上传、提交链接 | 需要账号持有人完成 |
 
 ## 协作规则
 
-1. **分支 → PR → main**，不直接推 main。每人在自己的 `feat/*` 分支上按任务做小步提交（写测试→实现→测试通过→commit）。
-2. **改 `src/contracts.ts` 需全队同意**（它是大家共同依赖的契约，乱改会连环编译失败）。
-3. 提 PR 前本地必须 `npm test` 全绿、`npm run typecheck` 无错——CI 也会自动跑这两项。
-4. **想加入协作**：把你的 GitHub 用户名发给队长 jiang4wqy，拉你进 collaborator。
-5. **红线别碰**（见 README）：不提交任何 API key；治疗集/验证集种子必须分离；不写实盘下单代码。
+1. 不直接改 `main`，使用短分支和有意义的提交。
+2. 行为变化先写失败测试，再写最小实现。
+3. 不修改与任务无关的代码。
+4. 提交前运行 `npm.cmd run verify` 和 `git diff --check`。
+5. 不提交 key、secret、passphrase 或账户数据。
+6. 不加入实盘、下单、账户或持仓能力。
+7. 快照更新后测试不得假设某个实时场景一定致死。
 
-## 现在仓库里有什么 / 还缺什么
+## 模块职责
 
-- ✅ 已有：基础框架、冻结的 `src/contracts.ts`、冒烟+契约测试、CI、完整开发计划、各模块 README 占位。
-- ⬜ 待补：`src/` 下六个模块的实现（按各自 README 和开发实施计划里的任务来填）。
+| 模块 | 路径 | 公共入口 |
+|---|---|---|
+| 契约 | `src/contracts.ts` | `Strategy`、`ScenarioEvaluation`、`Scorecard` |
+| 数据 | `src/data` | `loadDefaultSnapshotBundle`、`refreshSnapshots` |
+| 红队 | `src/redteam` | `buildAdversarialScenarioSet` |
+| 回测 | `src/backtest` | `MockBacktester`、`BitgetBacktester` |
+| 评分 | `src/scoring` | `scoreStyle` |
+| 处方 | `src/prescribe` | `prescribe`、`validateOnHeldOut` |
+| 编排 | `src/pipeline` | `runDoctor` |
+| 报告 | `src/report` | `renderScorecard` |
 
-照着 [开发实施计划.md](开发实施计划.md) 里你负责的任务区间做即可——里面每个函数的测试和实现代码都写好了，是"抄 + 理解 + 微调"，不是从零设计。
+## 发布前检查
+
+```powershell
+npm.cmd ci
+npm.cmd run verify
+npm.cmd run demo:json
+$env:BITGET_MCP_SMOKE='1'
+node --test tests/integration/bitget-live.test.ts
+git diff --check
+git status --short
+```
+
+人工步骤：
+
+1. 按 [DEMO.md](DEMO.md) 录制不超过 3 分钟的视频。
+2. 上传视频并把 URL 填入 [SUBMISSION.md](SUBMISSION.md)。
+3. 复核 README、提交表单和视频数字来自同一次冻结快照。
+4. 合并分支后打 `mvp-m3` 标签。
