@@ -1,7 +1,9 @@
 # Strategy Doctor Multi-Strategy Design
 
 **Status:** Approved on 2026-06-13. The shared contract, MA adapter,
-immutable registry, and registry-backed parser are merged on `main`.
+immutable registry, and registry-backed parser are merged on `main`. The
+second archetype is approved as enhanced RSI + Bollinger mean reversion with a
+long-term trend filter.
 
 **Goal:** Add a second strategy archetype behind a small typed adapter registry
 while preserving the existing `ma-cross` behavior and the offline diagnostic
@@ -67,6 +69,8 @@ interface RsiBollingerParams extends CommonRiskParams {
   rsiOverbought: number;
   bollingerPeriod: number;
   bollingerStdDev: number;
+  trendFilterPeriod: number;
+  trendFilterThreshold: number;
 }
 ```
 
@@ -102,6 +106,8 @@ Validation boundaries:
 - `0 < rsiOversold < 50 < rsiOverbought < 100`.
 - `bollingerPeriod >= 2`.
 - `0 < bollingerStdDev <= 5`.
+- `trendFilterPeriod` is an integer greater than `bollingerPeriod`.
+- `0 < trendFilterThreshold <= 0.5`.
 - `leverage >= 1`.
 - `0 < stopLossPct <= 0.99`.
 - `0 < positionPct <= 1`.
@@ -245,29 +251,38 @@ Indicators use close prices only:
 - Bollinger middle: simple moving average over `bollingerPeriod`.
 - Bollinger deviation: population standard deviation over the same window.
 - Upper/lower bands: middle plus/minus `bollingerStdDev * deviation`.
+- Trend baseline: simple moving average over `trendFilterPeriod`.
+- Trend deviation: `close / trendSMA - 1`.
 - RSI: Wilder RSI over `rsiPeriod`. The first ready value uses simple average
   gains and losses over the first `rsiPeriod` deltas; later values use Wilder's
   recursive smoothing.
-- If an indicator is not ready, return `hold`.
 - A zero-loss RSI window produces RSI 100.
 - A zero-gain RSI window produces RSI 0.
 - A fully flat window produces RSI 50.
+- If any required indicator is not ready, return `hold`.
+
+Trend classification:
+
+- `trendDeviation > trendFilterThreshold`: strong uptrend.
+- `trendDeviation < -trendFilterThreshold`: strong downtrend.
+- Otherwise: neutral enough for mean-reversion entry.
 
 Decision rules:
 
 - Enter `long` when close is at or below the lower band and
-  `RSI <= rsiOversold`.
+  `RSI <= rsiOversold`, unless a strong downtrend is active.
 - Enter `short` when close is at or above the upper band and
-  `RSI >= rsiOverbought`.
+  `RSI >= rsiOverbought`, unless a strong uptrend is active.
 - While long, return `flat` when close is at or above the middle band or
   `RSI >= 50`.
 - While short, return `flat` when close is at or below the middle band or
   `RSI <= 50`.
 - Otherwise return `hold`.
 
-When both entry conditions are impossible or indicators are flat, remain
-neutral. P0 does not add pyramiding, partial positions, cooldown bars, fees, or
-slippage.
+The trend filter controls new entries only. It does not force an open position
+to close; middle-band and RSI-50 exits remain responsible for exits. When both
+entry conditions are impossible or indicators are flat, remain neutral. P0
+does not add pyramiding, partial positions, cooldown bars, fees, or slippage.
 
 ## 8. Prescription Model
 
@@ -295,8 +310,9 @@ Common death policies:
 Strategy-specific `stop-loss-bleed` policies:
 
 - MA: increase `fastMA` and `slowMA` by 1.5x.
-- RSI/Bollinger: widen `bollingerStdDev` by 15%, move oversold down by 3, and
-  move overbought up by 3, all within parser bounds.
+- RSI/Bollinger: widen `bollingerStdDev` by 15%, move oversold down by 3, move
+  overbought up by 3, and reduce `trendFilterThreshold` by 15% so strong trends
+  are detected earlier. All values remain within parser bounds.
 
 Candidate search remains in `src/prescribe/evolve.ts`. It asks the selected
 adapter for the targeted patch, mutable fields, jitter, and parameter labels.
@@ -344,6 +360,9 @@ Indicators and decisions:
 - RSI flat, all-gain, and all-loss windows cover 50, 100, and 0.
 - RSI/Bollinger long entry, short entry, neutral hold, and middle-band exits
   each have focused tests.
+- Strong downtrends block new long entries and strong uptrends block new short
+  entries.
+- Trend filtering never forces an existing position to exit.
 
 Execution:
 
@@ -357,6 +376,8 @@ Prescription:
 - Common causes only change common risk fields.
 - MA bleed only changes MA fields.
 - RSI/Bollinger bleed only changes mean-reversion fields.
+- Trend-filter jitter preserves
+  `trendFilterPeriod > bollingerPeriod` and threshold bounds.
 - Jitter preserves every parser invariant.
 - Identical seeds remain deterministic.
 
