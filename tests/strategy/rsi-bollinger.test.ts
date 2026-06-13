@@ -2,7 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
 import type { RsiBollingerParams } from '../../src/contracts.ts';
+import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
 import { rsiBollingerAdapter } from '../../src/strategy/adapters/rsi-bollinger.ts';
+import { createStrategyRegistry } from '../../src/strategy/registry.ts';
 
 const decisionParams: RsiBollingerParams = {
   rsiPeriod: 2,
@@ -238,4 +240,20 @@ test('RSI Bollinger jitter is deterministic, scoped, and valid', () => {
     riskOnly.trendFilterPeriod,
     policyParams.trendFilterPeriod,
   );
+});
+
+test('local registry composes both strategy adapters', () => {
+  const registry = createStrategyRegistry([
+    maCrossAdapter,
+    rsiBollingerAdapter,
+  ]);
+  const strategy = registry.parse('rsi-bollinger-mean-reversion', {
+    id: 'mean-reversion',
+    name: 'RSI Bollinger mean reversion',
+    universe: ['BTCUSDT'],
+    timeframe: '1h',
+  }, policyParams);
+
+  assert.equal(strategy.archetype, 'rsi-bollinger-mean-reversion');
+  assert.deepEqual(strategy.params, policyParams);
 });
