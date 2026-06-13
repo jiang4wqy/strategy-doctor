@@ -8,8 +8,8 @@
 
 **Tech Stack:** Node.js 24 native TypeScript, strict TypeScript, `node:test`, GitHub Actions, no new dependencies.
 
-**Execution status:** Tasks 1-4 completed on 2026-06-13. Task 5 is pending
-full verification, golden comparison, and push.
+**Execution status:** Tasks 1-5 completed on 2026-06-13. Full verification
+passed and the golden JSON remained byte-for-byte identical.
 
 ---
 
