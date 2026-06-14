@@ -38,17 +38,18 @@ Expected: FAIL because `examples/rsi-bollinger.json` does not exist.
 
 - [x] **Step 3: Add the enhanced example**
 
-Use the approved parameters:
+Use the final demo parameters. They preserve the approved strategy semantics
+while exercising real entries across all five frozen dimensions:
 
 ```json
 {
   "rsiPeriod": 14,
-  "rsiOversold": 30,
-  "rsiOverbought": 70,
-  "bollingerPeriod": 20,
-  "bollingerStdDev": 2,
-  "trendFilterPeriod": 50,
-  "trendFilterThreshold": 0.03,
+  "rsiOversold": 40,
+  "rsiOverbought": 60,
+  "bollingerPeriod": 10,
+  "bollingerStdDev": 1.75,
+  "trendFilterPeriod": 30,
+  "trendFilterThreshold": 0.1,
   "leverage": 3,
   "stopLossPct": 0.05,
   "positionPct": 0.5
@@ -85,6 +86,8 @@ the same seed 42 treatment set and seed 100042 held-out set, and assert:
 - evaluation metrics or causes differ between the complementary strategies;
 - every changed field is allowed by the deaths and selected adapter policy;
 - identical repeated runs are deterministic.
+- the RSI/Bollinger example trades in every dimension and produces at least
+  one actionable diagnosis.
 
 - [x] **Step 2: Run and inspect**
 
