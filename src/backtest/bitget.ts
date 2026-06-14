@@ -6,7 +6,11 @@ import type {
   Strategy,
 } from '../contracts.ts';
 import { McpClient } from '../data/mcp-client.ts';
-import { runOnPrices } from './mock.ts';
+import {
+  getStrategyAdapter,
+  type AnyStrategyAdapter,
+} from '../strategy/registry.ts';
+import { runStrategyOnPrices } from './engine.ts';
 import { generatePath } from './path.ts';
 
 export interface Candle {
@@ -142,9 +146,6 @@ export class BitgetBacktester implements BacktestAdapter {
   }
 
   async run(strategy: Strategy, scenario: Scenario): Promise<Metrics> {
-    if (strategy.archetype !== 'ma-cross') {
-      throw new Error(`unsupported strategy archetype: ${strategy.archetype}`);
-    }
     const symbol = strategy.universe[0];
     if (!symbol) {
       throw new Error('strategy universe must contain a Bitget symbol');
@@ -162,9 +163,13 @@ export class BitgetBacktester implements BacktestAdapter {
     }
     const candles = await pending;
     const stressed = applyShockToCandles(candles, scenario.shock);
-    return runOnPrices(
-      strategy.params,
+    const adapter = getStrategyAdapter(
+      strategy.archetype,
+    ) as AnyStrategyAdapter;
+    return runStrategyOnPrices(
+      strategy,
       stressed.map(candle => candle.close),
+      adapter,
     );
   }
 }

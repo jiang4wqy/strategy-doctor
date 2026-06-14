@@ -51,6 +51,14 @@ git pull
   policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
 - A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
 
+当前 C 状态：
+
+- 已完成 shared execution engine 和 `flat`/方向阻塞状态机。
+- Mock 与 Bitget backtester 已通过 registry 分发到同一 engine。
+- `src/prescribe/evolve.ts` 已调用 adapter mutation policy，不再内置 MA 参数。
+- C 不注册 RSI/Bollinger adapter，也不修改 CLI 或示例。
+- 下一步先合入 C，再合入 B PR #7，之后由 A 完成全局接线。
+
 ## 3. 契约冻结规则
 
 以下内容已经冻结并进入 `main`：

@@ -21,6 +21,7 @@ import {
 } from '../../src/redteam/technical.ts';
 import { scoreStyle } from '../../src/scoring/scorecard.ts';
 import { getProfile } from '../../src/scoring/styles.ts';
+import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
 
 const loadJson = (relativePath: string): unknown =>
   JSON.parse(readFileSync(new URL(relativePath, import.meta.url), 'utf8'));
@@ -200,4 +201,73 @@ test('prescribe rejects an empty treatment set and invalid candidate count', asy
     ),
     /candidates/,
   );
+});
+
+test('prescribe delegates mutation policy and labels to the strategy adapter', async () => {
+  const calls = {
+    targetedPatch: 0,
+    targetedFields: 0,
+    jitterParams: 0,
+    paramLabel: 0,
+  };
+  const original = {
+    targetedPatch: maCrossAdapter.targetedPatch,
+    targetedFields: maCrossAdapter.targetedFields,
+    jitterParams: maCrossAdapter.jitterParams,
+    paramLabel: maCrossAdapter.paramLabel,
+  };
+
+  maCrossAdapter.targetedPatch = (...args) => {
+    calls.targetedPatch++;
+    return original.targetedPatch(...args);
+  };
+  maCrossAdapter.targetedFields = (...args) => {
+    calls.targetedFields++;
+    return original.targetedFields(...args);
+  };
+  maCrossAdapter.jitterParams = (...args) => {
+    calls.jitterParams++;
+    return original.jitterParams(...args);
+  };
+  maCrossAdapter.paramLabel = (...args) => {
+    calls.paramLabel++;
+    return original.paramLabel(...args);
+  };
+
+  try {
+    const backtest = new MockBacktester();
+    const treatment = treatmentScenarios();
+    const deaths = await diagnose(fragile, treatment, backtest);
+    await prescribe(
+      fragile,
+      deaths,
+      treatment,
+      backtest,
+      getProfile('conservative'),
+      { candidates: 3, seed: 7 },
+    );
+  } finally {
+    maCrossAdapter.targetedPatch = original.targetedPatch;
+    maCrossAdapter.targetedFields = original.targetedFields;
+    maCrossAdapter.jitterParams = original.jitterParams;
+    maCrossAdapter.paramLabel = original.paramLabel;
+  }
+
+  assert.ok(calls.targetedPatch > 0);
+  assert.ok(calls.targetedFields > 0);
+  assert.ok(calls.jitterParams > 0);
+  assert.ok(calls.paramLabel > 0);
+});
+
+test('prescription search contains no moving-average parameter policy', () => {
+  const source = readFileSync(
+    new URL('../../src/prescribe/evolve.ts', import.meta.url),
+    'utf8',
+  );
+
+  assert.doesNotMatch(source, /\bfastMA\b|\bslowMA\b/);
+  assert.match(source, /targetedPatch/);
+  assert.match(source, /targetedFields/);
+  assert.match(source, /jitterParams/);
+  assert.match(source, /paramLabel/);
 });

@@ -2,21 +2,23 @@ import type {
   BacktestAdapter,
   Death,
   DeathCause,
-  MaCrossParams,
-  MaCrossStrategy,
   Metrics,
+  ParameterChanges,
   Prescription,
   Scenario,
   Strategy,
+  StrategyParamKey,
+  StrategyParams,
+  TargetedPatch,
 } from '../contracts.ts';
 import { mulberry32 } from '../backtest/path.ts';
 import { scoreStyle } from '../scoring/scorecard.ts';
 import type { StyleProfile } from '../scoring/styles.ts';
 import {
-  diffParams,
-  jitterParams,
-  targetedPatch,
-} from './mutations.ts';
+  getStrategyAdapter,
+  type AnyStrategyAdapter,
+} from '../strategy/registry.ts';
+import { diffParams } from './mutations.ts';
 
 export interface PrescribeOptions {
   candidates: number;
@@ -24,7 +26,7 @@ export interface PrescribeOptions {
 }
 
 interface CandidateEvaluation {
-  params: MaCrossParams;
+  params: StrategyParams;
   score: number;
   survived: boolean;
   liquidations: number;
@@ -37,43 +39,32 @@ const DEFAULT_OPTIONS: PrescribeOptions = {
   seed: 7,
 };
 
-const PARAM_LABELS: Record<keyof MaCrossParams, string> = {
-  fastMA: '快均线',
-  slowMA: '慢均线',
-  leverage: '杠杆',
-  stopLossPct: '止损比例',
-  positionPct: '仓位比例',
-};
-
-function targetedFields(causes: Set<DeathCause>): (keyof MaCrossParams)[] {
-  const fields = new Set<keyof MaCrossParams>();
-  if (causes.has('liquidation')) {
-    fields.add('leverage');
-    fields.add('stopLossPct');
-  }
-  if (causes.has('drawdown-breach')) {
-    fields.add('positionPct');
-  }
-  if (causes.has('stop-loss-bleed')) {
-    fields.add('fastMA');
-    fields.add('slowMA');
-  }
-  return [...fields];
+function parameterRecord(
+  params: StrategyParams | ParameterChanges,
+): Record<string, number | undefined> {
+  return params as unknown as Record<string, number | undefined>;
 }
 
 function summarizeChanges(
-  before: MaCrossParams,
-  changes: Partial<MaCrossParams>,
+  before: StrategyParams,
+  changes: ParameterChanges,
+  adapter: AnyStrategyAdapter,
 ): string {
-  return (Object.keys(changes) as (keyof MaCrossParams)[])
-    .map(key => `${PARAM_LABELS[key]} ${before[key]}→${changes[key]}`)
+  const previous = parameterRecord(before);
+  const updated = parameterRecord(changes);
+  return (Object.keys(changes) as StrategyParamKey[])
+    .map(key => (
+      `${adapter.paramLabel(key as never)} ${previous[key]}→${updated[key]}`
+    ))
     .join('，');
 }
 
 function preservesTargetedIntent(
-  candidate: MaCrossParams,
-  base: MaCrossParams,
-  causes: Set<DeathCause>,
+  candidate: StrategyParams,
+  original: StrategyParams,
+  base: StrategyParams,
+  patch: ParameterChanges,
+  causes: ReadonlySet<DeathCause>,
 ): boolean {
   if (causes.has('liquidation')) {
     const stopLimit = 0.8 / candidate.leverage / 2;
@@ -90,14 +81,30 @@ function preservesTargetedIntent(
   ) {
     return false;
   }
-  if (
-    causes.has('stop-loss-bleed')
-    && (
-      candidate.fastMA < base.fastMA
-      || candidate.slowMA < base.slowMA
-    )
-  ) {
-    return false;
+
+  const originalValues = parameterRecord(original);
+  const baseValues = parameterRecord(base);
+  const candidateValues = parameterRecord(candidate);
+  for (const key of Object.keys(patch) as StrategyParamKey[]) {
+    if (key === 'stopLossPct') {
+      continue;
+    }
+    const originalValue = originalValues[key];
+    const baseValue = baseValues[key];
+    const candidateValue = candidateValues[key];
+    if (
+      originalValue === undefined
+      || baseValue === undefined
+      || candidateValue === undefined
+    ) {
+      continue;
+    }
+    if (baseValue < originalValue && candidateValue > baseValue) {
+      return false;
+    }
+    if (baseValue > originalValue && candidateValue < baseValue) {
+      return false;
+    }
   }
   return true;
 }
@@ -125,17 +132,17 @@ function isBetter(
 }
 
 async function evaluateCandidate(
-  strategy: MaCrossStrategy,
-  params: MaCrossParams,
+  strategy: Strategy,
+  params: StrategyParams,
   treatment: Scenario[],
   backtest: BacktestAdapter,
   profile: StyleProfile,
 ): Promise<CandidateEvaluation> {
-  const trial: MaCrossStrategy = {
+  const trial = {
     ...strategy,
     id: `${strategy.id}-rx`,
     params,
-  };
+  } as Strategy;
   const results: Metrics[] = await Promise.all(
     treatment.map(scenario => backtest.run(trial, scenario)),
   );
@@ -159,9 +166,6 @@ export async function prescribe(
   profile: StyleProfile,
   options: PrescribeOptions = DEFAULT_OPTIONS,
 ): Promise<Prescription> {
-  if (strategy.archetype !== 'ma-cross') {
-    throw new Error(`unsupported strategy archetype: ${strategy.archetype}`);
-  }
   const causes = new Set(
     deaths
       .map(death => death.cause)
@@ -181,20 +185,37 @@ export async function prescribe(
     throw new Error('candidates must be a positive integer');
   }
 
-  const { patch, rationale } = targetedPatch(
-    strategy.params,
+  const adapter = getStrategyAdapter(
+    strategy.archetype,
+  ) as AnyStrategyAdapter;
+  const { patch, rationale } = adapter.targetedPatch(
+    strategy.params as never,
     [...causes],
-  );
-  const base: MaCrossParams = {
+  ) as TargetedPatch<StrategyParams>;
+  const base = {
     ...strategy.params,
     ...patch,
-  };
+  } as StrategyParams;
   const random = mulberry32(options.seed);
-  const fields = targetedFields(causes);
-  const candidates: MaCrossParams[] = [base];
+  const fields = adapter.targetedFields(
+    causes,
+  ) as readonly StrategyParamKey[];
+  const candidates: StrategyParams[] = [base];
   for (let index = 1; index < options.candidates; index++) {
-    const candidate = jitterParams(base, random, fields);
-    if (preservesTargetedIntent(candidate, base, causes)) {
+    const candidate = adapter.jitterParams(
+      base as never,
+      random,
+      fields as never,
+    ) as StrategyParams;
+    if (
+      preservesTargetedIntent(
+        candidate,
+        strategy.params,
+        base,
+        patch as ParameterChanges,
+        causes,
+      )
+    ) {
       candidates.push(candidate);
     }
   }
@@ -214,8 +235,11 @@ export async function prescribe(
   }
 
   const bestParams = best!.params;
-  const changes = diffParams(strategy.params, bestParams);
-  const summary = summarizeChanges(strategy.params, changes);
+  const changes = diffParams(
+    strategy.params,
+    bestParams,
+  ) as ParameterChanges;
+  const summary = summarizeChanges(strategy.params, changes, adapter);
   return {
     changes,
     rationale: `${rationale.join('；')}；最终处方：${summary}`,
@@ -224,6 +248,6 @@ export async function prescribe(
       id: `${strategy.id}-rx`,
       name: `${strategy.name}（处方修补版）`,
       params: bestParams,
-    },
+    } as Strategy,
   };
 }
