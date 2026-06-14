@@ -124,7 +124,7 @@ Document that A, B, and C are integrated; D is the only remaining development
 stage and owns the permanent example, CLI acceptance tests, README, and demo
 material.
 
-- [ ] **Step 3: Commit, push, and open PR**
+- [x] **Step 3: Commit, push, and open PR**
 
 Push `feat/ma-adapter-integration`, open a new PR to `main`, wait for CI, and
 merge it before starting D.
