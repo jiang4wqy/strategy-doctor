@@ -8,6 +8,12 @@ import type {
 import { scoreStyle } from '../scoring/scorecard.ts';
 import type { StyleProfile } from '../scoring/styles.ts';
 
+export interface HeldOutValidation {
+  tradeoff: Tradeoff;
+  originalMetrics: Metrics[];
+  patchedMetrics: Metrics[];
+}
+
 async function runAll(
   strategy: Strategy,
   scenarios: Scenario[],
@@ -18,14 +24,14 @@ async function runAll(
   );
 }
 
-export async function validateOnHeldOut(
+export async function validateOnHeldOutDetailed(
   original: Strategy,
   patched: Strategy,
   treatment: Scenario[],
   heldOut: Scenario[],
   backtest: BacktestAdapter,
   profile: StyleProfile,
-): Promise<Tradeoff> {
+): Promise<HeldOutValidation> {
   if (treatment.length === 0) {
     throw new Error('treatment scenarios must not be empty');
   }
@@ -53,9 +59,31 @@ export async function validateOnHeldOut(
   const patchedScore = scoreStyle(patchedResults, profile);
 
   return {
-    robustnessGain: patchedScore.riskScore - originalScore.riskScore,
-    returnCost: Number(
-      (patchedScore.meanPnlPct - originalScore.meanPnlPct).toFixed(4),
-    ),
+    tradeoff: {
+      robustnessGain: patchedScore.riskScore - originalScore.riskScore,
+      returnCost: Number(
+        (patchedScore.meanPnlPct - originalScore.meanPnlPct).toFixed(4),
+      ),
+    },
+    originalMetrics: originalResults,
+    patchedMetrics: patchedResults,
   };
+}
+
+export async function validateOnHeldOut(
+  original: Strategy,
+  patched: Strategy,
+  treatment: Scenario[],
+  heldOut: Scenario[],
+  backtest: BacktestAdapter,
+  profile: StyleProfile,
+): Promise<Tradeoff> {
+  return (await validateOnHeldOutDetailed(
+    original,
+    patched,
+    treatment,
+    heldOut,
+    backtest,
+    profile,
+  )).tradeoff;
 }

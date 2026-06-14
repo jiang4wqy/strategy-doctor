@@ -10,7 +10,10 @@ import type {
   StyleScore,
 } from '../contracts.ts';
 import { prescribe } from '../prescribe/evolve.ts';
-import { validateOnHeldOut } from '../prescribe/validate.ts';
+import {
+  type HeldOutValidation,
+  validateOnHeldOutDetailed,
+} from '../prescribe/validate.ts';
 import { classifyDeath } from '../redteam/diagnose.ts';
 import type { Narrator } from '../redteam/narrate.ts';
 import { scoreStyle } from '../scoring/scorecard.ts';
@@ -21,6 +24,11 @@ export interface DoctorOptions {
   treatment: Scenario[];
   heldOut: Scenario[];
   narrator?: Narrator;
+}
+
+export interface DoctorResult {
+  scorecard: Scorecard;
+  heldOut: HeldOutValidation;
 }
 
 async function runAll(
@@ -204,11 +212,11 @@ async function evaluate(
   }));
 }
 
-export async function runDoctor(
+export async function runDoctorDetailed(
   strategy: Strategy,
   backtest: BacktestAdapter,
   options: DoctorOptions,
-): Promise<Scorecard> {
+): Promise<DoctorResult> {
   validateScenarioSets(options.treatment, options.heldOut);
 
   const treatmentMetrics = await runAll(
@@ -237,7 +245,7 @@ export async function runDoctor(
     backtest,
     profile,
   );
-  const tradeoff = await validateOnHeldOut(
+  const heldOut = await validateOnHeldOutDetailed(
     strategy,
     prescription.patchedStrategy,
     options.treatment,
@@ -247,13 +255,24 @@ export async function runDoctor(
   );
 
   return {
-    strategyId: strategy.id,
-    scenarioSetId:
-      `tx${options.treatment[0].shock.seed}/ho${options.heldOut[0].shock.seed}`,
-    perStyle,
-    evaluations,
-    deaths,
-    prescription,
-    tradeoff,
+    scorecard: {
+      strategyId: strategy.id,
+      scenarioSetId:
+        `tx${options.treatment[0].shock.seed}/ho${options.heldOut[0].shock.seed}`,
+      perStyle,
+      evaluations,
+      deaths,
+      prescription,
+      tradeoff: heldOut.tradeoff,
+    },
+    heldOut,
   };
+}
+
+export async function runDoctor(
+  strategy: Strategy,
+  backtest: BacktestAdapter,
+  options: DoctorOptions,
+): Promise<Scorecard> {
+  return (await runDoctorDetailed(strategy, backtest, options)).scorecard;
 }

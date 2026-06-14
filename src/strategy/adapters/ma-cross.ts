@@ -3,6 +3,7 @@ import type {
   DecisionContext,
   MaCrossParams,
   StrategyAdapter,
+  StrategyDefinition,
   StrategyDecision,
 } from '../../contracts.ts';
 
@@ -189,8 +190,75 @@ function jitterParams(
   };
 }
 
+const definition = Object.freeze({
+  archetype: 'ma-cross',
+  displayName: 'Moving Average Crossover',
+  description: 'Trend-following strategy using fast and slow moving averages.',
+  parameters: Object.freeze([
+    {
+      key: 'fastMA',
+      label: PARAM_LABELS.fastMA,
+      description: 'Fast moving-average period in bars.',
+      kind: 'integer',
+      minimum: 2,
+      defaultValue: 8,
+    },
+    {
+      key: 'slowMA',
+      label: PARAM_LABELS.slowMA,
+      description: 'Slow moving-average period; must exceed fastMA.',
+      kind: 'integer',
+      minimum: 3,
+      defaultValue: 30,
+    },
+    {
+      key: 'leverage',
+      label: PARAM_LABELS.leverage,
+      description: 'Position leverage multiplier.',
+      kind: 'number',
+      minimum: 1,
+      defaultValue: 10,
+    },
+    {
+      key: 'stopLossPct',
+      label: PARAM_LABELS.stopLossPct,
+      description: 'Stop-loss distance as a decimal fraction.',
+      kind: 'number',
+      minimum: 0,
+      maximum: 0.99,
+      exclusiveMinimum: true,
+      defaultValue: 0.5,
+    },
+    {
+      key: 'positionPct',
+      label: PARAM_LABELS.positionPct,
+      description: 'Share of equity allocated to one position.',
+      kind: 'number',
+      minimum: 0,
+      maximum: 1,
+      exclusiveMinimum: true,
+      defaultValue: 1,
+    },
+  ]),
+  example: Object.freeze({
+    id: 'tf-001',
+    name: '高杠杆趋势跟随',
+    archetype: 'ma-cross',
+    params: Object.freeze({
+      fastMA: 8,
+      slowMA: 30,
+      leverage: 10,
+      stopLossPct: 0.5,
+      positionPct: 1,
+    }),
+    universe: ['BTCUSDT'],
+    timeframe: '1h',
+  }),
+} satisfies StrategyDefinition<'ma-cross'>);
+
 export const maCrossAdapter: StrategyAdapter<'ma-cross'> = {
   archetype: 'ma-cross',
+  definition,
   parseParams,
   decide,
   targetedPatch,

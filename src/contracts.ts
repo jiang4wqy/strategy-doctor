@@ -71,6 +71,52 @@ export type StrategyParamKey =
 export type ParameterChanges =
   Partial<Record<StrategyParamKey, number>>;
 
+export type StrategyValidationCode =
+  | 'INVALID_REQUEST'
+  | 'UNSUPPORTED_ARCHETYPE'
+  | 'MULTI_SYMBOL_UNSUPPORTED'
+  | 'UNSUPPORTED_SYMBOL'
+  | 'UNSUPPORTED_TIMEFRAME';
+
+export class StrategyValidationError extends Error {
+  readonly code: StrategyValidationCode;
+  readonly field?: string;
+
+  constructor(
+    code: StrategyValidationCode,
+    message: string,
+    field?: string,
+  ) {
+    super(`invalid strategy: ${message}`);
+    this.name = 'StrategyValidationError';
+    this.code = code;
+    this.field = field;
+  }
+}
+
+export interface ParameterDefinition {
+  key: StrategyParamKey;
+  label: string;
+  description: string;
+  kind: 'integer' | 'number';
+  minimum: number;
+  maximum?: number;
+  exclusiveMinimum?: boolean;
+  defaultValue: number;
+}
+
+export interface StrategyDefinition<A extends StrategyArchetype> {
+  archetype: A;
+  displayName: string;
+  description: string;
+  parameters: readonly ParameterDefinition[];
+  example: StrategyByArchetype<A>;
+}
+
+export type AnyStrategyDefinition = {
+  [A in StrategyArchetype]: StrategyDefinition<A>;
+}[StrategyArchetype];
+
 export interface MarketShock {
   kind: 'crash' | 'whipsaw' | 'squeeze' | 'grind' | 'gap';
   magnitude: number;       // 主冲击幅度（0.3 = 30%）
@@ -120,6 +166,7 @@ export interface TargetedPatch<P> {
 
 export interface StrategyAdapter<A extends StrategyArchetype> {
   readonly archetype: A;
+  readonly definition: StrategyDefinition<A>;
   parseParams(value: unknown): ParamsByArchetype[A];
   decide(
     params: ParamsByArchetype[A],

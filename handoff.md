@@ -2,6 +2,72 @@
 
 更新时间：2026-06-14（Asia/Shanghai）
 
+## P1 Foundation 交接
+
+当前工作分支：`codex/p1-foundation`。
+
+P1 Foundation 已完成：
+
+- `AGENTS.md` 与 `CONTRIBUTING.md` 已切换到 P1 多 Agent 规则。
+- 根 `package.json`/`package-lock.json` 已由单一 owner 安装并锁定 Fastify、
+  React、Vite、ECharts、Vitest、Playwright 和 Testing Library 依赖。
+- `StrategyAdapter` 现在拥有 machine-readable `definition`。
+- registry 提供 `listDefinitions()` 与 `getDefinition()`。
+- runtime parser 只允许一个 `*USDT` symbol 和 `1h`、`4h`、`1d`，
+  并输出稳定的 `StrategyValidationError` code/field。
+- `validateOnHeldOutDetailed()` 返回原版与处方版 held-out metrics。
+- `runDoctorDetailed()` 返回旧 `Scorecard` 和 detailed held-out，旧
+  `runDoctor()` 保持兼容。
+- `src/platform/contracts.ts` 是 P1 API、自然语言、Web 和 TypeScript
+  client 唯一共享 DTO 来源。
+- `diagnoseStrategy()` 统一完成场景构造、诊断、处方、held-out 和
+  `DiagnosisView` 转换。
+- CLI 已迁移到共享 application service，但仍只序列化旧 `Scorecard`。
+- `tests/cli.test.ts` 新增 MA golden 原始文本回归，禁止通过更新
+  `examples/demo-scorecard.json` 隐藏变化。
+
+Wave 2 可依赖的冻结入口：
+
+```text
+src/contracts.ts
+  StrategyValidationError
+  StrategyAdapter.definition
+  AnyStrategyDefinition
+
+src/strategy/registry.ts
+  strategyRegistry.listDefinitions()
+  strategyRegistry.getDefinition()
+
+src/platform/contracts.ts
+  DiagnoseRequest
+  DiagnosisView
+  DiagnosisResult
+  StrategyDraft
+  ApiEnvelope / ApiErrorEnvelope
+  StoredDiagnosis
+
+src/application/diagnose.ts
+  diagnoseStrategy(request, dependencies?)
+```
+
+Foundation 验证：
+
+- 166 tests：165 passed、1 skipped、0 failed。
+- Lines 96.64%、branches 89.45%、functions 99.15%。
+- `npm.cmd run typecheck` 通过 core + Web config。
+- 离线 demo 通过。
+- MA seed 42 / candidates 6 golden JSON 文本一致。
+- 默认 Web/API 仍只允许 offline `MockBacktester`；无账户、持仓或下单能力。
+
+Wave 2 创建规则：
+
+1. Foundation handoff commit 合并到 `codex/p1-developer-platform`。
+2. `codex/p1-api`、`codex/p1-natural-language`、`codex/p1-web`、
+   `codex/p1-client-docs` 必须从同一个合并提交创建。
+3. 四个 Agent 只能修改各自 ownership 文件，禁止修改 root package、
+   `src/contracts.ts`、`src/platform/**`、application service 或 CLI。
+4. `examples/demo-scorecard.json` 对所有 Wave 2 Agent 只读。
+
 ## 当前结论
 
 多策略规格与契约已经冻结。B、C、A 最终接线已分别通过 PR #7、#8、#9 进入

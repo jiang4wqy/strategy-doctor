@@ -1,8 +1,10 @@
 import type {
+  AnyStrategyDefinition,
   StrategyAdapter,
   StrategyArchetype,
   StrategyBase,
   StrategyByArchetype,
+  StrategyDefinition,
 } from '../contracts.ts';
 import { maCrossAdapter } from './adapters/ma-cross.ts';
 import { rsiBollingerAdapter } from './adapters/rsi-bollinger.ts';
@@ -13,6 +15,10 @@ export type AnyStrategyAdapter = {
 
 export interface StrategyRegistry {
   get<A extends StrategyArchetype>(archetype: A): StrategyAdapter<A>;
+  listDefinitions(): readonly AnyStrategyDefinition[];
+  getDefinition<A extends StrategyArchetype>(
+    archetype: A,
+  ): StrategyDefinition<A>;
   parse<A extends StrategyArchetype>(
     archetype: A,
     base: StrategyBase,
@@ -30,6 +36,9 @@ export function createStrategyRegistry(
     }
     adapters.set(adapter.archetype, adapter);
   }
+  const definitions = Object.freeze(
+    registered.map(adapter => adapter.definition),
+  );
 
   const registry: StrategyRegistry = {
     get<A extends StrategyArchetype>(
@@ -39,7 +48,15 @@ export function createStrategyRegistry(
       if (!adapter) {
         throw new Error(`unsupported strategy archetype: ${archetype}`);
       }
-      return adapter as StrategyAdapter<A>;
+      return adapter as unknown as StrategyAdapter<A>;
+    },
+    listDefinitions(): readonly AnyStrategyDefinition[] {
+      return definitions;
+    },
+    getDefinition<A extends StrategyArchetype>(
+      archetype: A,
+    ): StrategyDefinition<A> {
+      return registry.get(archetype).definition;
     },
     parse<A extends StrategyArchetype>(
       archetype: A,

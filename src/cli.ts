@@ -3,10 +3,8 @@ import { pathToFileURL } from 'node:url';
 import { BitgetBacktester } from './backtest/bitget.ts';
 import { MockBacktester } from './backtest/mock.ts';
 import type { BacktestAdapter } from './contracts.ts';
-import { loadDefaultSnapshotBundle } from './data/snapshots.ts';
-import { runDoctor } from './pipeline/doctor.ts';
+import { diagnoseStrategy } from './application/diagnose.ts';
 import { createAnthropicNarrator } from './redteam/narrate.ts';
-import { buildAdversarialScenarioSet } from './redteam/search.ts';
 import { renderScorecard } from './report/render.ts';
 import { parseStrategy } from './strategy/parse.ts';
 import { parseCliArgs, type BacktestMode } from './cli/args.ts';
@@ -43,28 +41,13 @@ export async function runCli(args: string[]): Promise<void> {
     JSON.parse(readFileSync(options.strategyPath!, 'utf8')),
   );
   const adapter = backtester(options.backtest);
-  const snapshots = loadDefaultSnapshotBundle();
-  const heldOutSeed = options.seed + 100_000;
-  const [treatment, heldOut] = await Promise.all([
-    buildAdversarialScenarioSet(
-      strategy,
-      snapshots,
-      options.seed,
-      options.candidates,
-      adapter,
-    ),
-    buildAdversarialScenarioSet(
-      strategy,
-      snapshots,
-      heldOutSeed,
-      options.candidates,
-      adapter,
-    ),
-  ]);
-  const scorecard = await runDoctor(strategy, adapter, {
+  const { scorecard } = await diagnoseStrategy({
+    strategy,
     style: options.style,
-    treatment,
-    heldOut,
+    seed: options.seed,
+    candidates: options.candidates,
+  }, {
+    backtest: adapter,
     narrator: createAnthropicNarrator(),
   });
   const report = options.format === 'json'

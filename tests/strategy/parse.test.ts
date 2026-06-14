@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { StrategyValidationError } from '../../src/contracts.ts';
 import { parseStrategy } from '../../src/strategy/parse.ts';
 
 const validStrategy = {
@@ -41,6 +42,15 @@ test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
 
+test('parseStrategy normalizes a single USDT symbol to uppercase', () => {
+  const parsed = parseStrategy({
+    ...validStrategy,
+    universe: [' btcusdt '],
+  });
+
+  assert.deepEqual(parsed.universe, ['BTCUSDT']);
+});
+
 test('parseStrategy accepts the enhanced mean-reversion strategy', () => {
   const strategy = parseStrategy(validMeanReversionStrategy);
 
@@ -62,10 +72,45 @@ test('parseStrategy rejects malformed identity and market fields', () => {
     { ...validStrategy, archetype: 'grid' },
     { ...validStrategy, universe: [] },
     { ...validStrategy, universe: ['BTCUSDT', ' '] },
-    { ...validStrategy, timeframe: '' },
   ]) {
     assert.throws(() => parseStrategy(invalid), /strategy/i);
   }
+});
+
+test('parseStrategy rejects unsupported market boundaries with stable codes', () => {
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      universe: ['BTCUSDT', 'ETHUSDT'],
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'MULTI_SYMBOL_UNSUPPORTED'
+      && error.field === 'strategy.universe'
+    ),
+  );
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      universe: ['BTCUSD'],
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'UNSUPPORTED_SYMBOL'
+      && error.field === 'strategy.universe.0'
+    ),
+  );
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      timeframe: '15m',
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'UNSUPPORTED_TIMEFRAME'
+      && error.field === 'strategy.timeframe'
+    ),
+  );
 });
 
 test('parseStrategy rejects invalid parameter invariants', () => {

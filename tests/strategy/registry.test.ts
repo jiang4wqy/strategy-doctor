@@ -11,6 +11,7 @@ import { rsiBollingerAdapter } from '../../src/strategy/adapters/rsi-bollinger.t
 import {
   createStrategyRegistry,
   getStrategyAdapter,
+  strategyRegistry,
 } from '../../src/strategy/registry.ts';
 
 const params: MaCrossParams = {
@@ -43,6 +44,29 @@ test('registry returns the registered mean-reversion adapter', () => {
     getStrategyAdapter('rsi-bollinger-mean-reversion'),
     rsiBollingerAdapter,
   );
+});
+
+test('registry exposes immutable strategy capability definitions', () => {
+  const definitions = strategyRegistry.listDefinitions();
+
+  assert.equal(definitions.length, 2);
+  assert.deepEqual(
+    definitions.map(definition => definition.archetype),
+    ['ma-cross', 'rsi-bollinger-mean-reversion'],
+  );
+  assert.equal(
+    strategyRegistry.getDefinition('ma-cross').parameters[0].key,
+    'fastMA',
+  );
+  assert.equal(
+    strategyRegistry
+      .getDefinition('rsi-bollinger-mean-reversion')
+      .parameters[0].key,
+    'rsiPeriod',
+  );
+  assert.ok(Object.isFrozen(definitions));
+  assert.ok(Object.isFrozen(definitions[0]));
+  assert.ok(Object.isFrozen(definitions[0].parameters));
 });
 
 test('registry rejects duplicate adapter registration', () => {
