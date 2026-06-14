@@ -17,18 +17,41 @@ const validStrategy = {
   timeframe: '1h',
 };
 
+const validMeanReversionStrategy = {
+  id: 'mr-001',
+  name: 'RSI Bollinger 均值回归',
+  archetype: 'rsi-bollinger-mean-reversion',
+  params: {
+    rsiPeriod: 14,
+    rsiOversold: 30,
+    rsiOverbought: 70,
+    bollingerPeriod: 20,
+    bollingerStdDev: 2,
+    trendFilterPeriod: 50,
+    trendFilterThreshold: 0.03,
+    leverage: 3,
+    stopLossPct: 0.05,
+    positionPct: 0.5,
+  },
+  universe: ['BTCUSDT'],
+  timeframe: '4h',
+};
+
 test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
 
-test('parseStrategy rejects a known but unregistered strategy', () => {
-  assert.throws(
-    () => parseStrategy({
-      ...validStrategy,
-      archetype: 'rsi-bollinger-mean-reversion',
-      params: {},
-    }),
-    /unsupported strategy archetype/i,
+test('parseStrategy accepts the enhanced mean-reversion strategy', () => {
+  const strategy = parseStrategy(validMeanReversionStrategy);
+
+  assert.deepEqual(strategy, validMeanReversionStrategy);
+  assert.equal(
+    strategy.params.trendFilterPeriod,
+    validMeanReversionStrategy.params.trendFilterPeriod,
+  );
+  assert.equal(
+    strategy.params.trendFilterThreshold,
+    validMeanReversionStrategy.params.trendFilterThreshold,
   );
 });
 
