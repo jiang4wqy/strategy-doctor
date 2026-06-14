@@ -51,15 +51,15 @@ git pull
   policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
 - A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
 
-当前 A/B/C 状态：
+当前 A/B/C/D 状态：
 
 - C 的 shared execution engine 和 adapter-driven prescription 已通过 PR #8
   合入 `main`。
 - B 的 Wilder RSI、Bollinger、趋势过滤器和均值回归 adapter 已通过 PR #7
   合入 `main`。
 - 趋势过滤器只过滤新开仓，已有仓位仍按中轨或 RSI 50 退出。
-- A 已完成默认 registry 注册和第二策略离线 CLI 验证。
-- 下一步合入 A 最终接线，再由 D 补正式示例、验收和发布材料。
+- A 的默认 registry 注册和第二策略 CLI 接线已通过 PR #9 合入 `main`。
+- D 已补齐正式 RSI/Bollinger 示例、双策略 CLI 回归、共享场景集成验收和发布材料。
 
 ## 3. 契约冻结规则
 
@@ -77,7 +77,7 @@ git pull
 
 ## 4. 合并顺序
 
-公共契约和 MA adapter 基线已经进入 `main`。剩余建议分阶段合并：
+多策略 P0 按以下顺序完成合并与验收：
 
 1. A 基础收口：类型缩窄、通用 registry parser、MA policy ownership。
 2. C：公共执行引擎和 adapter-driven 处方框架。
@@ -85,7 +85,8 @@ git pull
 4. A 最终接线：注册 RSI adapter、CLI 和 MA 兼容性复核。
 5. D：双策略集成测试、示例和文档。
 
-后序 PR 必须明确前置 commit 或 PR。不得通过同时修改共享文件绕过顺序。
+第 1-4 步已进入 `main`；D 是最后一个验收 PR。后续增量仍须明确前置 commit
+或 PR，不得通过同时修改共享文件绕过顺序。
 
 ## 5. PR 规则
 

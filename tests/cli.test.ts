@@ -82,6 +82,75 @@ test('CLI emits a complete JSON scorecard and writes output files', () => {
   assert.ok(readFileSync(outputPath, 'utf8').includes('五维压力覆盖'));
 });
 
+test('CLI completes the full workflow for both registered strategies', () => {
+  const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
+  const examples = [
+    {
+      path: '../examples/trend-follower.json',
+      archetype: 'ma-cross',
+    },
+    {
+      path: '../examples/rsi-bollinger.json',
+      archetype: 'rsi-bollinger-mean-reversion',
+    },
+  ];
+
+  for (const example of examples) {
+    const output = execFileSync(
+      process.execPath,
+      [
+        cliPath,
+        fileURLToPath(new URL(example.path, import.meta.url)),
+        '--style',
+        'conservative',
+        '--seed',
+        '42',
+        '--candidates',
+        '6',
+        '--format',
+        'json',
+      ],
+      { encoding: 'utf8' },
+    );
+    const card = JSON.parse(output) as {
+      perStyle: Record<string, unknown>;
+      evaluations: {
+        metrics: { numTrades: number };
+      }[];
+      deaths: { cause: string }[];
+      prescription: {
+        changes: Record<string, number>;
+        patchedStrategy: { archetype: string };
+      };
+      tradeoff: {
+        robustnessGain: number;
+        returnCost: number;
+      };
+    };
+
+    assert.equal(card.evaluations.length, 5);
+    assert.deepEqual(
+      Object.keys(card.perStyle).sort(),
+      ['aggressive', 'conservative', 'trend'],
+    );
+    assert.equal(
+      card.prescription.patchedStrategy.archetype,
+      example.archetype,
+    );
+    assert.ok(Number.isFinite(card.tradeoff.robustnessGain));
+    assert.ok(Number.isFinite(card.tradeoff.returnCost));
+    if (example.archetype === 'rsi-bollinger-mean-reversion') {
+      assert.ok(
+        card.evaluations.every(evaluation =>
+          evaluation.metrics.numTrades > 0
+        ),
+      );
+      assert.ok(card.deaths.length > 0);
+      assert.ok(Object.keys(card.prescription.changes).length > 0);
+    }
+  }
+});
+
 test('CLI rejects malformed strategies with a non-zero exit code', () => {
   const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
   const result = spawnSync(

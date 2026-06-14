@@ -49,7 +49,21 @@ positionPct 1 -> 0.6
 
 > 清算只触发杠杆和止损修补，回撤只触发仓位修补。处方在 seed 100042 的 held-out 上复测。当前风险分变化 +2、平均收益变化 +37.1%。系统原样展示结果，不承诺一键变好。
 
-## 2:40-3:00 可信度
+## 2:40-2:55 双策略对比
+
+```powershell
+node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
+```
+
+> 同一条 CLI 和同一套五维压力场景也能诊断增强 RSI+Bollinger 均值回归策略。
+> 两种策略共用执行与评分框架，但保留各自的交易决策和参数处方，因此会产生
+> 不同的回测指标、死因与修补字段。
+
+当前 seed 42 的 RSI/Bollinger 示例在五个维度都有交易，共 27 次；technical
+whipsaw 触发 `stop-loss-bleed`。处方调整 RSI 阈值、Bollinger 倍数和趋势过滤
+阈值，held-out 风险分提高 50，平均收益变化 +0.27%。
+
+## 2:55-3:00 可信度
 
 > 项目使用 Node 24 原生 TypeScript，零运行时依赖。默认断网可运行；CI 强制 90/80/95 覆盖率门槛。系统没有交易账户和下单代码。
 
@@ -67,4 +81,5 @@ npm.cmd run demo:live
 
 - 总时长不超过 3 分钟。
 - 不显示 key、登录信息或环境变量值。
-- 数字与 `examples/demo-report.md` 一致。
+- MA 数字与 `examples/demo-report.md` 一致。
+- RSI/Bollinger 命令使用仓库内 `examples/rsi-bollinger.json`。

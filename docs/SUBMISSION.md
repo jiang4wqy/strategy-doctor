@@ -45,6 +45,7 @@ Trading tools create strategies but rarely explain which unseen regime can break
 npm.cmd ci
 npm.cmd run verify
 npm.cmd run demo
+node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
 ```
 
 Optional Bitget proof:
@@ -56,14 +57,16 @@ npm.cmd run demo:live
 ## Scope
 
 - CLI submission, no Web UI.
-- `ma-cross` MVP strategy.
+- Two registered reference strategies: `ma-cross` and
+  `rsi-bollinger-mean-reversion`.
+- A shared `StrategyAdapter` registry, execution engine, diagnosis pipeline,
+  and held-out prescription validation.
 - No real trading or performance guarantee.
 - News stores metadata and risk tags, not article bodies.
 - Surviving scenarios are valid results.
 
-The submission deliberately keeps one fully validated strategy archetype. The
-next milestone is a `StrategyAdapter` registry plus an RSI mean-reversion
-reference strategy, rather than an unverified arbitrary-strategy DSL.
+The submission deliberately keeps a closed, fully validated two-strategy
+registry rather than claiming an unverified arbitrary-strategy DSL.
 
 ## Checklist
 
@@ -72,6 +75,7 @@ reference strategy, rather than an unverified arbitrary-strategy DSL.
 - [x] Public Bitget adapter
 - [x] Deterministic candidate search
 - [x] Prescription and held-out validation
+- [x] Two-strategy adapter and CLI acceptance
 - [x] Automated tests and CI
 - [x] Three-minute script
 - [ ] Record and upload demo video
