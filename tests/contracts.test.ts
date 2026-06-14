@@ -35,6 +35,8 @@ test('契约：四大核心类型可构造且字段齐全', () => {
       rsiOverbought: 70,
       bollingerPeriod: 20,
       bollingerStdDev: 2,
+      trendFilterPeriod: 50,
+      trendFilterThreshold: 0.03,
       leverage: 3,
       stopLossPct: 0.08,
       positionPct: 0.5,
@@ -73,4 +75,6 @@ test('契约：四大核心类型可构造且字段齐全', () => {
   );
   assert.equal(signalPeriod(movingAverage), 8);
   assert.equal(signalPeriod(meanReversion), 14);
+  assert.equal(meanReversion.params.trendFilterPeriod, 50);
+  assert.equal(meanReversion.params.trendFilterThreshold, 0.03);
 });

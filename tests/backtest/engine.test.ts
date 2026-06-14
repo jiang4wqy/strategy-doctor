@@ -65,6 +65,8 @@ test('shared engine rejects invalid prices and adapter mismatches', () => {
       rsiOverbought: 70,
       bollingerPeriod: 20,
       bollingerStdDev: 2,
+      trendFilterPeriod: 50,
+      trendFilterThreshold: 0.03,
       leverage: 2,
       stopLossPct: 0.05,
       positionPct: 0.5,

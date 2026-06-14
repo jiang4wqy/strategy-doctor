@@ -36,7 +36,7 @@ git pull
 | 角色 | 独占范围 | 交付 |
 |---|---|---|
 | A 架构/集成 | `src/contracts.ts`、`src/strategy/parse.ts`、`src/strategy/registry.ts`、`src/cli.ts`、`package.json` | 契约、registry、MA 迁移、最终集成 |
-| B 策略算法 | `src/strategy/indicators.ts`、`src/strategy/adapters/rsi-bollinger.ts`、对应策略测试 | 指标、均值回归 adapter、示例参数 |
+| B 策略算法 | `src/strategy/indicators.ts`、`src/strategy/adapters/rsi-bollinger.ts`、对应策略测试 | 指标、增强均值回归 adapter |
 | C 执行/风险 | `src/backtest/*`、`src/prescribe/*`、对应测试 | 公共执行引擎、策略专属 mutation |
 | D QA/材料 | `tests/integration/*`、`tests/cli.test.ts`、`examples/*`、`docs/*`、`README.md` | 双策略验收、CLI 回归、演示材料 |
 
@@ -51,13 +51,14 @@ git pull
   policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
 - A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
 
-当前 C 状态：
+当前 C/B 状态：
 
-- 已完成 shared execution engine 和 `flat`/方向阻塞状态机。
-- Mock 与 Bitget backtester 已通过 registry 分发到同一 engine。
-- `src/prescribe/evolve.ts` 已调用 adapter mutation policy，不再内置 MA 参数。
-- C 不注册 RSI/Bollinger adapter，也不修改 CLI 或示例。
-- 下一步先合入 C，再合入 B PR #7，之后由 A 完成全局接线。
+- C 的 shared execution engine 和 adapter-driven prescription 已通过 PR #8
+  合入 `main`。
+- B 已完成 Wilder RSI、Bollinger、趋势过滤器和均值回归 adapter。
+- 趋势过滤器只过滤新开仓，已有仓位仍按中轨或 RSI 50 退出。
+- B 不修改全局 registry、CLI 或示例；这些由 A/D 在后续阶段完成。
+- 下一步合入 B PR #7，再由 A 完成全局接线，最后由 D 验收。
 
 ## 3. 契约冻结规则
 
