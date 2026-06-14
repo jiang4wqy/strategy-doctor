@@ -155,12 +155,12 @@ git diff --check
 Run both example strategies through JSON output. Compare MA seed 42 output
 byte-for-byte with `examples/demo-scorecard.json`.
 
-- [ ] **Step 3: Push, create PR, wait for CI, and merge**
+- [x] **Step 3: Push, create PR, wait for CI, and merge**
 
 Push `test/multi-strategy-acceptance`, create the final PR to `main`, wait for
 required checks, and merge with a merge commit.
 
-- [ ] **Step 4: Verify final `main` and tag**
+- [x] **Step 4: Verify final `main` and tag**
 
 Fast-forward the main worktree, run `npm.cmd run verify` on merged `main`, then
 create and push annotated tag `mvp-m3` if the tag does not already exist.
