@@ -26,7 +26,9 @@ node src/cli.ts <strategy> --style conservative --seed 42 --candidates 6 --forma
 ```
 
 Assert five evaluations, three style scores, a prescription whose patched
-strategy keeps the input archetype, and finite held-out trade-off values.
+strategy keeps the input archetype, and finite held-out trade-off values. The
+RSI/Bollinger CLI run must trade in every dimension and produce an actionable
+diagnosis with non-empty changes.
 
 - [x] **Step 2: Verify RED**
 
@@ -43,13 +45,13 @@ while exercising real entries across all five frozen dimensions:
 
 ```json
 {
-  "rsiPeriod": 14,
-  "rsiOversold": 40,
-  "rsiOverbought": 60,
-  "bollingerPeriod": 10,
+  "rsiPeriod": 10,
+  "rsiOversold": 30,
+  "rsiOverbought": 70,
+  "bollingerPeriod": 14,
   "bollingerStdDev": 1.75,
   "trendFilterPeriod": 30,
-  "trendFilterThreshold": 0.1,
+  "trendFilterThreshold": 0.05,
   "leverage": 3,
   "stopLossPct": 0.05,
   "positionPct": 0.5
@@ -86,8 +88,7 @@ the same seed 42 treatment set and seed 100042 held-out set, and assert:
 - evaluation metrics or causes differ between the complementary strategies;
 - every changed field is allowed by the deaths and selected adapter policy;
 - identical repeated runs are deterministic.
-- the RSI/Bollinger example trades in every dimension and produces at least
-  one actionable diagnosis.
+- the RSI/Bollinger example trades in every shared base dimension.
 
 - [x] **Step 2: Run and inspect**
 

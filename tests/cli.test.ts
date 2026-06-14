@@ -114,8 +114,12 @@ test('CLI completes the full workflow for both registered strategies', () => {
     );
     const card = JSON.parse(output) as {
       perStyle: Record<string, unknown>;
-      evaluations: unknown[];
+      evaluations: {
+        metrics: { numTrades: number };
+      }[];
+      deaths: { cause: string }[];
       prescription: {
+        changes: Record<string, number>;
         patchedStrategy: { archetype: string };
       };
       tradeoff: {
@@ -135,6 +139,15 @@ test('CLI completes the full workflow for both registered strategies', () => {
     );
     assert.ok(Number.isFinite(card.tradeoff.robustnessGain));
     assert.ok(Number.isFinite(card.tradeoff.returnCost));
+    if (example.archetype === 'rsi-bollinger-mean-reversion') {
+      assert.ok(
+        card.evaluations.every(evaluation =>
+          evaluation.metrics.numTrades > 0
+        ),
+      );
+      assert.ok(card.deaths.length > 0);
+      assert.ok(Object.keys(card.prescription.changes).length > 0);
+    }
   }
 });
 

@@ -59,9 +59,9 @@ node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --can
 > 两种策略共用执行与评分框架，但保留各自的交易决策和参数处方，因此会产生
 > 不同的回测指标、死因与修补字段。
 
-当前 seed 42 的 RSI/Bollinger 示例在五个维度都有交易，共 36 次；technical
+当前 seed 42 的 RSI/Bollinger 示例在五个维度都有交易，共 27 次；technical
 whipsaw 触发 `stop-loss-bleed`。处方调整 RSI 阈值、Bollinger 倍数和趋势过滤
-阈值，held-out 风险分提高 25，平均收益变化 -0.92%。
+阈值，held-out 风险分提高 50，平均收益变化 +0.27%。
 
 ## 2:55-3:00 可信度
 

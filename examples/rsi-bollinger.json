@@ -3,13 +3,13 @@
   "name": "RSI Bollinger 趋势过滤均值回归",
   "archetype": "rsi-bollinger-mean-reversion",
   "params": {
-    "rsiPeriod": 14,
-    "rsiOversold": 40,
-    "rsiOverbought": 60,
-    "bollingerPeriod": 10,
+    "rsiPeriod": 10,
+    "rsiOversold": 30,
+    "rsiOverbought": 70,
+    "bollingerPeriod": 14,
     "bollingerStdDev": 1.75,
     "trendFilterPeriod": 30,
-    "trendFilterThreshold": 0.1,
+    "trendFilterThreshold": 0.05,
     "leverage": 3,
     "stopLossPct": 0.05,
     "positionPct": 0.5
