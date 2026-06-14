@@ -75,12 +75,12 @@ export function jitterParams(
   };
 }
 
-export function diffParams(
-  before: MaCrossParams,
-  after: MaCrossParams,
-): Partial<MaCrossParams> {
-  const changes: Partial<MaCrossParams> = {};
-  for (const key of Object.keys(after) as (keyof MaCrossParams)[]) {
+export function diffParams<P extends object>(
+  before: P,
+  after: P,
+): Partial<P> {
+  const changes: Partial<P> = {};
+  for (const key of Object.keys(after) as (keyof P)[]) {
     if (before[key] !== after[key]) {
       changes[key] = after[key];
     }

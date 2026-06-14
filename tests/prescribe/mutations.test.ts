@@ -82,4 +82,11 @@ test('diffParams reports only changed values', () => {
     diffParams(base, { ...base, leverage: 5 }),
     { leverage: 5 },
   );
+  assert.deepEqual(
+    diffParams(
+      { alpha: 1, beta: 2 },
+      { alpha: 1, beta: 3 },
+    ),
+    { beta: 3 },
+  );
 });
