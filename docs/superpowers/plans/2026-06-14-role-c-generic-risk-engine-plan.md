@@ -235,7 +235,7 @@ Document:
 - A then registers the adapter and handles CLI wiring;
 - D remains responsible for examples and end-to-end acceptance.
 
-- [ ] **Step 4: Commit, push, and open Draft PR**
+- [x] **Step 4: Commit, push, and open Draft PR**
 
 ```powershell
 git add CONTRIBUTING.md handoff.md docs/superpowers/plans/2026-06-14-role-c-generic-risk-engine-plan.md
