@@ -147,6 +147,7 @@ interface DiagnosisView {
   charts: {
     treatmentEquity: DimensionEquity[];
     heldOutComparison: DimensionEquityComparison[];
+    defaultHeldOutDimension: Dimension;
     riskRadar: DimensionRisk[];
     parameterChanges: ParameterChange[];
     scenarioTimeline: ScenarioTimelineItem[];
@@ -198,8 +199,9 @@ Chart data is derived deterministically from `Metrics` and `Scorecard`; the
 frontend does not recalculate diagnostic meaning.
 
 - Held-out comparison keeps one original/patched pair per scenario dimension.
-  The Web client initially displays the dimension with the largest original
-  drawdown and lets the user switch dimensions.
+  The backend exposes `defaultHeldOutDimension` as the dimension with the
+  largest original drawdown. The Web client initially displays it and lets the
+  user switch dimensions without recalculating diagnostic meaning.
 - Radar risk is `100` for a liquidated scenario. Otherwise it is
   `round(clamp(maxDrawdownPct * 100, 0, 100))`.
 - Scenario timeline is sorted by existing `damageScore`, highest damage first.
@@ -561,6 +563,7 @@ interface StoredDiagnosis {
   id: string;
   createdAt: string;
   description: string;
+  requestId: string;
   request: DiagnoseRequest;
   view: DiagnosisView;
 }
