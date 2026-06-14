@@ -17,7 +17,7 @@
 - Modify: `tests/strategy/parse.test.ts`
 - Modify: `src/strategy/registry.ts`
 
-- [ ] **Step 1: Write failing registration tests**
+- [x] **Step 1: Write failing registration tests**
 
 Assert:
 
@@ -25,7 +25,7 @@ Assert:
 - the default registry parses a fully populated enhanced strategy;
 - `parseStrategy` accepts the second archetype and preserves both trend fields.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```powershell
 node --test tests/strategy/registry.test.ts tests/strategy/parse.test.ts
@@ -33,7 +33,7 @@ node --test tests/strategy/registry.test.ts tests/strategy/parse.test.ts
 
 Expected: FAIL because the default registry contains only `maCrossAdapter`.
 
-- [ ] **Step 3: Register `rsiBollingerAdapter`**
+- [x] **Step 3: Register `rsiBollingerAdapter`**
 
 Import the adapter and initialize:
 
@@ -43,7 +43,7 @@ createStrategyRegistry([maCrossAdapter, rsiBollingerAdapter])
 
 No parser or CLI branch should be added.
 
-- [ ] **Step 4: Verify GREEN**
+- [x] **Step 4: Verify GREEN**
 
 ```powershell
 node --test tests/strategy/registry.test.ts tests/strategy/parse.test.ts
@@ -52,7 +52,7 @@ npm.cmd run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add src/strategy/registry.ts tests/strategy/registry.test.ts tests/strategy/parse.test.ts
@@ -64,7 +64,7 @@ git commit -m "feat: register RSI Bollinger strategy"
 **Files:**
 - No permanent production or example file required.
 
-- [ ] **Step 1: Create a temporary complete strategy JSON**
+- [x] **Step 1: Create a temporary complete strategy JSON**
 
 Use:
 
@@ -90,7 +90,7 @@ Use:
 }
 ```
 
-- [ ] **Step 2: Run the complete offline CLI**
+- [x] **Step 2: Run the complete offline CLI**
 
 ```powershell
 node src/cli.ts <temp-json> --style conservative --seed 42 --candidates 6 --format json
@@ -99,7 +99,7 @@ node src/cli.ts <temp-json> --style conservative --seed 42 --candidates 6 --form
 Expected: exit 0 with five evaluations, three style scores, a prescription,
 and held-out trade-off.
 
-- [ ] **Step 3: Verify MA golden**
+- [x] **Step 3: Verify MA golden**
 
 Confirm the original seed 42 / six-candidate MA output remains byte-for-byte
 equal to `examples/demo-scorecard.json`.
@@ -111,14 +111,14 @@ equal to `examples/demo-scorecard.json`.
 - Modify: `CONTRIBUTING.md`
 - Modify: `docs/superpowers/plans/2026-06-14-role-a-final-integration-plan.md`
 
-- [ ] **Step 1: Run complete verification**
+- [x] **Step 1: Run complete verification**
 
 ```powershell
 npm.cmd run verify
 git diff --check
 ```
 
-- [ ] **Step 2: Record status**
+- [x] **Step 2: Record status**
 
 Document that A, B, and C are integrated; D is the only remaining development
 stage and owns the permanent example, CLI acceptance tests, README, and demo
