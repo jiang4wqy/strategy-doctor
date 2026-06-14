@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MockBacktester, runOnPrices } from '../../src/backtest/mock.ts';
@@ -97,4 +98,14 @@ test('MockBacktester implements the BacktestAdapter behavior', async () => {
   assert.equal(typeof metrics.maxDrawdownPct, 'number');
   assert.equal(typeof metrics.liquidated, 'boolean');
   assert.ok(Array.isArray(metrics.equityCurve));
+});
+
+test('mock backtests delegate execution through the shared engine', () => {
+  const source = readFileSync(
+    new URL('../../src/backtest/mock.ts', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(source, /runStrategyOnPrices/);
+  assert.doesNotMatch(source, /strategy\.archetype !== 'ma-cross'/);
 });

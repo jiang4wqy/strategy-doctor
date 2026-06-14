@@ -51,13 +51,14 @@ git pull
   policy，不在 `src/strategy/adapters/*` 中实现公共搜索流程。
 - A 不提前实现 C 的公共 engine，也不提前实现 B 的指标和决策算法。
 
-当前 B 状态：
+当前 C/B 状态：
 
-- 已完成 Wilder RSI、SMA、population standard deviation。
-- 已完成 RSI + Bollinger + 趋势过滤器 adapter。
+- C 的 shared execution engine 和 adapter-driven prescription 已通过 PR #8
+  合入 `main`。
+- B 已完成 Wilder RSI、Bollinger、趋势过滤器和均值回归 adapter。
 - 趋势过滤器只过滤新开仓，已有仓位仍按中轨或 RSI 50 退出。
-- B 分支不修改全局 registry、公共 engine、prescribe consumer、CLI 或示例。
-- C 完成公共执行/处方后，由 A 注册并接线；D 最后补示例与端到端验收。
+- B 不修改全局 registry、CLI 或示例；这些由 A/D 在后续阶段完成。
+- 下一步合入 B PR #7，再由 A 完成全局接线，最后由 D 验收。
 
 ## 3. 契约冻结规则
 
