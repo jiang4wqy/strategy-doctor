@@ -82,6 +82,35 @@ test('CLI emits a complete JSON scorecard and writes output files', () => {
   assert.ok(readFileSync(outputPath, 'utf8').includes('五维压力覆盖'));
 });
 
+test('CLI preserves the frozen MA golden JSON output', () => {
+  const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
+  const strategyPath = fileURLToPath(
+    new URL('../examples/trend-follower.json', import.meta.url),
+  );
+  const output = execFileSync(
+    process.execPath,
+    [
+      cliPath,
+      strategyPath,
+      '--style',
+      'conservative',
+      '--seed',
+      '42',
+      '--candidates',
+      '6',
+      '--format',
+      'json',
+    ],
+    { encoding: 'utf8' },
+  );
+  const golden = readFileSync(
+    new URL('../examples/demo-scorecard.json', import.meta.url),
+    'utf8',
+  );
+
+  assert.equal(output.trim(), golden.trim());
+});
+
 test('CLI completes the full workflow for both registered strategies', () => {
   const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
   const examples = [
