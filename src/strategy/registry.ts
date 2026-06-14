@@ -5,6 +5,7 @@ import type {
   StrategyByArchetype,
 } from '../contracts.ts';
 import { maCrossAdapter } from './adapters/ma-cross.ts';
+import { rsiBollingerAdapter } from './adapters/rsi-bollinger.ts';
 
 export type AnyStrategyAdapter = {
   [A in StrategyArchetype]: StrategyAdapter<A>;
@@ -59,7 +60,10 @@ export function createStrategyRegistry(
   return Object.freeze(registry);
 }
 
-export const strategyRegistry = createStrategyRegistry([maCrossAdapter]);
+export const strategyRegistry = createStrategyRegistry([
+  maCrossAdapter,
+  rsiBollingerAdapter,
+]);
 
 export function getStrategyAdapter<A extends StrategyArchetype>(
   archetype: A,

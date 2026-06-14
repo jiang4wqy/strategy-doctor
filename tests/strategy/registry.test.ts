@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
 import type {
   MaCrossParams,
+  RsiBollingerParams,
   StrategyArchetype,
 } from '../../src/contracts.ts';
 import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
+import { rsiBollingerAdapter } from '../../src/strategy/adapters/rsi-bollinger.ts';
 import {
   createStrategyRegistry,
   getStrategyAdapter,
@@ -19,14 +21,27 @@ const params: MaCrossParams = {
   positionPct: 1,
 };
 
+const meanReversionParams: RsiBollingerParams = {
+  rsiPeriod: 14,
+  rsiOversold: 30,
+  rsiOverbought: 70,
+  bollingerPeriod: 20,
+  bollingerStdDev: 2,
+  trendFilterPeriod: 50,
+  trendFilterThreshold: 0.03,
+  leverage: 3,
+  stopLossPct: 0.05,
+  positionPct: 0.5,
+};
+
 test('registry returns the registered moving-average adapter', () => {
   assert.equal(getStrategyAdapter('ma-cross').archetype, 'ma-cross');
 });
 
-test('registry rejects a known but unregistered archetype', () => {
-  assert.throws(
-    () => getStrategyAdapter('rsi-bollinger-mean-reversion'),
-    /unsupported strategy archetype/i,
+test('registry returns the registered mean-reversion adapter', () => {
+  assert.equal(
+    getStrategyAdapter('rsi-bollinger-mean-reversion'),
+    rsiBollingerAdapter,
   );
 });
 
@@ -150,6 +165,25 @@ test('registry constructs a typed strategy through its adapter', () => {
     Object.keys(strategy),
     ['id', 'name', 'archetype', 'params', 'universe', 'timeframe'],
   );
+});
+
+test('default registry constructs the enhanced mean-reversion strategy', () => {
+  const strategy = {
+    id: 'mean-reversion',
+    name: 'RSI Bollinger mean reversion',
+    universe: ['BTCUSDT'],
+    timeframe: '4h',
+  };
+  const parsed = {
+    ...strategy,
+    archetype: 'rsi-bollinger-mean-reversion' as const,
+    params: getStrategyAdapter(
+      'rsi-bollinger-mean-reversion',
+    ).parseParams(meanReversionParams),
+  };
+
+  assert.equal(parsed.archetype, 'rsi-bollinger-mean-reversion');
+  assert.deepEqual(parsed.params, meanReversionParams);
 });
 
 test('registry preserves discrimination for a runtime archetype', () => {
