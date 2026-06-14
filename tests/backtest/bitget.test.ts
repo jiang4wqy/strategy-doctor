@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Scenario, Strategy } from '../../src/contracts.ts';
@@ -128,4 +129,14 @@ test('McpBitgetCandleSource maps symbols and requests public Bitget klines', asy
     timeframe: '4h',
     limit: 240,
   });
+});
+
+test('Bitget backtests delegate stressed closes through the shared engine', () => {
+  const source = readFileSync(
+    new URL('../../src/backtest/bitget.ts', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(source, /runStrategyOnPrices/);
+  assert.doesNotMatch(source, /strategy\.archetype !== 'ma-cross'/);
 });
