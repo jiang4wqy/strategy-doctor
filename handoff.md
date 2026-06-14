@@ -211,7 +211,7 @@ npm.cmd run verify
 ```
 
 - 155 tests：154 passed、1 skipped、0 failed。
-- Lines 96.22%、branches 88.77%、functions 99.07%。
+- Lines 96.27%、branches 89.24%、functions 99.07%。
 - 双策略 CLI、共享场景验收、TypeScript typecheck 和离线 demo 均通过。
 - 两种策略均有 5 evaluations、conservative/aggressive/trend 三风格、
   prescription 和 held-out trade-off。

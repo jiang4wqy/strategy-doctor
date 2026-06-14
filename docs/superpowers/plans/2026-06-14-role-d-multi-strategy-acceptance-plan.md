@@ -143,14 +143,14 @@ git commit -m "docs: finalize multi-strategy submission"
 **Files:**
 - No additional production files.
 
-- [ ] **Step 1: Run full verification**
+- [x] **Step 1: Run full verification**
 
 ```powershell
 npm.cmd run verify
 git diff --check
 ```
 
-- [ ] **Step 2: Verify both CLIs and MA golden**
+- [x] **Step 2: Verify both CLIs and MA golden**
 
 Run both example strategies through JSON output. Compare MA seed 42 output
 byte-for-byte with `examples/demo-scorecard.json`.
