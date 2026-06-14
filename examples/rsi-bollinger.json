@@ -4,12 +4,12 @@
   "archetype": "rsi-bollinger-mean-reversion",
   "params": {
     "rsiPeriod": 14,
-    "rsiOversold": 30,
-    "rsiOverbought": 70,
-    "bollingerPeriod": 20,
-    "bollingerStdDev": 2,
-    "trendFilterPeriod": 50,
-    "trendFilterThreshold": 0.03,
+    "rsiOversold": 40,
+    "rsiOverbought": 60,
+    "bollingerPeriod": 10,
+    "bollingerStdDev": 1.75,
+    "trendFilterPeriod": 30,
+    "trendFilterThreshold": 0.1,
     "leverage": 3,
     "stopLossPct": 0.05,
     "positionPct": 0.5

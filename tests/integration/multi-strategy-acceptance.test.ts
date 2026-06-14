@@ -76,6 +76,11 @@ test('both strategies complete deterministic diagnosis and prescription on share
   assert.deepEqual(rsiFirst, rsiSecond);
   assertComplete(movingAverage, maFirst);
   assertComplete(meanReversion, rsiFirst);
+  assert.ok(
+    rsiFirst.evaluations.every(evaluation => evaluation.metrics.numTrades > 0),
+  );
+  assert.ok(rsiFirst.deaths.length > 0);
+  assert.ok(Object.keys(rsiFirst.prescription.changes).length > 0);
 
   assert.notDeepEqual(
     maFirst.evaluations.map(evaluation => evaluation.metrics),
