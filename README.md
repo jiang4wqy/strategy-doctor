@@ -70,10 +70,20 @@ node src/cli.ts <strategy.json> [options]
 
 ```powershell
 node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/trend-follower.json --format json --output examples/demo-scorecard.json
 ```
 
-策略 JSON 当前只支持 `ma-cross`。非法均线、杠杆、止损、仓位、symbol 或 timeframe 会在回测前被拒绝。
+当前注册并验证了两个互补的策略原型：
+
+| Archetype | 行为 | 专属参数 |
+|---|---|---|
+| `ma-cross` | 快慢均线交叉的趋势跟随 | `fastMA`、`slowMA` |
+| `rsi-bollinger-mean-reversion` | RSI + Bollinger 反转入场，趋势过滤器阻止强趋势中的逆势新仓 | RSI、Bollinger 与趋势过滤参数 |
+
+两种策略共用同一套场景搜索、回测风险循环、评分和 held-out 验证，但由各自
+`StrategyAdapter` 负责解析、交易决策与定向处方。非法参数、symbol 或 timeframe
+会在回测前被拒绝。
 
 ```json
 {
@@ -146,8 +156,9 @@ damage = (liquidated ? 1000 : 0) + maxDrawdown * 100 - pnl * 100
 | 路径 | 职责 |
 |---|---|
 | `src/data` | 快照读取、MCP client、在线刷新 |
+| `src/strategy` | 策略契约、指标、adapter 与注册表 |
 | `src/redteam` | 五维映射、候选搜索、死因和叙事 |
-| `src/backtest` | Mock 与 Bitget 公共数据回测 |
+| `src/backtest` | Mock 与 Bitget 调度、共享执行引擎 |
 | `src/scoring` | 三风格风险评分 |
 | `src/prescribe` | 定向修补和 held-out 验证 |
 | `src/pipeline` | `runDoctor` 总编排 |
@@ -164,12 +175,11 @@ damage = (liquidated ? 1000 : 0) + maxDrawdown * 100 - pnl * 100
 
 ## 当前限制
 
-- 仅支持 `ma-cross` 策略原型和单 symbol 回测。
+- 只支持两个已注册的参考策略，不提供任意策略 DSL 或动态插件。
+- 每次只回测一个 symbol；示例使用 `BTCUSDT`。
 - Mock 模型不包含手续费、滑点、资金费率和订单簿冲击。
 - 处方是参数级风险修补，不是投资建议或收益保证。
 - CLI 是本次黑客松的正式界面，不包含 Web UI。
-
-下一里程碑会先抽出 `StrategyAdapter`/策略注册表，再增加 RSI 均值回归作为第二个参考实现。这样可以验证多策略扩展能力，同时避免在提交版中引入尚未定义执行语义的“任意策略”接口。
 
 ## License
 

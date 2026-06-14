@@ -16,7 +16,7 @@
 - Create: `examples/rsi-bollinger.json`
 - Modify: `tests/cli.test.ts`
 
-- [ ] **Step 1: Write a failing dual-strategy CLI test**
+- [x] **Step 1: Write a failing dual-strategy CLI test**
 
 For both `examples/trend-follower.json` and the missing
 `examples/rsi-bollinger.json`, run:
@@ -28,7 +28,7 @@ node src/cli.ts <strategy> --style conservative --seed 42 --candidates 6 --forma
 Assert five evaluations, three style scores, a prescription whose patched
 strategy keeps the input archetype, and finite held-out trade-off values.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```powershell
 node --test tests/cli.test.ts
@@ -36,7 +36,7 @@ node --test tests/cli.test.ts
 
 Expected: FAIL because `examples/rsi-bollinger.json` does not exist.
 
-- [ ] **Step 3: Add the enhanced example**
+- [x] **Step 3: Add the enhanced example**
 
 Use the approved parameters:
 
@@ -55,14 +55,14 @@ Use the approved parameters:
 }
 ```
 
-- [ ] **Step 4: Verify GREEN**
+- [x] **Step 4: Verify GREEN**
 
 ```powershell
 node --test tests/cli.test.ts
 npm.cmd run typecheck
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add examples/rsi-bollinger.json tests/cli.test.ts
@@ -74,7 +74,7 @@ git commit -m "test: accept both strategy CLI workflows"
 **Files:**
 - Create: `tests/integration/multi-strategy-acceptance.test.ts`
 
-- [ ] **Step 1: Write the acceptance test**
+- [x] **Step 1: Write the acceptance test**
 
 Load both examples through `parseStrategy`, run each through `runDoctor` with
 the same seed 42 treatment set and seed 100042 held-out set, and assert:
@@ -86,7 +86,7 @@ the same seed 42 treatment set and seed 100042 held-out set, and assert:
 - every changed field is allowed by the deaths and selected adapter policy;
 - identical repeated runs are deterministic.
 
-- [ ] **Step 2: Run and inspect**
+- [x] **Step 2: Run and inspect**
 
 ```powershell
 node --test tests/integration/multi-strategy-acceptance.test.ts
@@ -95,7 +95,7 @@ node --test tests/integration/multi-strategy-acceptance.test.ts
 Expected: PASS after Task 1. If the chosen frozen scenarios produce no deaths
 for one strategy, zero changes are accepted.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```powershell
 git add tests/integration/multi-strategy-acceptance.test.ts
@@ -112,22 +112,22 @@ git commit -m "test: verify multi-strategy doctor acceptance"
 - Modify: `handoff.md`
 - Modify: `docs/superpowers/plans/2026-06-14-role-d-multi-strategy-acceptance-plan.md`
 
-- [ ] **Step 1: Update README**
+- [x] **Step 1: Update README**
 
 Document both archetypes, both example commands, the shared adapter/engine
 architecture, strategy-specific behavior, and current limitations.
 
-- [ ] **Step 2: Update demo and submission material**
+- [x] **Step 2: Update demo and submission material**
 
 Add the RSI/Bollinger comparison command and remove statements that the
 submission supports only MA or treats RSI as a future milestone.
 
-- [ ] **Step 3: Record final engineering status**
+- [x] **Step 3: Record final engineering status**
 
 Mark A/B/C/D implementation complete. Keep account-owner tasks such as video
 upload and submission URL explicitly separate.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add README.md docs/DEMO.md docs/SUBMISSION.md CONTRIBUTING.md handoff.md docs/superpowers/plans/2026-06-14-role-d-multi-strategy-acceptance-plan.md
