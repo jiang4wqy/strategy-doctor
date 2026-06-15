@@ -104,4 +104,89 @@ export const requestFixture: DiagnoseRequest = {
   candidates: 6,
 };
 
-export const diagnosisFixture = {} as DiagnosisView;
+export const diagnosisFixture = {
+  scorecard: {
+    strategyId: 'draft-ma',
+    scenarioSetId: 'tx42/ho100042',
+    perStyle: {},
+    evaluations: [],
+    deaths: [],
+    prescription: {
+      changes: {
+        leverage: 5,
+        stopLossPct: 0.1,
+      },
+      rationale: 'Lower leverage and tighten the stop loss.',
+      patchedStrategy: {
+        ...draftFixture.strategy,
+        params: {
+          ...draftFixture.strategy.params,
+          leverage: 5,
+          stopLossPct: 0.1,
+        },
+      },
+    },
+    tradeoff: {
+      robustnessGain: 12,
+      returnCost: -0.02,
+    },
+  },
+  summary: {
+    riskScore: 42,
+    worstDrawdownPct: 0.42,
+    totalTrades: 27,
+    robustnessGain: 12,
+    returnDelta: -0.02,
+  },
+  charts: {
+    treatmentEquity: [
+      { dimension: 'sentiment', equity: [1, 0.9, 1.1] },
+      { dimension: 'macro', equity: [1, 0.8, 0.85] },
+      { dimension: 'market-intel', equity: [1, 0.7, 0.75] },
+      { dimension: 'news', equity: [1, 0.6, 0.65] },
+      { dimension: 'technical', equity: [1, 0.5, 0.55] },
+    ],
+    heldOutComparison: [
+      {
+        dimension: 'sentiment',
+        original: [1, 0.8, 0.9],
+        patched: [1, 0.9, 1.02],
+      },
+      {
+        dimension: 'technical',
+        original: [1, 0.5, 0.6],
+        patched: [1, 0.75, 0.88],
+      },
+    ],
+    defaultHeldOutDimension: 'technical',
+    riskRadar: [
+      { dimension: 'sentiment', value: 30 },
+      { dimension: 'macro', value: 40 },
+      { dimension: 'market-intel', value: 50 },
+      { dimension: 'news', value: 60 },
+      { dimension: 'technical', value: 70 },
+    ],
+    parameterChanges: [
+      { key: 'leverage', label: 'Leverage', before: 10, after: 5 },
+      { key: 'stopLossPct', label: 'Stop loss', before: 0.5, after: 0.1 },
+    ],
+    scenarioTimeline: [
+      {
+        dimension: 'technical',
+        scenarioName: 'Technical whipsaw',
+        damageScore: 90,
+        cause: 'liquidation',
+        pnlPct: -0.9,
+        maxDrawdownPct: 0.99,
+      },
+      {
+        dimension: 'news',
+        scenarioName: 'News gap',
+        damageScore: 70,
+        cause: 'drawdown-breach',
+        pnlPct: -0.4,
+        maxDrawdownPct: 0.5,
+      },
+    ],
+  },
+} as unknown as DiagnosisView;
