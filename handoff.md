@@ -2,139 +2,194 @@
 
 更新时间：2026-06-15（Asia/Shanghai）
 
-## 当前目标
+## 当前结论
 
-当前里程碑是 P1 developer platform。集成分支：
-
-```text
-codex/p1-developer-platform
-```
-
-目标是在保留 P0 双策略 CLI 与 MA golden 输出的前提下，完成：
-
-- Fastify REST API v1、OpenAPI、access code/Bearer 鉴权、限流与并发保护。
-- 中英文自然语言描述到 `ma-cross` 或
-  `rsi-bollinger-mean-reversion` 的结构化草稿。
-- TypeScript client 与可直接运行的 Agent 示例。
-- React/Vite/ECharts 参考前端、显式参数确认、四类图表和本地十条历史。
-- 单进程静态服务、真实 Client/API 联调、Playwright、CI 与 Quick Tunnel 文档。
-
-P1 仍然只支持单 symbol、两个已注册策略和离线 `MockBacktester`。不包含任意
-策略代码、DSL、账户、持仓、下单或永久云部署。
-
-## 已完成
-
-P0 已完成并验证：
-
-- `ma-cross` 与增强 RSI/Bollinger adapter 已注册到同一个 registry。
-- 公共回测引擎、处方搜索、双策略 CLI 和离线场景验收已完成。
-- MA seed 42 / candidates 6 golden SHA-256：
-  `60745EB1377E3B2160311C8101E72E1731329AA3DF173D75C4672616DD455E90`。
-
-P1 Foundation 已合入当前集成分支，merge commit：
-
-```text
-0ba5fdb merge: establish P1 foundation
-```
-
-Foundation 提供：
-
-- machine-readable `StrategyAdapter.definition`。
-- `strategyRegistry.listDefinitions()` 与 `getDefinition()`。
-- 单 symbol、`*USDT`、`1h`/`4h`/`1d` runtime 校验和稳定错误码。
-- detailed held-out metrics 与保持兼容的旧接口。
-- `src/platform/contracts.ts` 共享 API/Web/Client DTO。
-- `diagnoseStrategy()` 共享 application service。
-- CLI 复用 application service，输出仍保持旧 `Scorecard`。
-
-2026-06-15 Foundation 审查已补充修复：
-
-- RSI capability 用 `exclusiveMaximum` 准确表达 `< 50` 与 `< 100`。
-- capability 参数 key 受所属 strategy archetype 的 TypeScript 类型约束。
-- definition、参数对象、example params 与 universe 全部深冻结。
-- 协作规则不再引用旧 A 角色或让 Wave 2 错误同步 `origin/main`。
-
-## Agent 执行状态
-
-四个 Wave 2 实现 Agent 曾分别分配 API、自然语言、Web、Client/文档，但都在
-写入文件前因 Agent 使用额度上限终止，没有可合并的提交，也没有修改对应
-worktree。
-
-两个只读审查 Agent 已完成，发现的问题已记录在上节并由集成线程修复。
-
-因此后续不等待已终止 Agent，当前线程按以下顺序继续：
-
-1. Fastify API。
-2. 自然语言 parser。
-3. TypeScript Client 与 API 文档。
-4. React Web。
-5. parse route、static serving、真实联调、E2E、CI、发布文档。
-
-## 分支与 Ownership
-
-当前 P1 分支：
+P1 developer platform 已在以下分支完成：
 
 ```text
 codex/p1-developer-platform
-codex/p1-foundation
-codex/p1-api
-codex/p1-natural-language
-codex/p1-client-docs
-codex/p1-web
 ```
 
-四个 Wave 2 分支都从 `0ba5fdb` 创建，目前没有独立提交。旧 P0 A/B/C/D
-分支只属于历史记录，不再用于 P1。
+已验证的功能包括：
 
-文件 ownership 与合并顺序以以下文件为准：
+- 两个注册策略：`ma-cross`、`rsi-bollinger-mean-reversion`。
+- Fastify REST API v1、OpenAPI、Web access code、Bearer API key。
+- 限流、同源 mutation 保护、请求体限制、诊断并发限制。
+- 中英文自然语言解析，无法识别、歧义和未支持策略返回稳定错误。
+- TypeScript Client、PowerShell/curl 示例和 Agent 接入文档。
+- React/Vite Web：登录、自然语言输入、显式参数确认、诊断、四类图表、
+  JSON/Markdown 导出、本地最近 10 条历史。
+- Fastify 同源托管 React build，并保留 `/api/*` JSON 404。
+- 真实 Client/API 集成测试和 Chromium Playwright 验收。
 
-- `AGENTS.md`
-- `CONTRIBUTING.md`
-- `docs/superpowers/plans/2026-06-14-developer-platform-master-plan.md`
+P1.1 的薄 MCP adapter 尚未开始。按现有计划，它应在 P1 合并后单独进入
+`codex/p1-mcp`，只调用 REST/TypeScript Client，不复制诊断核心。
 
-Wave 2 的目标分支是 `codex/p1-developer-platform`。只有 P1 完整验收后的最终
-PR 才以 `main` 为 base。
+## 已验证提交
 
-## 当前验证
-
-Foundation merge 后的完整验证记录：
-
-- 166 tests：165 passed、1 skipped、0 failed。
-- Coverage：lines 96.64%、branches 89.45%、functions 99.15%。
-- core + Web TypeScript typecheck 通过。
-- 离线 demo 与 MA golden 文本通过。
-- dependency audit：0 vulnerabilities。
-
-2026-06-15 审查修复的定向验证：
+Foundation 之后的关键提交：
 
 ```text
-node --test tests/strategy/registry.test.ts tests/strategy/rsi-bollinger.test.ts
-21 passed, 0 failed
-
-npm.cmd run typecheck:core
-passed
+5812887 fix: align P1 capability contracts
+f3199f8 feat: define API configuration and error envelopes
+452b2b2 feat: authenticate Web sessions and API keys
+b39b14a feat: guard API mutations and diagnosis capacity
+b950c15 feat: expose capability and diagnosis routes
+1f38bc0 feat: assemble documented Fastify API
+984bd1f feat: define natural-language strategy drafts
+48bebbf feat: parse supported strategies from local language rules
+7bee5d3 feat: add constrained Anthropic strategy parsing
+b1df345 feat: coordinate local-first strategy parsing
+d9c0259 feat: define TypeScript client errors
+a69c00b feat: add native TypeScript API client
+08efb9e docs: add copy-ready Agent API examples
+f1ca447 docs: explain the developer API contract
+d90911b..a7f3e7d React Web implementation and responsive workspace
+ed18c36 feat: connect natural-language parsing to the API
+f844e58 feat: serve the React client from Fastify
+eec8a4e docs: publish the developer platform workflow
+81a6032 test: exercise the client against the real API
+6b8a5a1 test: accept the browser diagnosis workflows
 ```
 
-完整 `npm test`、`build:web`、`server` 和 E2E 当前尚不能作为通过项，因为
-Wave 2 的 Web 与 Server 文件还未实现。这是当前待完成工作，不是已完成能力。
+## 最终验证
+
+2026-06-15 在 Windows、Node.js 24.14.1 上执行：
+
+```text
+npm.cmd ci
+PASS
+
+npm.cmd run verify
+227 core tests: 226 passed, 1 skipped, 0 failed
+coverage: lines 96.35%, branches 89.28%, functions 99.10%
+core + Web TypeScript typecheck: PASS
+offline CLI demo: PASS
+
+npm.cmd run test:web
+11 files, 19 tests passed
+
+npm.cmd run build:web
+PASS
+
+npm.cmd run test:e2e
+3 Chromium tests passed
+```
+
+Playwright 覆盖：
+
+- 中文 RSI/Bollinger 完整输入、确认、诊断、四图表和本地历史恢复。
+- 英文 MA 短流程。
+- 登录页和完整诊断页的 axe 扫描：0 个 serious/critical violation。
+
+Web build：
+
+```text
+4 files
+768,698 bytes / 750.68 KiB
+initial JS: 204.93 kB / gzip 64.76 kB
+lazy diagnosis chunk: 555.38 kB / gzip 187.07 kB
+CSS: 7.86 kB / gzip 2.42 kB
+```
+
+ECharts 诊断 chunk 仍超过 Vite 500 kB 警告线，但已延迟加载，不阻塞首屏。
+
+MA golden 原始字节完全一致：
+
+```text
+SHA-256
+60745EB1377E3B2160311C8101E72E1731329AA3DF173D75C4672616DD455E90
+
+output bytes: 70,755
+golden bytes: 70,755
+```
+
+本机 API 五次测量：
+
+```text
+parse: mean 1.37 ms, min 0.93 ms, max 2.40 ms
+diagnosis: mean 24.13 ms, min 22.73 ms, max 26.30 ms
+```
+
+干净安装到首次完成：
+
+```text
+npm ci -> first CLI completion: 32.60 s
+npm ci -> Chinese RSI Web diagnosis workflow completion: 46.41 s
+```
+
+Codex 应用内浏览器受到企业网络策略限制，不能访问
+`127.0.0.1:8080`；没有尝试绕过。独立 Chromium Playwright 的真实服务验收已通过。
+
+## 模块与 Ownership
+
+| 部分 | 主要文件 |
+|---|---|
+| API | `src/server/**`、`tests/server/**` |
+| 自然语言 | `src/natural-language/**`、`tests/natural-language/**` |
+| Web | `web/**`、`tests/e2e/**` |
+| Client/文档 | `src/client/**`、`examples/agent-*`、`docs/API.md` |
+| 集成 | `src/server/default-services.ts`、`tests/integration/**` |
+
+初始四个实现 Agent 因使用额度中断，没有提交代码。后续实现由当前集成线程完成。
+最后的 CI/公开文档 Agent 成功提交 `eec8a4e`，改动范围仅为：
+
+```text
+.github/workflows/ci.yml
+README.md
+docs/SETUP.md
+docs/DEMO.md
+docs/SUBMISSION.md
+docs/API.md
+```
+
+## 运行方式
+
+离线 CLI 不需要环境变量：
+
+```powershell
+npm.cmd run demo
+```
+
+受保护 Web：
+
+```powershell
+$env:DOCTOR_WEB_ACCESS_CODE='team-preview-code-change-me'
+$env:DOCTOR_SESSION_SECRET='replace-this-with-a-random-32-char-secret'
+$env:DOCTOR_API_KEYS='replace-this-with-a-private-agent-key'
+$env:DOCTOR_HOST='127.0.0.1'
+npm.cmd run web
+```
+
+环境变量计数：
+
+- Web 必需 2 个：`DOCTOR_WEB_ACCESS_CODE`、`DOCTOR_SESSION_SECRET`。
+- Agent/REST 另需 1 个：`DOCTOR_API_KEYS`。
+- Server 可选 5 个：host、port、session TTL、body limit、static root。
+- 自然语言 AI 可选 3 个，必须一起启用：
+  `DOCTOR_NL_AI_ENABLED`、`ANTHROPIC_API_KEY`、`DOCTOR_NL_MODEL`。
+- 叙事增强可选 2 个额外变量：
+  `DOCTOR_LLM_NARRATE`、`DOCTOR_LLM_MODEL`，并复用 Anthropic key。
+
+## 已知限制
+
+- 公共 Web/API 固定使用离线 `MockBacktester`，不读取账户、余额、持仓或私钥，
+  也不会下单。
+- 只支持单 symbol、`*USDT`、`1h/4h/1d` 和两个已注册策略。
+- Quick Tunnel 仅用于临时演示；URL 重启后变化，终端和本地服务必须持续运行。
+- 仓库未自动创建永久云部署。
+- GitHub branch protection、required review、CODEOWNERS review 仍需仓库 owner
+  在 GitHub Settings 中开启。
+- ECharts 延迟 chunk 仍较大，后续可按图表拆分或替换更轻量渲染层。
 
 ## 下一步
 
-立即从 API 计划开始，遵循 TDD：
+1. 审查并合并 `codex/p1-developer-platform`。
+2. 在 GitHub 开启 `main` branch protection 和 required review。
+3. 如需临时团队预览，启动 `npm.cmd run web` 后运行：
 
-```text
-docs/superpowers/plans/2026-06-14-developer-platform-api-plan.md
+```powershell
+cloudflared tunnel --url http://localhost:8080
 ```
 
-API 完成后依次执行自然语言、Client、Web 和 Integration 计划。每个阶段必须
-先运行定向测试，再运行 typecheck 与 `git diff --check`。最终验收还必须运行
-完整 coverage、Web build、Playwright、真实 Client/API 联调和 MA golden
-字节校验。
-
-## 已知外部事项
-
-- GitHub `main` 的 branch protection、required review 与 required
-  CODEOWNERS review 仍需要仓库 owner 在 GitHub Settings 中启用。
-- Quick Tunnel 只用于临时团队预览，URL 重启后变化，终端和本地服务必须持续
-  运行。
-- 黑客松录屏、视频上传和平台提交需要账号持有人完成。
+4. P1 合并后，从最新 `main` 创建 `codex/p1-mcp`，执行集成计划 Task 8。
