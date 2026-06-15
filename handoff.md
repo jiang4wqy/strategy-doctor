@@ -1,255 +1,195 @@
 # Strategy Doctor Handoff
 
-更新时间：2026-06-14（Asia/Shanghai）
+更新时间：2026-06-15（Asia/Shanghai）
 
 ## 当前结论
 
-多策略规格与契约已经冻结。B、C、A 最终接线已分别通过 PR #7、#8、#9 进入
-`main`。D 的永久 RSI/Bollinger 示例、双策略 CLI 回归、共享场景集成验收和
-最终发布文档已通过 PR #10 合入。合并后的 `main` 已复验并发布 `mvp-m3` 标签，
-本轮工程实现完成。
+P1 developer platform 已在以下分支完成：
 
-本轮已经完成：
-
-- 建立独立 integration worktree。
-- 验证基线测试与覆盖率。
-- 恢复团队协作 Word 文档。
-- 落地仓库级多人开发约束。
-- 确认多策略正式设计规格。
-- 合并 `Strategy` discriminated union 和 adapter contract。
-- 合并 MA adapter、不可变 registry 和 registry-backed parser。
-- 扩展 RSI/Bollinger 参数契约，加入趋势过滤周期与偏离阈值。
-- 实现 SMA、population standard deviation 和 Wilder RSI。
-- 实现增强 RSI/Bollinger adapter、定向 mutation policy 和确定性 jitter。
-- 证明 MA 与 RSI/Bollinger adapter 可在本地 registry 中共同注册。
-- 提取 `src/backtest/engine.ts`，统一持仓、止损、清算和 drawdown 循环。
-- 将 Mock 与 Bitget backtester 迁移到 registry + shared engine。
-- 将 prescription search 迁移到 adapter-owned patch、fields、jitter 和标签。
-- 将 RSI/Bollinger adapter 注册进默认 runtime registry。
-- 新增 `examples/rsi-bollinger.json` 并验证第二策略离线 CLI 全链路。
-- 增加双策略 CLI 回归和共享场景端到端验收。
-- 验证 seed 42 golden JSON 与原基线逐字节一致。
-
-剩余事项只有远端治理、协作 Word 文档视觉检查，以及录屏、视频上传和黑客松
-平台提交；这些事项需要仓库或提交账号持有人完成。
-
-## 工作区与分支
-
-### 公共基线
-
-- 远端公共基线：`main`
-- 已合入契约提交：
-  - `7274a51 refactor: define multi-strategy type contract`
-  - `b7db676 feat: register moving-average strategy adapter`
-  - `74d06a7 refactor: parse strategies through adapter registry`
-  - `5411fd6 Merge pull request #6 from jiang4wqy/feat/ma-adapter-integration`
-  - `5ec015d Merge pull request #8 from jiang4wqy/feat/generic-risk-engine`
-  - `97b0244 Merge pull request #7 from jiang4wqy/feat/rsi-bollinger-adapter`
-  - `494f626 Merge pull request #9 from jiang4wqy/feat/ma-adapter-integration`
-  - `6ce606d Merge pull request #10 from jiang4wqy/test/multi-strategy-acceptance`
-- 发布标签：`mvp-m3`，指向 `6ce606d`。
-
-### 已合入 A/B/C
-
-- `d9977fc feat: register RSI Bollinger strategy`
-- A PR #9 已合入，merge commit：`494f626`。
-- B PR #7 已合入，merge commit：`97b0244`。
-- C PR #8 已合入，merge commit：`5ec015d`。
-- `41f4877 refactor: extract generic strategy execution engine`
-- `f6a7045 refactor: dispatch backtests through strategy adapters`
-- `8a9b68b refactor: delegate prescription policy to adapters`
-
-### D 最终验收
-
-- `6d2b025 test: accept both strategy CLI workflows`
-- `2509988 test: verify multi-strategy doctor acceptance`
-- `a20cf1c test: exercise actionable RSI CLI diagnosis`
-- 分支：`test/multi-strategy-acceptance`
-- PR #10 已通过 CI 并合入，merge commit：`6ce606d`。
-
-### 组员独立分支
-
-所有角色分支从同一个已验证 `main` 提交创建：
-
-- A：`feat/ma-adapter-integration`
-- B：`feat/rsi-bollinger-adapter`
-- C：`feat/generic-risk-engine`
-- D：`test/multi-strategy-acceptance`
-
-每位组员只在自己的分支提交，并通过 PR 合入 `main`。不要直接向 `main`
-提交，也不要切换或推送其他组员的分支。
-
-### 已淘汰的旧分支结构
-
-- `feat/backtest`、`feat/demo`、`feat/redteam` 和
-  `feat/scoring-prescribe` 没有独立提交，不再使用。
-- `codex/complete-hackathon-submission` 的有效提交已经被 `main` 吸收。
-- `feat/multi-strategy-integration` 的有效提交已经被 `main` 吸收。
-- 以上旧远端分支均已删除。远端当前仅保留 `main` 和 A/B/C/D 四个角色分支。
-
-## 多人开发规范状态
-
-仓库级规范已经写好：
-
-- `AGENTS.md`
-  - 约束代理范围、worktree 隔离、ownership、TDD、验证和安全边界。
-- `CONTRIBUTING.md`
-  - 定义 A/B/C/D 分工、文件 owner、分支命名、固定合并顺序、PR 规则和 DoD。
-- `.github/CODEOWNERS`
-  - 当前使用已验证的仓库 owner `@jiang4wqy` 作为中央集成 owner。
-- `.github/pull_request_template.md`
-  - 强制记录范围、接口变化、依赖顺序、测试数量、coverage 和安全检查。
-- `docs/Strategy-Doctor-团队协同分工方案.docx`
-  - 详细 4 人方案、3/5 人调整、worktree 命令、P0-P4 清单和策略路线。
-  - 其中旧分支命令仅作历史参考，当前分支操作以 `CONTRIBUTING.md` 为准。
-
-当前本地约束已完整。2026-06-14 通过 GitHub API 确认 `main` 尚未启用 branch
-protection，因此 required review 和 required CODEOWNERS review 也没有生效；
-需要仓库账号持有人在 GitHub Settings 中配置。
-
-## Word 文档恢复与 QA
-
-文件：
-
-- `docs/Strategy-Doctor-团队协同分工方案.docx`
-- 大小：50,066 bytes
-
-恢复方式：
-
-- 从 `2026-06-13` Codex 会话日志提取原始生成脚本。
-- 在内存中重放，不保留临时生成脚本。
-- 应用原会话最后一次表格 indent 修订。
-
-结构审计结果：
-
-- 69 个正文段落。
-- 14 张表。
-- Letter 页面和 1 英寸页边距。
-- Heading 1/2/3 字号与段距符合原 preset。
-- 必需章节完整。
-- 无 `TODO`、`TBD`、`<填写>` 或“待补充”。
-- 真实 bullet/decimal numbering 存在。
-- 多页表头 repeat 属性存在。
-- 无固定表格行高。
-- 14 张表的 `tblW`、`tblInd`、`tblGrid` 和 `tcW` 全部一致。
-
-视觉 QA 未完成：
-
-- 标准 `render_docx.py` 仍因本机没有 LibreOffice/`soffice` 报
-  `FileNotFoundError: [WinError 2]`。
-- 因此不能声称逐页 PNG 已检查。
-
-## 多策略设计规格
-
-文件：
-
-- `docs/superpowers/specs/2026-06-13-multi-strategy-design.md`
-
-已冻结的设计：
-
-- 闭合的两策略 registry，不做动态插件或 DSL。
-- `Strategy` discriminated union。
-- 公共风险参数与策略专属信号参数分离。
-- adapter 负责 parser、decision、mutation 和参数标签。
-- 公共 engine 负责持仓、止损、清算、equity 和 drawdown。
-- 保留 `runOnPrices(MaCrossParams, prices)` 兼容入口。
-- MA 决策语义保持现状。
-- RSI 使用 Wilder RSI；Bollinger 使用 SMA 和 population standard deviation。
-- RSI/Bollinger 明确多空入场和中轨/RSI 50 退出规则。
-- 趋势过滤器只阻止强趋势中的逆势新开仓，不强制关闭已有仓位。
-- prescription `changes` 保持 JSON key/value object 兼容。
-- 固定合并顺序和完整测试矩阵。
-
-当前状态：
-
-- 规格已确认。
-- 公共契约、MA adapter、registry 和 parser 接入已完成。
-- A 分支已经进一步完成：
-  - `StrategyByArchetype` 保持真正的 discriminated union 缩窄。
-  - parser 不再按 archetype 写硬编码分支，只调用 registry。
-  - MA adapter 自己拥有 decision、targeted patch、jitter 和参数标签。
-  - adapter 目录通过架构测试禁止反向依赖 `src/prescribe/*`。
-- B 分支已经完成：
-  - `RsiBollingerParams` 新增 `trendFilterPeriod` 和
-    `trendFilterThreshold`。
-  - 指标实现为纯函数，Wilder RSI 的初始平均和递归平滑均有测试。
-  - adapter 拥有参数解析、决策、定向 patch、targeted fields、jitter 和标签。
-  - 清算只收紧杠杆/止损，回撤只降低仓位，反复止损才调整信号参数。
-  - 没有修改全局 registry、公共 engine、`src/prescribe/*`、CLI 或示例。
-- C 分支已经完成：
-  - shared engine 实现 `hold`、`flat`、方向切换和止损后方向阻塞。
-  - `runOnPrices(MaCrossParams, prices)` 保持兼容包装入口。
-  - Mock 与 Bitget backtester 均通过 registry 选择 adapter。
-  - `evolve.ts` 不再包含 `fastMA` 或 `slowMA` 策略专属 policy。
-  - candidate 排序和公共 liquidation/drawdown 风险边界保持不变。
-- A 最终接线已经完成：
-  - 默认 registry 同时注册 MA 和 RSI/Bollinger adapter。
-  - `parseStrategy` 接受并保留完整趋势过滤参数。
-  - RSI 示例通过完整离线 CLI，产生 5 个 evaluations、3 个 style
-    scores、prescription 和 held-out trade-off。
-  - 无需在 `src/cli.ts` 增加 archetype 分支。
-- D 最终验收已经完成：
-  - 永久示例 `examples/rsi-bollinger.json` 已加入。
-  - 同一 CLI 已验证两个 archetype。
-  - 两种策略在相同 treatment/held-out 场景上均产生完整且确定性的 scorecard。
-  - RSI 示例通过正式 CLI 候选搜索后在五个维度均有交易，共 27 次；technical
-    场景触发
-    `stop-loss-bleed`。
-  - adapter 定向处方只修改对应死因允许的字段。
-- 实施计划位于
-  `docs/superpowers/plans/2026-06-13-contract-registry-plan.md`。
-- A 角色收口计划位于
-  `docs/superpowers/plans/2026-06-13-role-a-integration-plan.md`。
-- A 基础收口 PR #6 已合入。
-- C 公共执行/处方 PR #8 已合入。
-- B PR #7 已合入。
-- A 最终接线 PR #9 已合入。
-- D 最终验收 PR #10 已合入。
-
-## 最近验证
-
-在 merge commit `6ce606d` 的 `main` 上再次执行：
-
-```powershell
-npm.cmd run verify
+```text
+codex/p1-developer-platform
 ```
 
-- 155 tests：154 passed、1 skipped、0 failed。
-- Lines 96.27%、branches 89.24%、functions 99.07%。
-- 双策略 CLI、共享场景验收、TypeScript typecheck 和离线 demo 均通过。
-- 两种策略均有 5 evaluations、conservative/aggressive/trend 三风格、
-  prescription 和 held-out trade-off。
-- RSI/Bollinger CLI：五维共 27 次交易，1 个 `stop-loss-bleed`，处方修改
-  `rsiOversold`、`rsiOverbought`、`bollingerStdDev` 和
-  `trendFilterThreshold`；held-out `robustnessGain=50`、
-  `returnCost=0.0027`。
-- seed 42 / 6 candidates 输出与 `examples/demo-scorecard.json` 逐字节一致。
-- 两份 JSON 的 SHA-256 均为
-  `60745EB1377E3B2160311C8101E72E1731329AA3DF173D75C4672616DD455E90`。
+已验证的功能包括：
+
+- 两个注册策略：`ma-cross`、`rsi-bollinger-mean-reversion`。
+- Fastify REST API v1、OpenAPI、Web access code、Bearer API key。
+- 限流、同源 mutation 保护、请求体限制、诊断并发限制。
+- 中英文自然语言解析，无法识别、歧义和未支持策略返回稳定错误。
+- TypeScript Client、PowerShell/curl 示例和 Agent 接入文档。
+- React/Vite Web：登录、自然语言输入、显式参数确认、诊断、四类图表、
+  JSON/Markdown 导出、本地最近 10 条历史。
+- Fastify 同源托管 React build，并保留 `/api/*` JSON 404。
+- 真实 Client/API 集成测试和 Chromium Playwright 验收。
+
+P1.1 的薄 MCP adapter 尚未开始。按现有计划，它应在 P1 合并后单独进入
+`codex/p1-mcp`，只调用 REST/TypeScript Client，不复制诊断核心。
+
+## 已验证提交
+
+Foundation 之后的关键提交：
+
+```text
+5812887 fix: align P1 capability contracts
+f3199f8 feat: define API configuration and error envelopes
+452b2b2 feat: authenticate Web sessions and API keys
+b39b14a feat: guard API mutations and diagnosis capacity
+b950c15 feat: expose capability and diagnosis routes
+1f38bc0 feat: assemble documented Fastify API
+984bd1f feat: define natural-language strategy drafts
+48bebbf feat: parse supported strategies from local language rules
+7bee5d3 feat: add constrained Anthropic strategy parsing
+b1df345 feat: coordinate local-first strategy parsing
+d9c0259 feat: define TypeScript client errors
+a69c00b feat: add native TypeScript API client
+08efb9e docs: add copy-ready Agent API examples
+f1ca447 docs: explain the developer API contract
+d90911b..a7f3e7d React Web implementation and responsive workspace
+ed18c36 feat: connect natural-language parsing to the API
+f844e58 feat: serve the React client from Fastify
+eec8a4e docs: publish the developer platform workflow
+81a6032 test: exercise the client against the real API
+6b8a5a1 test: accept the browser diagnosis workflows
+```
+
+## 最终验证
+
+2026-06-15 在 Windows、Node.js 24.14.1 上执行：
+
+```text
+npm.cmd ci
+PASS
+
+npm.cmd run verify
+227 core tests: 226 passed, 1 skipped, 0 failed
+coverage: lines 96.35%, branches 89.28%, functions 99.10%
+core + Web TypeScript typecheck: PASS
+offline CLI demo: PASS
+
+npm.cmd run test:web
+11 files, 19 tests passed
+
+npm.cmd run build:web
+PASS
+
+npm.cmd run test:e2e
+3 Chromium tests passed
+```
+
+Playwright 覆盖：
+
+- 中文 RSI/Bollinger 完整输入、确认、诊断、四图表和本地历史恢复。
+- 英文 MA 短流程。
+- 登录页和完整诊断页的 axe 扫描：0 个 serious/critical violation。
+
+Web build：
+
+```text
+4 files
+768,698 bytes / 750.68 KiB
+initial JS: 204.93 kB / gzip 64.76 kB
+lazy diagnosis chunk: 555.38 kB / gzip 187.07 kB
+CSS: 7.86 kB / gzip 2.42 kB
+```
+
+ECharts 诊断 chunk 仍超过 Vite 500 kB 警告线，但已延迟加载，不阻塞首屏。
+
+MA golden 原始字节完全一致：
+
+```text
+SHA-256
+60745EB1377E3B2160311C8101E72E1731329AA3DF173D75C4672616DD455E90
+
+output bytes: 70,755
+golden bytes: 70,755
+```
+
+本机 API 五次测量：
+
+```text
+parse: mean 1.37 ms, min 0.93 ms, max 2.40 ms
+diagnosis: mean 24.13 ms, min 22.73 ms, max 26.30 ms
+```
+
+干净安装到首次完成：
+
+```text
+npm ci -> first CLI completion: 32.60 s
+npm ci -> Chinese RSI Web diagnosis workflow completion: 46.41 s
+```
+
+Codex 应用内浏览器受到企业网络策略限制，不能访问
+`127.0.0.1:8080`；没有尝试绕过。独立 Chromium Playwright 的真实服务验收已通过。
+
+## 模块与 Ownership
+
+| 部分 | 主要文件 |
+|---|---|
+| API | `src/server/**`、`tests/server/**` |
+| 自然语言 | `src/natural-language/**`、`tests/natural-language/**` |
+| Web | `web/**`、`tests/e2e/**` |
+| Client/文档 | `src/client/**`、`examples/agent-*`、`docs/API.md` |
+| 集成 | `src/server/default-services.ts`、`tests/integration/**` |
+
+初始四个实现 Agent 因使用额度中断，没有提交代码。后续实现由当前集成线程完成。
+最后的 CI/公开文档 Agent 成功提交 `eec8a4e`，改动范围仅为：
+
+```text
+.github/workflows/ci.yml
+README.md
+docs/SETUP.md
+docs/DEMO.md
+docs/SUBMISSION.md
+docs/API.md
+```
+
+## 运行方式
+
+离线 CLI 不需要环境变量：
+
+```powershell
+npm.cmd run demo
+```
+
+受保护 Web：
+
+```powershell
+$env:DOCTOR_WEB_ACCESS_CODE='team-preview-code-change-me'
+$env:DOCTOR_SESSION_SECRET='replace-this-with-a-random-32-char-secret'
+$env:DOCTOR_API_KEYS='replace-this-with-a-private-agent-key'
+$env:DOCTOR_HOST='127.0.0.1'
+npm.cmd run web
+```
+
+环境变量计数：
+
+- Web 必需 2 个：`DOCTOR_WEB_ACCESS_CODE`、`DOCTOR_SESSION_SECRET`。
+- Agent/REST 另需 1 个：`DOCTOR_API_KEYS`。
+- Server 可选 5 个：host、port、session TTL、body limit、static root。
+- 自然语言 AI 可选 3 个，必须一起启用：
+  `DOCTOR_NL_AI_ENABLED`、`ANTHROPIC_API_KEY`、`DOCTOR_NL_MODEL`。
+- 叙事增强可选 2 个额外变量：
+  `DOCTOR_LLM_NARRATE`、`DOCTOR_LLM_MODEL`，并复用 Anthropic key。
+
+## 已知限制
+
+- 公共 Web/API 固定使用离线 `MockBacktester`，不读取账户、余额、持仓或私钥，
+  也不会下单。
+- 只支持单 symbol、`*USDT`、`1h/4h/1d` 和两个已注册策略。
+- Quick Tunnel 仅用于临时演示；URL 重启后变化，终端和本地服务必须持续运行。
+- 仓库未自动创建永久云部署。
+- GitHub branch protection、required review、CODEOWNERS review 仍需仓库 owner
+  在 GitHub Settings 中开启。
+- ECharts 延迟 chunk 仍较大，后续可按图表拆分或替换更轻量渲染层。
 
 ## 下一步
 
-1. 仓库账号持有人启用 `main` branch protection、required review 和
-   required CODEOWNERS review。
-2. 人工用 Word 打开协作方案，检查：
-   - 分页和跨页表头。
-   - 长路径换行。
-   - P0-P4 大表密度。
-3. 按 `docs/DEMO.md` 录屏、上传视频并填写提交 URL。
+1. 审查并合并 `codex/p1-developer-platform`。
+2. 在 GitHub 开启 `main` branch protection 和 required review。
+3. 如需临时团队预览，启动 `npm.cmd run web` 后运行：
 
-## P0 验收标准
+```powershell
+cloudflared tunnel --url http://localhost:8080
+```
 
-- 原 `ma-cross` seed 42 结果无意外变化。
-- 新增 `examples/rsi-bollinger.json`。
-- 同一 CLI 可以运行两个 archetype。
-- 两种策略均输出五维 evaluations、deaths/survivors、prescription 和 held-out trade-off。
-- 两种策略对相同压力场景产生可解释的不同诊断。
-- `npm.cmd run verify` 全部通过且不降低 coverage 门槛。
-- 默认仍离线，不连接账户或下单。
-
-## 黑客松发布仍需账号持有人完成
-
-- 按 `docs/DEMO.md` 录屏。
-- 上传视频。
-- 将 URL 填入 `docs/SUBMISSION.md`。
-- 在 2026-06-24 前完成黑客松平台提交。
+4. P1 合并后，从最新 `main` 创建 `codex/p1-mcp`，执行集成计划 Task 8。

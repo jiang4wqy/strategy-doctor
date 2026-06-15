@@ -11,6 +11,7 @@ import { rsiBollingerAdapter } from '../../src/strategy/adapters/rsi-bollinger.t
 import {
   createStrategyRegistry,
   getStrategyAdapter,
+  strategyRegistry,
 } from '../../src/strategy/registry.ts';
 
 const params: MaCrossParams = {
@@ -43,6 +44,54 @@ test('registry returns the registered mean-reversion adapter', () => {
     getStrategyAdapter('rsi-bollinger-mean-reversion'),
     rsiBollingerAdapter,
   );
+});
+
+test('registry exposes immutable strategy capability definitions', () => {
+  const definitions = strategyRegistry.listDefinitions();
+
+  assert.equal(definitions.length, 2);
+  assert.deepEqual(
+    definitions.map(definition => definition.archetype),
+    ['ma-cross', 'rsi-bollinger-mean-reversion'],
+  );
+  assert.equal(
+    strategyRegistry.getDefinition('ma-cross').parameters[0].key,
+    'fastMA',
+  );
+  assert.equal(
+    strategyRegistry
+      .getDefinition('rsi-bollinger-mean-reversion')
+      .parameters[0].key,
+    'rsiPeriod',
+  );
+  assert.ok(Object.isFrozen(definitions));
+  assert.ok(Object.isFrozen(definitions[0]));
+  assert.ok(Object.isFrozen(definitions[0].parameters));
+  for (const definition of definitions) {
+    assert.ok(
+      definition.parameters.every(parameter => Object.isFrozen(parameter)),
+    );
+    assert.ok(Object.isFrozen(definition.example));
+    assert.ok(Object.isFrozen(definition.example.params));
+    assert.ok(Object.isFrozen(definition.example.universe));
+  }
+});
+
+test('registry capability bounds match exclusive RSI parser limits', () => {
+  const definition = strategyRegistry.getDefinition(
+    'rsi-bollinger-mean-reversion',
+  );
+  const oversold = definition.parameters.find(
+    parameter => parameter.key === 'rsiOversold',
+  );
+  const overbought = definition.parameters.find(
+    parameter => parameter.key === 'rsiOverbought',
+  );
+
+  assert.equal(oversold?.maximum, 50);
+  assert.equal(oversold?.exclusiveMaximum, true);
+  assert.equal(overbought?.maximum, 100);
+  assert.equal(overbought?.exclusiveMaximum, true);
 });
 
 test('registry rejects duplicate adapter registration', () => {

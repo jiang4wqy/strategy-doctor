@@ -8,7 +8,10 @@ import type {
   Scenario,
   Strategy,
 } from '../../src/contracts.ts';
-import { runDoctor } from '../../src/pipeline/doctor.ts';
+import {
+  runDoctor,
+  runDoctorDetailed,
+} from '../../src/pipeline/doctor.ts';
 import {
   buildSentimentScenario,
   parseSentimentSnapshot,
@@ -77,6 +80,54 @@ test('runDoctor returns a complete scorecard for frozen snapshot scenarios', asy
   assert.ok(card.tradeoff);
   assert.ok(Number.isFinite(card.tradeoff.robustnessGain));
   assert.ok(Number.isFinite(card.tradeoff.returnCost));
+});
+
+test('runDoctorDetailed preserves the legacy scorecard and held-out metrics', async () => {
+  const treatment = buildScenarioSet(42);
+  const heldOut = buildScenarioSet(100042);
+  const options = {
+    style: 'conservative' as const,
+    treatment,
+    heldOut,
+  };
+  const detailed = await runDoctorDetailed(
+    strategy,
+    new MockBacktester(),
+    options,
+  );
+  const legacy = await runDoctor(strategy, new MockBacktester(), options);
+
+  assert.deepEqual(detailed.scorecard, legacy);
+  assert.equal(detailed.heldOut.originalMetrics.length, heldOut.length);
+  assert.equal(detailed.heldOut.patchedMetrics.length, heldOut.length);
+});
+
+test('runDoctorDetailed evaluates each held-out strategy exactly once', async () => {
+  const treatment = buildScenarioSet(42);
+  const heldOut = buildScenarioSet(100042);
+  const heldOutIds = new Set(heldOut.map(scenario => scenario.id));
+  const counts = new Map<string, number>();
+  const mock = new MockBacktester();
+  const backtest: BacktestAdapter = {
+    async run(candidate, scenario) {
+      if (heldOutIds.has(scenario.id)) {
+        const key = `${candidate.id}:${scenario.id}`;
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      return mock.run(candidate, scenario);
+    },
+  };
+
+  const result = await runDoctorDetailed(strategy, backtest, {
+    style: 'conservative',
+    treatment,
+    heldOut,
+  });
+
+  assert.equal(counts.size, heldOut.length * 2);
+  assert.ok([...counts.values()].every(count => count === 1));
+  assert.equal(result.heldOut.originalMetrics.length, heldOut.length);
+  assert.equal(result.heldOut.patchedMetrics.length, heldOut.length);
 });
 
 test('runDoctor is deterministic for identical inputs', async () => {

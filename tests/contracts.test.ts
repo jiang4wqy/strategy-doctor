@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { StrategyValidationError } from '../src/contracts.ts';
 import type {
   MaCrossStrategy,
   Metrics,
@@ -77,4 +78,17 @@ test('契约：四大核心类型可构造且字段齐全', () => {
   assert.equal(signalPeriod(meanReversion), 14);
   assert.equal(meanReversion.params.trendFilterPeriod, 50);
   assert.equal(meanReversion.params.trendFilterThreshold, 0.03);
+});
+
+test('StrategyValidationError preserves stable API-facing details', () => {
+  const error = new StrategyValidationError(
+    'MULTI_SYMBOL_UNSUPPORTED',
+    'exactly one symbol is required',
+    'strategy.universe',
+  );
+
+  assert.equal(error.name, 'StrategyValidationError');
+  assert.equal(error.code, 'MULTI_SYMBOL_UNSUPPORTED');
+  assert.equal(error.field, 'strategy.universe');
+  assert.match(error.message, /exactly one symbol/i);
 });

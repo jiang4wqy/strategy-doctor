@@ -1,0 +1,170 @@
+import type {
+  AnyStrategyDefinition,
+  ApiEnvelope,
+  ApiErrorEnvelope,
+  DiagnoseRequest,
+  DiagnosisView,
+  StrategyDraft,
+} from '../platform/contracts.ts';
+import { StrategyDoctorApiError } from './error.ts';
+
+export { StrategyDoctorApiError } from './error.ts';
+export type * from './types.ts';
+
+export interface StrategyDoctorOptions {
+  baseUrl: string;
+  apiKey: string;
+  fetch?: typeof globalThis.fetch;
+}
+
+export interface RequestOptions {
+  signal?: AbortSignal;
+}
+
+export interface StrategyDoctorClient {
+  capabilities(
+    options?: RequestOptions,
+  ): Promise<readonly AnyStrategyDefinition[]>;
+  parseStrategy(
+    input: { description: string },
+    options?: RequestOptions,
+  ): Promise<StrategyDraft>;
+  diagnose(
+    input: DiagnoseRequest,
+    options?: RequestOptions,
+  ): Promise<DiagnosisView>;
+}
+
+function normalizeBaseUrl(value: string): string {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error('base URL must be a valid HTTP(S) URL');
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('base URL must use HTTP or HTTPS');
+  }
+  url.search = '';
+  url.hash = '';
+  url.pathname = url.pathname.replace(/\/+$/, '');
+  return url.toString().replace(/\/+$/, '');
+}
+
+function object(value: unknown): Record<string, unknown> | undefined {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function errorEnvelope(value: unknown): ApiErrorEnvelope | undefined {
+  const envelope = object(value);
+  const error = object(envelope?.error);
+  if (
+    envelope?.apiVersion !== 'v1'
+    || typeof envelope.requestId !== 'string'
+    || !error
+    || typeof error.code !== 'string'
+    || typeof error.message !== 'string'
+    || typeof error.retryable !== 'boolean'
+  ) {
+    return undefined;
+  }
+  return value as ApiErrorEnvelope;
+}
+
+function successEnvelope<T>(value: unknown): ApiEnvelope<T> | undefined {
+  const envelope = object(value);
+  if (
+    envelope?.apiVersion !== 'v1'
+    || typeof envelope.requestId !== 'string'
+    || !Object.hasOwn(envelope, 'data')
+  ) {
+    return undefined;
+  }
+  return value as ApiEnvelope<T>;
+}
+
+export function createStrategyDoctor(
+  options: StrategyDoctorOptions,
+): StrategyDoctorClient {
+  const baseUrl = normalizeBaseUrl(options.baseUrl);
+  if (options.apiKey.trim() === '') {
+    throw new Error('API key must be a non-empty string');
+  }
+  const fetchImplementation = options.fetch ?? globalThis.fetch;
+
+  async function request<T>(
+    path: string,
+    method: 'GET' | 'POST',
+    body: unknown,
+    requestOptions: RequestOptions = {},
+  ): Promise<T> {
+    const response = await fetchImplementation(
+      `${baseUrl}/api/v1${path}`,
+      {
+        method,
+        headers: {
+          authorization: `Bearer ${options.apiKey}`,
+          ...(method === 'POST'
+            ? { 'content-type': 'application/json' }
+            : {}),
+        },
+        ...(method === 'POST' ? { body: JSON.stringify(body) } : {}),
+        signal: requestOptions.signal,
+      },
+    );
+
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      throw StrategyDoctorApiError.invalidResponse(response.status);
+    }
+    if (!response.ok) {
+      const envelope = errorEnvelope(payload);
+      if (!envelope) {
+        throw StrategyDoctorApiError.invalidResponse(response.status);
+      }
+      throw StrategyDoctorApiError.fromEnvelope(response.status, envelope);
+    }
+    const envelope = successEnvelope<T>(payload);
+    if (!envelope) {
+      throw StrategyDoctorApiError.invalidResponse(response.status);
+    }
+    return envelope.data;
+  }
+
+  return Object.freeze({
+    capabilities(requestOptions?: RequestOptions) {
+      return request<readonly AnyStrategyDefinition[]>(
+        '/capabilities',
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    parseStrategy(
+      input: { description: string },
+      requestOptions?: RequestOptions,
+    ) {
+      return request<StrategyDraft>(
+        '/strategies/parse',
+        'POST',
+        input,
+        requestOptions,
+      );
+    },
+    diagnose(
+      input: DiagnoseRequest,
+      requestOptions?: RequestOptions,
+    ) {
+      return request<DiagnosisView>(
+        '/diagnoses',
+        'POST',
+        input,
+        requestOptions,
+      );
+    },
+  });
+}

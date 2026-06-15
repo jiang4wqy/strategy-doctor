@@ -6,7 +6,10 @@ import type {
   MaCrossStrategy,
   Scenario,
 } from '../../src/contracts.ts';
-import { validateOnHeldOut } from '../../src/prescribe/validate.ts';
+import {
+  validateOnHeldOut,
+  validateOnHeldOutDetailed,
+} from '../../src/prescribe/validate.ts';
 import {
   buildSentimentScenario,
   parseSentimentSnapshot,
@@ -74,6 +77,36 @@ test('validateOnHeldOut returns a finite honest tradeoff on separate seeds', asy
     tradeoff.robustnessGain >= 0,
     `expected non-negative robustness gain, received ${tradeoff.robustnessGain}`,
   );
+});
+
+test('validateOnHeldOutDetailed preserves metrics and legacy tradeoff behavior', async () => {
+  const { treatment, heldOut } = scenarioSets();
+  const detailed = await validateOnHeldOutDetailed(
+    original,
+    patched,
+    treatment,
+    heldOut,
+    new MockBacktester(),
+    getProfile('conservative'),
+  );
+  const legacy = await validateOnHeldOut(
+    original,
+    patched,
+    treatment,
+    heldOut,
+    new MockBacktester(),
+    getProfile('conservative'),
+  );
+
+  assert.equal(detailed.originalMetrics.length, heldOut.length);
+  assert.equal(detailed.patchedMetrics.length, heldOut.length);
+  assert.ok(
+    detailed.originalMetrics.every(metrics => metrics.equityCurve.length > 0),
+  );
+  assert.ok(
+    detailed.patchedMetrics.every(metrics => metrics.equityCurve.length > 0),
+  );
+  assert.deepEqual(detailed.tradeoff, legacy);
 });
 
 test('validateOnHeldOut rejects any treatment and held-out seed overlap', async () => {
