@@ -12,6 +12,7 @@ import {
   requireJsonMutation,
   requireSameOrigin,
 } from '../guards.ts';
+import { diagnosisRouteSchema } from '../schema.ts';
 
 const STYLES = new Set<StyleName>([
   'conservative',
@@ -91,6 +92,7 @@ export const registerDiagnosisRoutes:
         requireJsonMutation,
         requireSameOrigin,
       ],
+      schema: diagnosisRouteSchema,
     }, async (request, reply) => {
       const body = requestObject(request.body);
       const seed = parseSafeInteger(body.seed, 42, 'seed');

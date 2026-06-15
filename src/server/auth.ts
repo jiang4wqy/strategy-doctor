@@ -7,6 +7,7 @@ import type {
 } from 'fastify';
 import type { ServerConfig } from './config.ts';
 import { fail, ok } from './envelope.ts';
+import { authRouteSchema } from './schema.ts';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -101,7 +102,15 @@ export async function registerAuth(
     );
   });
 
-  app.post('/api/v1/auth', async (request, reply) => {
+  app.post('/api/v1/auth', {
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '15 minutes',
+      },
+    },
+    schema: authRouteSchema,
+  }, async (request, reply) => {
     const body = request.body as { accessCode?: unknown } | undefined;
     const accessCode = typeof body?.accessCode === 'string'
       ? body.accessCode
