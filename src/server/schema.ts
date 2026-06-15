@@ -74,6 +74,24 @@ export const diagnosisRouteSchema: FastifySchema = {
   },
 };
 
+export const parseRouteSchema: FastifySchema = {
+  tags: ['strategies'],
+  summary: 'Parse a supported strategy description',
+  security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+  body: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['description'],
+    properties: {
+      description: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 2000,
+      },
+    },
+  },
+};
+
 export const authRouteSchema: FastifySchema = {
   tags: ['authentication'],
   summary: 'Create a browser session',

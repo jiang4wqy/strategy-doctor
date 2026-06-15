@@ -1,6 +1,9 @@
 import {
   StrategyValidationError,
 } from '../contracts.ts';
+import {
+  DescriptionParseError,
+} from '../natural-language/errors.ts';
 import type {
   ApiError,
   ApiErrorCode,
@@ -69,6 +72,16 @@ export function toApiError(error: unknown): MappedApiError {
         code: error.code,
         message: error.message.replace(/^invalid strategy:\s*/i, ''),
         ...(error.field ? { field: error.field } : {}),
+        retryable: false,
+      },
+    };
+  }
+  if (error instanceof DescriptionParseError) {
+    return {
+      statusCode: error.code === 'AMBIGUOUS_DESCRIPTION' ? 400 : 422,
+      error: {
+        code: error.code,
+        message: error.message,
         retryable: false,
       },
     };

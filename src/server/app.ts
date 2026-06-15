@@ -4,26 +4,30 @@ import rateLimit from '@fastify/rate-limit';
 import staticPlugin from '@fastify/static';
 import swagger from '@fastify/swagger';
 import Fastify, { type FastifyInstance } from 'fastify';
-import { diagnoseStrategy } from '../application/diagnose.ts';
 import type {
   DiagnoseRequest,
   DiagnosisResult,
 } from '../platform/contracts.ts';
-import { strategyRegistry } from '../strategy/registry.ts';
 import { registerAuth } from './auth.ts';
 import {
   isLoopbackHost,
   parseServerConfig,
 } from './config.ts';
 import { DiagnosisLimiter } from './concurrency.ts';
+import {
+  createDefaultServices,
+  type ServerServices,
+} from './default-services.ts';
 import { fail } from './envelope.ts';
 import { toApiError } from './errors.ts';
 import { registerCapabilityRoutes } from './routes/capabilities.ts';
 import { registerDiagnosisRoutes } from './routes/diagnoses.ts';
 import { registerHealthRoutes } from './routes/health.ts';
+import { registerParseRoutes } from './routes/parse.ts';
 
 export interface BuildServerOptions {
   env?: Record<string, string | undefined>;
+  services?: Partial<ServerServices>;
   diagnose?: (request: DiagnoseRequest) => Promise<DiagnosisResult>;
   logger?: boolean;
 }
@@ -72,6 +76,14 @@ export async function buildServer(
   options: BuildServerOptions = {},
 ): Promise<FastifyInstance> {
   const config = parseServerConfig(options.env ?? process.env);
+  const defaults = createDefaultServices();
+  const services: ServerServices = {
+    capabilities: options.services?.capabilities ?? defaults.capabilities,
+    parse: options.services?.parse ?? defaults.parse,
+    diagnose: options.diagnose
+      ?? options.services?.diagnose
+      ?? defaults.diagnose,
+  };
   const app = Fastify({
     bodyLimit: config.bodyLimit,
     logger: options.logger ?? false,
@@ -117,10 +129,13 @@ export async function buildServer(
   await registerAuth(app, config);
   await app.register(registerHealthRoutes);
   await app.register(registerCapabilityRoutes, {
-    capabilities: () => strategyRegistry.listDefinitions(),
+    capabilities: services.capabilities,
+  });
+  await app.register(registerParseRoutes, {
+    parse: services.parse,
   });
   await app.register(registerDiagnosisRoutes, {
-    diagnose: options.diagnose ?? diagnoseStrategy,
+    diagnose: services.diagnose,
     limiter: new DiagnosisLimiter(2),
   });
 
