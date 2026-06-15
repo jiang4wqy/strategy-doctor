@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
+import path from 'node:path';
 import rateLimit from '@fastify/rate-limit';
 import staticPlugin from '@fastify/static';
 import swagger from '@fastify/swagger';
@@ -29,6 +30,7 @@ export interface BuildServerOptions {
   env?: Record<string, string | undefined>;
   services?: Partial<ServerServices>;
   diagnose?: (request: DiagnoseRequest) => Promise<DiagnosisResult>;
+  staticRoot?: string;
   logger?: boolean;
 }
 
@@ -76,6 +78,8 @@ export async function buildServer(
   options: BuildServerOptions = {},
 ): Promise<FastifyInstance> {
   const config = parseServerConfig(options.env ?? process.env);
+  const staticRoot = options.staticRoot ?? config.staticRoot;
+  const hasWebBuild = existsSync(path.join(staticRoot, 'index.html'));
   const defaults = createDefaultServices();
   const services: ServerServices = {
     capabilities: options.services?.capabilities ?? defaults.capabilities,
@@ -146,17 +150,26 @@ export async function buildServer(
     return reply.send(app.swagger());
   });
 
-  if (existsSync(config.staticRoot)) {
+  if (hasWebBuild) {
     await app.register(staticPlugin, {
-      root: config.staticRoot,
+      root: staticRoot,
       wildcard: false,
     });
   }
 
   app.setNotFoundHandler((request, reply) => {
+    const isApiRequest = request.url.startsWith('/api/');
+    const isPageRequest = request.method === 'GET'
+      || request.method === 'HEAD';
+    if (!isApiRequest && isPageRequest && hasWebBuild) {
+      return reply.type('text/html').sendFile('index.html');
+    }
+    const message = !isApiRequest && isPageRequest
+      ? 'Web client build is missing. Run npm.cmd run build:web.'
+      : `Route not found: ${request.method} ${request.url}`;
     return reply.code(404).send(fail(request.id, {
       code: 'INVALID_REQUEST',
-      message: `Route not found: ${request.method} ${request.url}`,
+      message,
       retryable: false,
     }));
   });

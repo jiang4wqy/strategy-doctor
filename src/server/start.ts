@@ -3,7 +3,10 @@ import { parseServerConfig } from './config.ts';
 
 async function start(): Promise<void> {
   const config = parseServerConfig(process.env);
-  const app = await buildServer({ logger: true });
+  const app = await buildServer({
+    logger: true,
+    staticRoot: config.staticRoot,
+  });
   await app.listen({
     host: config.host,
     port: config.port,
