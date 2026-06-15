@@ -108,8 +108,59 @@ export const diagnosisFixture = {
   scorecard: {
     strategyId: 'draft-ma',
     scenarioSetId: 'tx42/ho100042',
-    perStyle: {},
-    evaluations: [],
+    perStyle: {
+      conservative: {
+        style: 'conservative',
+        riskScore: 42,
+        survived: false,
+        worstDrawdownPct: 0.42,
+        meanPnlPct: -0.1,
+      },
+      aggressive: {
+        style: 'aggressive',
+        riskScore: 55,
+        survived: false,
+        worstDrawdownPct: 0.42,
+        meanPnlPct: -0.1,
+      },
+      trend: {
+        style: 'trend',
+        riskScore: 50,
+        survived: false,
+        worstDrawdownPct: 0.42,
+        meanPnlPct: -0.1,
+      },
+    },
+    evaluations: [
+      'sentiment',
+      'macro',
+      'market-intel',
+      'news',
+      'technical',
+    ].map((dimension, index) => ({
+      scenarioId: `scenario-${index}`,
+      scenarioName: `${dimension} stress`,
+      dimension,
+      sourceSkill: `${dimension}-skill`,
+      severity: index + 1,
+      shock: {
+        kind: 'crash',
+        magnitude: 0.2,
+        durationBars: 20,
+        volMult: 1.5,
+        seed: index,
+      },
+      metrics: {
+        pnlPct: -0.1 * index,
+        maxDrawdownPct: 0.2 + index * 0.05,
+        liquidated: index === 4,
+        numTrades: index + 2,
+        equityCurve: [1, 0.9, 0.8],
+      },
+      cause: index === 4 ? 'liquidation' : 'drawdown-breach',
+      damageScore: 50 + index * 10,
+      narrative: `${dimension} narrative`,
+    })),
     deaths: [],
     prescription: {
       changes: {

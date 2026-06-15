@@ -6,6 +6,7 @@ import { StrategyComposer } from './components/StrategyComposer.tsx';
 import {
   StrategyConfirmation,
 } from './components/StrategyConfirmation.tsx';
+import { DiagnosisWorkspace } from './components/DiagnosisWorkspace.tsx';
 import {
   appReducer,
   initialAppState,
@@ -96,8 +97,11 @@ export function App({ client = defaultClient }: AppProps) {
 
   return (
     <main className="app-shell">
-      <h1>Strategy Doctor</h1>
-      <p>Diagnosis complete. Request {state.requestId}</p>
+      <DiagnosisWorkspace
+        request={state.request}
+        requestId={state.requestId}
+        view={state.view}
+      />
     </main>
   );
 }
