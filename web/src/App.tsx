@@ -1,4 +1,8 @@
-import { useReducer } from 'react';
+import {
+  lazy,
+  Suspense,
+  useReducer,
+} from 'react';
 import { createApiClient } from './api/client.ts';
 import type { ApiClient } from './api/types.ts';
 import { LoginScreen } from './components/LoginScreen.tsx';
@@ -6,7 +10,6 @@ import { StrategyComposer } from './components/StrategyComposer.tsx';
 import {
   StrategyConfirmation,
 } from './components/StrategyConfirmation.tsx';
-import { DiagnosisWorkspace } from './components/DiagnosisWorkspace.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
 import { saveDiagnosis } from './history/storage.ts';
 import {
@@ -15,6 +18,10 @@ import {
 } from './state/app-state.ts';
 
 const defaultClient = createApiClient();
+const DiagnosisWorkspace = lazy(async () => {
+  const module = await import('./components/DiagnosisWorkspace.tsx');
+  return { default: module.DiagnosisWorkspace };
+});
 
 export interface AppProps {
   client?: ApiClient;
@@ -114,11 +121,13 @@ export function App({ client = defaultClient }: AppProps) {
 
   return (
     <main className="app-shell">
-      <DiagnosisWorkspace
-        request={state.request}
-        requestId={state.requestId}
-        view={state.view}
-      />
+      <Suspense fallback={<p aria-live="polite">Loading visual analysis…</p>}>
+        <DiagnosisWorkspace
+          request={state.request}
+          requestId={state.requestId}
+          view={state.view}
+        />
+      </Suspense>
       {state.error ? <p role="status">{state.error}</p> : null}
       <HistoryPanel onOpen={record => dispatch({
         type: 'restored',

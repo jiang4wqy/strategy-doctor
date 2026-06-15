@@ -1,0 +1,30 @@
+:root {
+  color-scheme: dark;
+  --ink-950: #07111f;
+  --ink-900: #0a1726;
+  --ink-850: #0d1c2b;
+  --ink-800: #102233;
+  --ink-700: #193147;
+  --line: #284259;
+  --text: #e8f0f6;
+  --muted: #91a4b7;
+  --quiet: #667b8f;
+  --ice: #66d4d0;
+  --ice-soft: #b9efec;
+  --amber: #d9a441;
+  --risk: #ef7d68;
+  --positive: #6bd3a8;
+  --shadow: 0 18px 54px rgba(1, 8, 16, 0.34);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --space-1: 0.35rem;
+  --space-2: 0.65rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --display: Bahnschrift, "Arial Narrow", sans-serif;
+  --body: "Segoe UI Variable", "Segoe UI", sans-serif;
+  --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+}
