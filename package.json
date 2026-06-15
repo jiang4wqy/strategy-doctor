@@ -24,6 +24,7 @@
     "demo": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6",
     "demo:json": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --format json",
     "demo:live": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --backtest bitget",
+    "mcp": "node src/mcp/server.ts",
     "snapshots:refresh": "node src/scripts/refresh-snapshots.ts",
     "verify": "npm run test:coverage && npm run typecheck && npm run demo"
   },
@@ -46,9 +47,11 @@
     "@fastify/rate-limit": "^11.0.0",
     "@fastify/static": "^9.1.3",
     "@fastify/swagger": "^9.7.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "echarts": "^6.1.0",
     "fastify": "^5.8.5",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
   }
 }
