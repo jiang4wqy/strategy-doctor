@@ -266,4 +266,90 @@ Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL chan
 
 ## Extension path
 
-New strategy support is added through a validated `StrategyAdapter` and capability definition. The planned thin MCP adapter will call this REST/TypeScript layer and expose capability discovery, parsing, and diagnosis without duplicating core logic.
+New strategy support is added through a validated `StrategyAdapter` and capability definition. The thin MCP adapter calls this REST/TypeScript layer and exposes capability discovery, parsing, and diagnosis without duplicating core logic.
+
+---
+
+## MCP Adapter
+
+The MCP server exposes Strategy Doctor as a stdio-based MCP tool server. Any MCP-compatible AI agent (Claude Code, Cursor, etc.) can call it.
+
+### Prerequisites
+
+The MCP server requires the same backend as the Web/API service:
+
+```powershell
+npm.cmd run web
+```
+
+In a separate terminal:
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
+npm.cmd run mcp
+```
+
+### Agent configuration
+
+```json
+{
+  "mcpServers": {
+    "strategy-doctor": {
+      "command": "npm.cmd",
+      "args": ["run", "mcp"],
+      "cwd": "C:\\path\\to\\strategy-doctor",
+      "env": {
+        "STRATEGY_DOCTOR_URL": "http://127.0.0.1:8080",
+        "STRATEGY_DOCTOR_API_KEY": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+### Available tools
+
+| Tool | Description | Input |
+|---|---|---|
+| `list_strategy_capabilities` | List supported strategy types and parameter definitions | None |
+| `parse_strategy_description` | Convert natural-language strategy description to structured JSON | `description` (1–2000 chars) |
+| `diagnose_strategy` | Run five-dimension adversarial diagnosis | `strategy` (JSON string), `style`, `seed` (default 42), `candidates` (default 6) |
+
+### Example workflow
+
+```
+Agent: "Parse a BTC 4h RSI Bollinger mean reversion"
+→ calls parse_strategy_description
+
+Agent: "Diagnose this strategy with conservative style"
+→ calls diagnose_strategy
+
+Agent: "What strategies do you support?"
+→ calls list_strategy_capabilities
+```
+
+### Architecture boundary
+
+```text
+Agent / MCP Client
+    │  stdio JSON-RPC
+    ▼
+src/mcp/server.ts      ←  transport, tool routing
+    │
+    ▼
+src/mcp/tools.ts       ←  tool definitions, Zod validation
+    │
+    ▼
+src/client/index.ts    ←  HTTP + Bearer (REST API)
+    │
+    ▼
+Fastify REST API
+    │
+    ▼
+Application / Strategy / Backtest / Diagnosis
+```
+
+- `src/mcp/` only delegates to the REST client
+- No business logic in the MCP layer
+- No direct import of `application/`, `strategy/`, `backtest/`
