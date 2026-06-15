@@ -6,6 +6,7 @@ import type {
   StrategyDefinition,
   StrategyDecision,
 } from '../../contracts.ts';
+import { freezeStrategyDefinition } from '../definition.ts';
 
 const PARAM_LABELS: Record<keyof MaCrossParams, string> = {
   fastMA: '快均线',
@@ -190,11 +191,11 @@ function jitterParams(
   };
 }
 
-const definition = Object.freeze({
+const definition = freezeStrategyDefinition({
   archetype: 'ma-cross',
   displayName: 'Moving Average Crossover',
   description: 'Trend-following strategy using fast and slow moving averages.',
-  parameters: Object.freeze([
+  parameters: [
     {
       key: 'fastMA',
       label: PARAM_LABELS.fastMA,
@@ -239,21 +240,21 @@ const definition = Object.freeze({
       exclusiveMinimum: true,
       defaultValue: 1,
     },
-  ]),
-  example: Object.freeze({
+  ],
+  example: {
     id: 'tf-001',
     name: '高杠杆趋势跟随',
     archetype: 'ma-cross',
-    params: Object.freeze({
+    params: {
       fastMA: 8,
       slowMA: 30,
       leverage: 10,
       stopLossPct: 0.5,
       positionPct: 1,
-    }),
+    },
     universe: ['BTCUSDT'],
     timeframe: '1h',
-  }),
+  },
 } satisfies StrategyDefinition<'ma-cross'>);
 
 export const maCrossAdapter: StrategyAdapter<'ma-cross'> = {

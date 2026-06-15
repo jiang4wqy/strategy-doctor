@@ -6,6 +6,7 @@ import type {
   StrategyDefinition,
   StrategyDecision,
 } from '../../contracts.ts';
+import { freezeStrategyDefinition } from '../definition.ts';
 import {
   populationStandardDeviation,
   simpleMovingAverage,
@@ -332,12 +333,12 @@ function jitterParams(
   };
 }
 
-const definition = Object.freeze({
+const definition = freezeStrategyDefinition({
     archetype: 'rsi-bollinger-mean-reversion',
     displayName: 'RSI + Bollinger Mean Reversion',
     description:
       'Mean-reversion strategy with RSI, Bollinger Bands, and a trend filter.',
-    parameters: Object.freeze([
+    parameters: [
       {
         key: 'rsiPeriod',
         label: PARAM_LABELS.rsiPeriod,
@@ -354,6 +355,7 @@ const definition = Object.freeze({
         minimum: 0,
         maximum: 50,
         exclusiveMinimum: true,
+        exclusiveMaximum: true,
         defaultValue: 30,
       },
       {
@@ -364,6 +366,7 @@ const definition = Object.freeze({
         minimum: 50,
         maximum: 100,
         exclusiveMinimum: true,
+        exclusiveMaximum: true,
         defaultValue: 70,
       },
       {
@@ -430,12 +433,12 @@ const definition = Object.freeze({
         exclusiveMinimum: true,
         defaultValue: 0.5,
       },
-    ]),
-    example: Object.freeze({
+    ],
+    example: {
       id: 'rsi-bollinger-001',
       name: 'RSI Bollinger 趋势过滤均值回归',
       archetype: 'rsi-bollinger-mean-reversion',
-      params: Object.freeze({
+      params: {
         rsiPeriod: 10,
         rsiOversold: 30,
         rsiOverbought: 70,
@@ -446,10 +449,10 @@ const definition = Object.freeze({
         leverage: 3,
         stopLossPct: 0.05,
         positionPct: 0.5,
-      }),
+      },
       universe: ['BTCUSDT'],
       timeframe: '4h',
-    }),
+    },
   } satisfies StrategyDefinition<'rsi-bollinger-mean-reversion'>);
 
 export const rsiBollingerAdapter:

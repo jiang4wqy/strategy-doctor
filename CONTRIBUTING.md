@@ -34,7 +34,9 @@ git pull
 ```
 
 不要执行 `git switch main` 后直接修改。需要同步公共进展时，在自己的分支执行
-`git fetch origin`，再执行 `git merge origin/main`。
+`git fetch origin`，Wave 2 成员再执行
+`git merge origin/codex/p1-developer-platform`。只有集成人在最终 P1 PR 前同步
+`origin/main`。
 
 ## 2. 文件 ownership
 
@@ -49,7 +51,7 @@ git pull
 | MCP | `src/mcp/**`、`tests/mcp/**`、MCP 专属依赖 | P1.1 stdio MCP adapter |
 
 一个文件同一时间只能有一个 owner。跨 ownership 修改必须在 PR 的
-“跨模块依赖”中写明，并由文件 owner 与 A 共同解决冲突。
+“跨模块依赖”中写明，并由文件 owner 与 Foundation/集成 owner 共同解决冲突。
 
 集成边界：
 
@@ -98,9 +100,10 @@ P1 固定顺序：
 - 一个 PR 只解决一个模块目标。
 - 标题使用 `feat:`、`fix:`、`test:`、`docs:` 或 `refactor:` 前缀。
 - 列出 changed files、未包含范围、接口变化、验证命令和已知限制。
-- 修改共享契约时，必须由 A 和受影响模块 owner 审查。
-- 普通模块 PR 至少由 A 和相邻模块 owner 审查。
-- 冲突由文件 owner 与 A 共同解决，禁止直接选择整文件 ours/theirs。
+- 修改共享契约时，必须由 Foundation/集成 owner 和受影响模块 owner 审查。
+- 普通模块 PR 至少由集成 owner 和相邻模块 owner 审查。
+- 冲突由文件 owner 与集成 owner 共同解决，禁止直接选择整文件
+  ours/theirs。
 - Wave 2 PR 的 base branch 是 `codex/p1-developer-platform`；最终 P1 PR 的
   base branch 才是 `main`。
 - 合并前在个人分支合并最新目标分支，禁止对已共享分支 rebase。

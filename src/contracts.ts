@@ -94,23 +94,35 @@ export class StrategyValidationError extends Error {
   }
 }
 
-export interface ParameterDefinition {
-  key: StrategyParamKey;
+export interface ParameterDefinition<
+  K extends StrategyParamKey = StrategyParamKey,
+> {
+  key: K;
   label: string;
   description: string;
   kind: 'integer' | 'number';
   minimum: number;
   maximum?: number;
   exclusiveMinimum?: boolean;
+  exclusiveMaximum?: boolean;
   defaultValue: number;
 }
+
+export type StrategyDefinitionExample<A extends StrategyArchetype> =
+  Readonly<Omit<StrategyByArchetype<A>, 'params' | 'universe'>>
+  & {
+    readonly params: Readonly<ParamsByArchetype[A]>;
+    readonly universe: readonly string[];
+  };
 
 export interface StrategyDefinition<A extends StrategyArchetype> {
   archetype: A;
   displayName: string;
   description: string;
-  parameters: readonly ParameterDefinition[];
-  example: StrategyByArchetype<A>;
+  parameters: readonly ParameterDefinition<
+    keyof ParamsByArchetype[A] & StrategyParamKey
+  >[];
+  example: StrategyDefinitionExample<A>;
 }
 
 export type AnyStrategyDefinition = {
