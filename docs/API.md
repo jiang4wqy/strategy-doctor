@@ -1,38 +1,46 @@
 # Strategy Doctor API v1
 
-Strategy Doctor 对已注册交易策略执行确定性的五维对抗诊断。P1 支持：
+Strategy Doctor exposes deterministic five-dimension diagnosis for two registered strategy archetypes:
 
 - `ma-cross`
 - `rsi-bollinger-mean-reversion`
 
-公共 Web/API 默认使用离线 `MockBacktester`。它不读取账户、余额、持仓或私有
-凭证，也不提交订单。
+The public Web/API uses offline `MockBacktester`. It does not read account data or private Bitget credentials and cannot submit orders.
 
-## 启动与认证
-
-设置本地预览变量：
+## Start the service
 
 ```powershell
-$env:DOCTOR_WEB_ACCESS_CODE='team-code-change-me'
-$env:DOCTOR_SESSION_SECRET='replace-with-at-least-32-random-characters'
-$env:DOCTOR_API_KEYS='replace-with-a-private-agent-key'
+$env:DOCTOR_WEB_ACCESS_CODE='team-preview-code-change-me'
+$env:DOCTOR_SESSION_SECRET='replace-this-with-a-random-32-char-secret'
+$env:DOCTOR_API_KEYS='replace-this-with-a-private-agent-key'
 npm.cmd run web
 ```
 
-Agent 和开发者使用 Bearer key：
+Base URL:
 
 ```text
-Authorization: Bearer <DOCTOR_API_KEYS 中的一项>
+http://127.0.0.1:8080
 ```
 
-浏览器向 `POST /api/v1/auth` 提交 access code，服务返回签名、
-HttpOnly、SameSite=Lax cookie。`DELETE /api/v1/auth` 清除会话。
+## Authentication
 
-除 `GET /api/v1/health` 外，所有接口都需要 Bearer key 或有效浏览器会话。
+### Agent and script
 
-## 通用 Envelope
+```http
+Authorization: Bearer replace-this-with-a-private-agent-key
+```
 
-成功：
+`DOCTOR_API_KEYS` accepts one or more comma-separated keys.
+
+### Browser
+
+The Web client posts the access code to `POST /api/v1/auth`. A successful login creates a signed, HttpOnly, SameSite=Lax session cookie. `DELETE /api/v1/auth` clears it.
+
+`GET /api/v1/health` is public. All capability, parsing, diagnosis, and OpenAPI routes require a Bearer key or valid browser session.
+
+## Common envelope
+
+Success:
 
 ```json
 {
@@ -42,7 +50,7 @@ HttpOnly、SameSite=Lax cookie。`DELETE /api/v1/auth` 清除会话。
 }
 ```
 
-失败：
+Failure:
 
 ```json
 {
@@ -57,7 +65,7 @@ HttpOnly、SameSite=Lax cookie。`DELETE /api/v1/auth` 清除会话。
 }
 ```
 
-稳定错误码包括：
+Stable error codes:
 
 ```text
 AUTH_REQUIRED
@@ -74,28 +82,41 @@ UNSUPPORTED_TIMEFRAME
 DIAGNOSIS_FAILED
 ```
 
-## 发现能力
+Clients should log `requestId`. They may retry only when `retryable` is `true`.
+
+## Health
+
+```http
+GET /api/v1/health
+```
+
+No authentication required.
+
+## Discover capabilities
 
 ```http
 GET /api/v1/capabilities
+Authorization: Bearer <key>
 ```
 
-返回两个 strategy definitions，包括参数 label、类型、默认值、最小/最大值和
-排他边界。客户端应从该接口生成参数表单，不要维护第二份参数元数据。
+The response contains closed strategy definitions, including parameter labels, types, defaults, bounds, and exclusive bounds. Clients should generate forms and validation hints from this endpoint rather than maintain duplicate metadata.
 
-PowerShell：
+PowerShell:
 
 ```powershell
-$headers = @{ Authorization = "Bearer $env:STRATEGY_DOCTOR_API_KEY" }
+$headers = @{
+  Authorization = "Bearer $env:STRATEGY_DOCTOR_API_KEY"
+}
 Invoke-RestMethod `
   -Uri "$env:STRATEGY_DOCTOR_URL/api/v1/capabilities" `
   -Headers $headers
 ```
 
-## 解析自然语言
+## Parse a natural-language strategy
 
 ```http
 POST /api/v1/strategies/parse
+Authorization: Bearer <key>
 Content-Type: application/json
 ```
 
@@ -105,21 +126,31 @@ Content-Type: application/json
 }
 ```
 
-返回 `StrategyDraft`：
+The response data is a `StrategyDraft`:
 
-- `strategy`：经过 runtime parser 校验的结构化策略。
-- `source`：`rules` 或可选的 `anthropic`。
-- `confidence`：解析置信度。
-- `assumptions`：未在描述中明确给出、由市场或 registry 默认补齐的字段。
-- `warnings`：低置信度或 AI fallback 失败等提示。
+- `strategy`: runtime-validated structured strategy
+- `source`: `rules` or optional `anthropic`
+- `confidence`: parser confidence
+- `assumptions`: values inferred from market or registry defaults
+- `warnings`: low-confidence or fallback information
 
-解析不会自动运行诊断。用户或 Agent 必须检查 assumptions、修改所需参数，
-然后显式提交最终结构化策略。这是强制 confirmation boundary。
+Parsing never starts a diagnosis. The user or Agent must inspect assumptions, edit parameters if necessary, and explicitly submit the final structured strategy. Descriptions longer than 2,000 characters are rejected.
 
-## 提交诊断
+Local rules are the default. Optional Anthropic fallback requires all three variables:
+
+```powershell
+$env:DOCTOR_NL_AI_ENABLED='1'
+$env:ANTHROPIC_API_KEY='<your-key>'
+$env:DOCTOR_NL_MODEL='<available-model-id>'
+```
+
+CI and the default service do not enable the fallback.
+
+## Run a diagnosis
 
 ```http
 POST /api/v1/diagnoses
+Authorization: Bearer <key>
 Content-Type: application/json
 ```
 
@@ -145,27 +176,43 @@ Content-Type: application/json
 }
 ```
 
-相同 strategy、style、seed、candidates 与冻结数据会产生确定性结果。诊断响应
-是 `DiagnosisView`，包含旧 `Scorecard`、摘要和前端可直接绘制的 chart data。
+The response data is a `DiagnosisView` containing:
 
-摘要使用 `returnDelta`。嵌入的旧 Scorecard 为保持 CLI/JSON 兼容，仍使用：
+- the complete `Scorecard`
+- summary values for the selected style
+- five scenario evaluations
+- death diagnoses and prescription
+- held-out risk/return comparison
+- chart-ready series for the Web client
 
-```text
-scorecard.tradeoff.returnCost
+For the same strategy, style, seed, candidate count, and frozen snapshots, the result is deterministic.
+
+The API summary calls the held-out return change `returnDelta`. The embedded legacy Scorecard retains `scorecard.tradeoff.returnCost` for CLI/JSON compatibility; both fields carry the same numeric value. A negative value means held-out average return decreased.
+
+## OpenAPI
+
+```http
+GET /api/v1/openapi.json
+Authorization: Bearer <key>
 ```
 
-两者数值相同，只是 API 摘要使用更清晰的新名称。负值表示 held-out 平均收益
-下降；不要把处方描述为保证改善。
+Local URL:
+
+```text
+http://127.0.0.1:8080/api/v1/openapi.json
+```
 
 ## TypeScript Client
 
+Run the complete example:
+
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
-$env:STRATEGY_DOCTOR_API_KEY='your-private-agent-key'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 node examples/agent-client.ts
 ```
 
-核心调用：
+Core usage:
 
 ```ts
 import { createStrategyDoctor } from './src/client/index.ts';
@@ -174,6 +221,7 @@ const doctor = createStrategyDoctor({
   baseUrl: process.env.STRATEGY_DOCTOR_URL!,
   apiKey: process.env.STRATEGY_DOCTOR_API_KEY!,
 });
+
 const capabilities = await doctor.capabilities();
 const draft = await doctor.parseStrategy({
   description: 'BTC 4h RSI and Bollinger mean reversion',
@@ -186,69 +234,36 @@ const result = await doctor.diagnose({
 });
 ```
 
-Client 不自动重试。`RATE_LIMITED` 和 `SERVER_BUSY` 可根据
-`StrategyDoctorApiError.retryable` 由调用方决定退避策略。
+The Client does not automatically retry. For `RATE_LIMITED` and `SERVER_BUSY`, callers can inspect `StrategyDoctorApiError.retryable` and apply their own bounded backoff.
 
-## 四条五分钟路径
-
-### Web 用户
-
-```powershell
-$env:DOCTOR_WEB_ACCESS_CODE='team-code-change-me'
-$env:DOCTOR_SESSION_SECRET='replace-with-at-least-32-random-characters'
-$env:DOCTOR_API_KEYS='replace-with-a-private-agent-key'
-npm.cmd run web
-```
-
-打开 `http://127.0.0.1:8080`，输入 access code，描述策略，确认结构化参数，
-再运行诊断。
-
-### REST / PowerShell
+## Copy-ready REST workflow
 
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
-$env:STRATEGY_DOCTOR_API_KEY='your-private-agent-key'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 .\examples\agent-curl.ps1
 ```
 
-### TypeScript
+## Temporary remote URL
+
+Keep the local service running and start:
 
 ```powershell
-$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
-$env:STRATEGY_DOCTOR_API_KEY='your-private-agent-key'
-node examples/agent-client.ts
+cloudflared tunnel --url http://localhost:8080
 ```
 
-### 现有 CLI
+Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL changes after restart. Share the URL and API key privately. Quick Tunnel is for demo/testing, not permanent production.
 
-```powershell
-npm.cmd run demo
-node src/cli.ts examples/rsi-bollinger.json `
-  --style conservative --seed 42 --candidates 6
-```
+## P1 limits
 
-CLI 不需要启动 API，也不需要 AI key。
+- One `*USDT` symbol per diagnosis
+- Timeframes: `1h`, `4h`, `1d`
+- Two registered archetypes only
+- Offline `MockBacktester` for public Web/API
+- No database; browser history stays local
+- No fees, slippage, funding, latency, or order-book fill model
+- Diagnosis and prescription are not a return guarantee
 
-## OpenAPI
+## Extension path
 
-服务启动后使用 Bearer key访问：
-
-```text
-GET /api/v1/openapi.json
-```
-
-本地完整地址：
-
-```text
-http://127.0.0.1:8080/api/v1/openapi.json
-```
-
-## P1 限制
-
-- 只支持单一 `*USDT` symbol。
-- 只支持 `1h`、`4h`、`1d`。
-- 只支持两种已注册 archetype。
-- API/Web 只使用离线 `MockBacktester`。
-- 不建数据库，浏览器历史只保存在本地。
-- 不模拟手续费、滑点、funding、延迟或订单簿成交。
-- 诊断和处方不是收益保证。
+New strategy support is added through a validated `StrategyAdapter` and capability definition. The planned thin MCP adapter will call this REST/TypeScript layer and expose capability discovery, parsing, and diagnosis without duplicating core logic.
