@@ -3,6 +3,7 @@ import type {
   ApiEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  StoredDiagnosis,
   StrategyDraft,
 } from '../../../src/platform/contracts.ts';
 
@@ -11,6 +12,7 @@ export type {
   ApiEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  StoredDiagnosis,
   StrategyDraft,
 };
 

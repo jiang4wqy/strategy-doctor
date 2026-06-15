@@ -7,6 +7,8 @@ import {
   StrategyConfirmation,
 } from './components/StrategyConfirmation.tsx';
 import { DiagnosisWorkspace } from './components/DiagnosisWorkspace.tsx';
+import { HistoryPanel } from './components/HistoryPanel.tsx';
+import { saveDiagnosis } from './history/storage.ts';
 import {
   appReducer,
   initialAppState,
@@ -50,6 +52,10 @@ export function App({ client = defaultClient }: AppProps) {
             draft,
           })}
         />
+        <HistoryPanel onOpen={record => dispatch({
+          type: 'restored',
+          record,
+        })} />
       </main>
     );
   }
@@ -66,10 +72,21 @@ export function App({ client = defaultClient }: AppProps) {
             dispatch({ type: 'diagnosisStarted', request });
             try {
               const response = await client.diagnose(request);
+              const saved = saveDiagnosis({
+                id: response.requestId,
+                createdAt: new Date().toISOString(),
+                description: state.description,
+                requestId: response.requestId,
+                request,
+                view: response.data,
+              });
               dispatch({
                 type: 'diagnosed',
                 requestId: response.requestId,
                 view: response.data,
+                message: saved.saved
+                  ? undefined
+                  : 'The diagnosis could not be saved in local history.',
               });
             } catch (reason) {
               dispatch({
@@ -102,6 +119,11 @@ export function App({ client = defaultClient }: AppProps) {
         requestId={state.requestId}
         view={state.view}
       />
+      {state.error ? <p role="status">{state.error}</p> : null}
+      <HistoryPanel onOpen={record => dispatch({
+        type: 'restored',
+        record,
+      })} />
     </main>
   );
 }

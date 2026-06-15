@@ -2,6 +2,7 @@ import type {
   AnyStrategyDefinition,
   DiagnoseRequest,
   DiagnosisView,
+  StoredDiagnosis,
   StrategyDraft,
 } from '../api/types.ts';
 
@@ -53,6 +54,7 @@ export type AppAction =
       type: 'diagnosed';
       requestId: string;
       view: DiagnosisView;
+      message?: string;
     }
   | {
       type: 'diagnosisFailed';
@@ -60,6 +62,7 @@ export type AppAction =
       message: string;
     }
   | { type: 'failed'; message: string }
+  | { type: 'restored'; record: StoredDiagnosis }
   | { type: 'signedOut' };
 
 export const initialAppState: AppState = { status: 'signedOut' };
@@ -106,6 +109,7 @@ export function appReducer(
             request: state.request,
             requestId: action.requestId,
             view: action.view,
+            error: action.message,
           }
         : state;
     case 'diagnosisFailed':
@@ -120,6 +124,17 @@ export function appReducer(
         : state;
     case 'failed':
       return { ...state, error: action.message };
+    case 'restored':
+      return state.status === 'signedOut'
+        ? state
+        : {
+            status: 'result',
+            description: action.record.description,
+            capabilities: state.capabilities,
+            request: action.record.request,
+            requestId: action.record.requestId,
+            view: action.record.view,
+          };
     case 'signedOut':
       return initialAppState;
   }
