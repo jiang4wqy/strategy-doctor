@@ -54,6 +54,11 @@ export type AppAction =
       requestId: string;
       view: DiagnosisView;
     }
+  | {
+      type: 'diagnosisFailed';
+      draft: StrategyDraft;
+      message: string;
+    }
   | { type: 'failed'; message: string }
   | { type: 'signedOut' };
 
@@ -101,6 +106,16 @@ export function appReducer(
             request: state.request,
             requestId: action.requestId,
             view: action.view,
+          }
+        : state;
+    case 'diagnosisFailed':
+      return state.status === 'diagnosing'
+        ? {
+            status: 'confirming',
+            description: state.description,
+            capabilities: state.capabilities,
+            draft: action.draft,
+            error: action.message,
           }
         : state;
     case 'failed':
