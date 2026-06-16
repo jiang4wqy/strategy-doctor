@@ -40,6 +40,32 @@ export interface McpTool<TInput = unknown, TOutput = unknown> {
     client: StrategyDoctorClient,
     input: TInput,
   ) => Promise<TOutput>;
+  invoke: (
+    client: StrategyDoctorClient,
+    rawInput: unknown,
+  ) => Promise<TOutput>;
+}
+
+export interface RegisteredMcpTool {
+  name: string;
+  description: string;
+  inputSchema: z.ZodType;
+  invoke: (
+    client: StrategyDoctorClient,
+    rawInput: unknown,
+  ) => Promise<unknown>;
+}
+
+function defineMcpTool<TInput, TOutput>(
+  tool: Omit<McpTool<TInput, TOutput>, 'invoke'>,
+): McpTool<TInput, TOutput> {
+  return {
+    ...tool,
+    async invoke(client, rawInput) {
+      const input = tool.inputSchema.parse(rawInput);
+      return tool.handler(client, input);
+    },
+  };
 }
 
 /**
@@ -48,14 +74,14 @@ export interface McpTool<TInput = unknown, TOutput = unknown> {
 export const listCapabilitiesTool: McpTool<
   Record<string, never>,
   readonly AnyStrategyDefinition[]
-> = {
+> = defineMcpTool({
   name: 'list_strategy_capabilities',
   description: '列出策略医生当前支持的策略类型、参数定义和边界',
   inputSchema: z.object({}).strict(),
   async handler(client) {
     return client.capabilities();
   },
-};
+});
 
 /**
  * 用自然语言描述策略，解析为结构化 JSON
@@ -63,7 +89,7 @@ export const listCapabilitiesTool: McpTool<
 export const parseStrategyTool: McpTool<
   { description: string },
   StrategyDraft
-> = {
+> = defineMcpTool({
   name: 'parse_strategy_description',
   description: '用一句话描述交易策略，返回结构化的策略 JSON 参数',
   inputSchema: z.object({
@@ -72,7 +98,7 @@ export const parseStrategyTool: McpTool<
   async handler(client, input) {
     return client.parseStrategy({ description: input.description });
   },
-};
+});
 
 /**
  * 对策略进行五维压力体检
@@ -81,11 +107,11 @@ export const diagnoseStrategyTool: McpTool<
   {
     strategy: string;
     style: 'conservative' | 'aggressive' | 'trend';
-    seed?: number;
-    candidates?: number;
+    seed: number;
+    candidates: number;
   },
   DiagnosisView
-> = {
+> = defineMcpTool({
   name: 'diagnose_strategy',
   description: '对策略进行五维体检：诊断死因、三风格评分、开处方、held-out 复测',
   inputSchema: diagnoseInputSchema,
@@ -107,10 +133,10 @@ export const diagnoseStrategyTool: McpTool<
       candidates: input.candidates ?? 6,
     });
   },
-};
+});
 
 /** 所有工具的注册表 */
-export const ALL_TOOLS: McpTool[] = [
+export const ALL_TOOLS: readonly RegisteredMcpTool[] = [
   listCapabilitiesTool,
   parseStrategyTool,
   diagnoseStrategyTool,

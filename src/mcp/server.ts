@@ -75,8 +75,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
   }
 
   try {
-    const parsed = tool.inputSchema.parse(request.params.arguments ?? {});
-    const result = await tool.handler(client, parsed);
+    const result = await tool.invoke(client, request.params.arguments ?? {});
     return {
       content: [
         {

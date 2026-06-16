@@ -6,6 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  ALL_TOOLS,
   listCapabilitiesTool,
   parseStrategyTool,
   diagnoseStrategyTool,
@@ -110,6 +111,20 @@ test('parseStrategyTool accepts valid description', () => {
   assert.equal(result.success, true);
 });
 
+test('ALL_TOOLS invokes heterogeneous tools through one registry entry', async () => {
+  const client = createFakeClient();
+  const tool = ALL_TOOLS.find(
+    candidate => candidate.name === 'parse_strategy_description',
+  );
+
+  assert.ok(tool);
+  const result = await tool.invoke(client, {
+    description: 'BTC 1h MA cross',
+  });
+
+  assert.equal((result as StrategyDraft).strategy.archetype, 'ma-cross');
+});
+
 // ── diagnose_strategy ───────────────────────────────
 
 test('diagnoseStrategyTool name and description are set', () => {
@@ -141,6 +156,8 @@ test('diagnoseStrategyTool rejects invalid strategy JSON', async () => {
     () => diagnoseStrategyTool.handler(client, {
       strategy: 'not-json',
       style: 'conservative',
+      seed: 42,
+      candidates: 6,
     }),
     /invalid strategy JSON/,
   );
