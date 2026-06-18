@@ -12,6 +12,7 @@ import {
 } from './components/StrategyConfirmation.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
 import { saveDiagnosis } from './history/storage.ts';
+import { ShowcasePage } from './showcase/ShowcasePage.tsx';
 import {
   appReducer,
   initialAppState,
@@ -29,6 +30,10 @@ export interface AppProps {
 
 export function App({ client = defaultClient }: AppProps) {
   const [state, dispatch] = useReducer(appReducer, initialAppState);
+
+  if (window.location.pathname === '/showcase') {
+    return <ShowcasePage />;
+  }
 
   if (state.status === 'signedOut') {
     return (

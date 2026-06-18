@@ -31,6 +31,30 @@ vi.mock('./charts/ParameterChangeChart.tsx', () => ({
 }));
 
 describe('App workflow', () => {
+  it('renders a public no-login showcase route', async () => {
+    window.history.pushState({}, '', '/showcase');
+
+    render(<App />);
+
+    expect(screen.getByRole('heading', {
+      name: 'Strategy Doctor public showcase',
+    })).toBeTruthy();
+    expect(screen.getByText('228 passed / 1 skipped')).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'MA trend follower',
+      pressed: true,
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'RSI/Bollinger mean reversion',
+    })).toBeTruthy();
+    expect(await screen.findByRole('region', {
+      name: 'Diagnosis summary',
+    })).toBeTruthy();
+    expect(screen.queryByLabelText('Access code')).toBeNull();
+
+    window.history.pushState({}, '', '/');
+  });
+
   it('moves from login to a fully named diagnosis workspace', async () => {
     const client: ApiClient = {
       login: vi.fn(async () => undefined),

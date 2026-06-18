@@ -8,6 +8,19 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 700,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'charts',
+              test: /node_modules[\\/]echarts[\\/]/,
+            },
+          ],
+        },
+      },
+    },
   },
   server: {
     host: '127.0.0.1',

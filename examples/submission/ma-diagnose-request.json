@@ -1,0 +1,21 @@
+{
+  "strategy": {
+    "id": "tf-001",
+    "name": "高杠杆趋势跟随",
+    "archetype": "ma-cross",
+    "params": {
+      "fastMA": 8,
+      "slowMA": 30,
+      "leverage": 10,
+      "stopLossPct": 0.5,
+      "positionPct": 1
+    },
+    "universe": [
+      "BTCUSDT"
+    ],
+    "timeframe": "1h"
+  },
+  "style": "conservative",
+  "seed": 42,
+  "candidates": 6
+}

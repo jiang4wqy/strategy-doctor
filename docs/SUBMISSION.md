@@ -115,7 +115,16 @@ npm.cmd run verify
 npm.cmd run web
 ```
 
-See [DEMO.md](DEMO.md) for the three-minute Web-first script and [API.md](API.md) for developer integration.
+Open the no-login public showcase at:
+
+```text
+http://127.0.0.1:8080/showcase
+```
+
+See [DEMO.md](DEMO.md) for the three-minute Web-first script,
+[API.md](API.md) for developer integration, [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
+for reproducible artifacts, and [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md)
+for the Bitget Playbook bridge.
 
 ## Checklist
 
@@ -128,8 +137,13 @@ See [DEMO.md](DEMO.md) for the three-minute Web-first script and [API.md](API.md
 - [x] Automated core, Web, integration, and browser gates
 - [x] Temporary team-sharing instructions
 - [x] Three-minute demo script
+- [x] No-login public showcase route
+- [x] Reproducible sample input/output artifacts
+- [x] Validated GetAgent Playbook package
 - [ ] Record and upload demo video
 - [ ] Fill video URL
+- [ ] Fill public showcase URL
+- [ ] Fill published Playbook URL after managed run
 - [ ] Submit before 2026-06-24
 
 ## P1.1

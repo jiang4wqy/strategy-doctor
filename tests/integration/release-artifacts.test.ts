@@ -8,6 +8,10 @@ import type {
   Scorecard,
   StrategyArchetype,
 } from '../../src/contracts.ts';
+import type {
+  DiagnoseRequest,
+  DiagnosisView,
+} from '../../src/platform/contracts.ts';
 import { parseStrategy } from '../../src/strategy/parse.ts';
 
 const CLI_PATH = fileURLToPath(new URL('../../src/cli.ts', import.meta.url));
@@ -19,6 +23,8 @@ const EXPECTED_DIMENSIONS: Dimension[] = [
   'technical',
 ];
 const EXPECTED_STYLES = ['aggressive', 'conservative', 'trend'];
+const SUBMISSION_PREFIXES = ['ma', 'rsi'] as const;
+const SECRET_LIKE_PATTERN = /(?:playbook\s+key|GETAGENT_ACCESS_KEY)\s*[:=]\s*['"]?(?!<|replace-|demo-)[A-Za-z0-9_-]{12,}/i;
 const EXAMPLES: {
   path: string;
   archetype: StrategyArchetype;
@@ -33,8 +39,24 @@ const EXAMPLES: {
   },
 ];
 
+interface SubmissionApiLogEntry {
+  timestamp: string;
+  endpoint: string;
+  requestId: string;
+  strategyId: string;
+  archetype: StrategyArchetype;
+  status: number;
+  latencyMs: number;
+  evaluations: number;
+  selectedStyleRiskScore: number;
+  deaths: string[];
+}
+
 const readRepoText = (relativePath: string): string =>
   readFileSync(new URL(`../../${relativePath}`, import.meta.url), 'utf8');
+
+const readRepoJson = <T>(relativePath: string): T =>
+  JSON.parse(readRepoText(relativePath)) as T;
 
 const runCliJson = (relativePath: string): Scorecard => {
   const output = execFileSync(
@@ -61,6 +83,7 @@ test('public release docs reference executable two-strategy CLI examples', () =>
     'README.md',
     'docs/DEMO.md',
     'docs/SUBMISSION.md',
+    'docs/SUBMISSION_EVIDENCE.md',
   ]) {
     const text = readRepoText(docPath);
     for (const example of EXAMPLES) {
@@ -70,6 +93,52 @@ test('public release docs reference executable two-strategy CLI examples', () =>
       );
     }
   }
+});
+
+test('hackathon evidence docs point reviewers to public UI and Playbook proof', () => {
+  const publicEntryReferences = [
+    'http://127.0.0.1:8080/showcase',
+    'SUBMISSION_EVIDENCE.md',
+    'PLAYBOOK_EVIDENCE.md',
+  ];
+
+  for (const docPath of [
+    'README.md',
+    'docs/DEMO.md',
+    'docs/SUBMISSION.md',
+  ]) {
+    const text = readRepoText(docPath);
+    assert.doesNotMatch(text, SECRET_LIKE_PATTERN);
+    for (const expectedReference of publicEntryReferences) {
+      assert.ok(
+        text.includes(expectedReference),
+        `${docPath} should mention ${expectedReference}`,
+      );
+    }
+  }
+
+  const submissionEvidence = readRepoText('docs/SUBMISSION_EVIDENCE.md');
+  for (const expectedReference of [
+    'http://127.0.0.1:8080/showcase',
+    'examples/submission/api-call-log.jsonl',
+    'examples/playbook/strategy-doctor-adaptive-playbook',
+  ]) {
+    assert.ok(
+      submissionEvidence.includes(expectedReference),
+      `docs/SUBMISSION_EVIDENCE.md should mention ${expectedReference}`,
+    );
+  }
+
+  const playbookEvidence = readRepoText('docs/PLAYBOOK_EVIDENCE.md');
+  assert.match(
+    playbookEvidence,
+    /examples\/playbook\/strategy-doctor-adaptive-playbook/,
+  );
+  assert.match(playbookEvidence, /GETAGENT_ACCESS_KEY/);
+  assert.doesNotMatch(
+    submissionEvidence + playbookEvidence,
+    SECRET_LIKE_PATTERN,
+  );
 });
 
 test('published strategy examples parse and produce complete offline scorecards', () => {
@@ -104,4 +173,73 @@ test('published strategy examples parse and produce complete offline scorecards'
       && evaluation.metrics.equityCurve.length > 0
     )));
   }
+});
+
+test('submission sample inputs and outputs are reproducible reviewer artifacts', () => {
+  const apiLog = readRepoText('examples/submission/api-call-log.jsonl')
+    .trim()
+    .split('\n')
+    .map(line => JSON.parse(line) as SubmissionApiLogEntry);
+  assert.equal(apiLog.length, SUBMISSION_PREFIXES.length);
+  assert.deepEqual(
+    apiLog.map(item => item.status),
+    [200, 200],
+  );
+  assert.ok(apiLog.every(item => (
+    item.endpoint === 'POST /api/v1/diagnoses'
+    && item.requestId.startsWith('req_submission_')
+    && item.evaluations === EXPECTED_DIMENSIONS.length
+    && Number.isFinite(item.latencyMs)
+    && item.deaths.length > 0
+  )));
+
+  for (const prefix of SUBMISSION_PREFIXES) {
+    const request = readRepoJson<DiagnoseRequest>(
+      `examples/submission/${prefix}-diagnose-request.json`,
+    );
+    const scorecard = readRepoJson<Scorecard>(
+      `examples/submission/${prefix}-scorecard.json`,
+    );
+    const view = readRepoJson<DiagnosisView>(
+      `examples/submission/${prefix}-diagnosis-view.json`,
+    );
+
+    const expectedArchetype = prefix === 'ma'
+      ? 'ma-cross'
+      : 'rsi-bollinger-mean-reversion';
+    assert.equal(request.strategy.archetype, expectedArchetype);
+    assert.equal(request.style, 'conservative');
+    assert.equal(request.seed, 42);
+    assert.equal(request.candidates, 6);
+    assert.equal(scorecard.scenarioSetId, 'tx42/ho100042');
+    assert.equal(view.scorecard.scenarioSetId, scorecard.scenarioSetId);
+    assert.equal(
+      view.scorecard.prescription.patchedStrategy.archetype,
+      expectedArchetype,
+    );
+    assert.deepEqual(
+      view.scorecard.evaluations
+        .map(evaluation => evaluation.dimension)
+        .sort(),
+      EXPECTED_DIMENSIONS,
+    );
+    assert.equal(view.charts.riskRadar.length, EXPECTED_DIMENSIONS.length);
+    assert.ok(view.charts.parameterChanges.length > 0);
+    assert.ok(Number.isFinite(view.summary.riskScore));
+  }
+});
+
+test('Playbook package stays local-validatable and credential-free', () => {
+  const basePath = 'examples/playbook/strategy-doctor-adaptive-playbook';
+  const manifest = readRepoText(`${basePath}/manifest.yaml`);
+  const readme = readRepoText(`${basePath}/README.md`);
+  const strategy = readRepoText(`${basePath}/src/strategy.py`);
+
+  assert.match(manifest, /name: strategy-doctor-risk-gated-btc/);
+  assert.match(manifest, /trading_symbols:\s*\["BTCUSDT"\]/);
+  assert.match(manifest, /signal_only/);
+  assert.match(readme, /Strategy Doctor Risk-Gated BTC/);
+  assert.match(strategy, /class EmaCrossStrategy\(Strategy\)/);
+  assert.match(strategy, /def on_bar\(self, bar: Bar\)/);
+  assert.doesNotMatch(manifest + readme + strategy, SECRET_LIKE_PATTERN);
 });

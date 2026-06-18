@@ -333,6 +333,87 @@ th {
   color: var(--quiet);
 }
 
+.showcase-page {
+  width: min(1560px, calc(100% - 2rem));
+}
+
+.showcase-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.8fr);
+  gap: var(--space-5);
+  align-items: end;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.showcase-hero h1 {
+  max-width: 15ch;
+  margin-bottom: var(--space-3);
+  font-size: clamp(2.3rem, 7vw, 5.4rem);
+}
+
+.showcase-proof {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.showcase-proof div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  background: var(--ink-850);
+}
+
+.showcase-proof dt {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.showcase-proof dd {
+  margin: 0;
+  color: var(--ice-soft);
+  font-weight: 800;
+}
+
+.showcase-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+}
+
+.showcase-switcher button {
+  min-width: 13.2rem;
+  border-color: rgba(102, 212, 208, 0.42);
+  color: var(--ice-soft);
+  background: rgba(8, 21, 34, 0.68);
+}
+
+.showcase-switcher button:hover:not(:disabled) {
+  border-color: var(--ice);
+  background: rgba(102, 212, 208, 0.12);
+}
+
+.showcase-switcher button[aria-pressed="true"] {
+  border-color: var(--ice);
+  background: linear-gradient(180deg, var(--ice) 0%, #49bab6 100%);
+  color: var(--ink-950);
+  box-shadow: 0 0 0 1px rgba(209, 250, 247, 0.28) inset;
+}
+
+.showcase-switcher a {
+  color: var(--ice-soft);
+  font-weight: 800;
+}
+
 @media (max-width: 960px) {
   .summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -360,9 +441,14 @@ th {
   .workspace-header,
   .form-footer,
   .chart-heading,
+  .showcase-hero,
   .history-panel li {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .showcase-hero {
+    grid-template-columns: 1fr;
   }
 
   .summary-grid,

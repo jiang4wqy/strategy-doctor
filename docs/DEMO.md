@@ -25,6 +25,17 @@ npm.cmd run web
 BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
 ```
 
+评委无需登录的展示页：
+
+```text
+http://127.0.0.1:8080/showcase
+```
+
+Reviewer evidence index:
+
+- `docs/SUBMISSION_EVIDENCE.md`
+- `docs/PLAYBOOK_EVIDENCE.md`
+
 ## 0:00-0:20 问题
 
 > 大多数工具帮助用户生成策略，却很少回答策略会在哪种陌生行情中失败、为什么失败、应该改哪个参数，以及修改能否在独立场景中继续成立。Strategy Doctor 是策略生成器和执行系统之间的诊断层。
@@ -84,6 +95,10 @@ node src/cli.ts examples/rsi-bollinger.json `
 ## 2:45-3:00 Track 2 总结
 
 > Strategy Doctor 不是另一个策略生成器，而是 Agent 开发中缺失的可解释诊断层。REST、TypeScript、OpenAPI 和能力发现让现有 Agent 可以直接接入；封闭 capability definitions 让后续策略和薄 MCP adapter 能在不复制核心逻辑的情况下扩展。
+
+如果展示 Playbook 闭环，打开 `docs/PLAYBOOK_EVIDENCE.md`，说明
+`examples/playbook/strategy-doctor-adaptive-playbook` 已通过官方 GetAgent
+validator，发布阶段只需要使用参赛账户的 Playbook API key 走上传、回测和发布。
 
 最后说明安全边界：
 
