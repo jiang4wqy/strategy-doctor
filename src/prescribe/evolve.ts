@@ -184,6 +184,9 @@ export async function prescribe(
   if (!Number.isInteger(options.candidates) || options.candidates < 1) {
     throw new Error('candidates must be a positive integer');
   }
+  if (!Number.isSafeInteger(options.seed)) {
+    throw new Error('seed must be a safe integer');
+  }
 
   const adapter = getStrategyAdapter(
     strategy.archetype,
