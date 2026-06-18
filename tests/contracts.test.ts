@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StrategyValidationError } from '../src/contracts.ts';
 import type {
+  BreakoutConfirmationStrategy,
   MaCrossStrategy,
   Metrics,
   RsiBollingerStrategy,
@@ -15,9 +16,14 @@ import type {
 function signalPeriod(
   strategy: StrategyByArchetype<StrategyArchetype>,
 ): number {
-  return strategy.archetype === 'ma-cross'
-    ? strategy.params.fastMA
-    : strategy.params.rsiPeriod;
+  switch (strategy.archetype) {
+    case 'ma-cross':
+      return strategy.params.fastMA;
+    case 'rsi-bollinger-mean-reversion':
+      return strategy.params.rsiPeriod;
+    case 'breakout-confirmation':
+      return strategy.params.breakoutLookback;
+  }
 }
 
 test('契约：四大核心类型可构造且字段齐全', () => {
@@ -45,7 +51,25 @@ test('契约：四大核心类型可构造且字段齐全', () => {
     universe: ['BTCUSDT'],
     timeframe: '1h',
   };
-  const strategies: Strategy[] = [movingAverage, meanReversion];
+  const breakout: BreakoutConfirmationStrategy = {
+    id: 's3',
+    name: '纭绐佺牬',
+    archetype: 'breakout-confirmation',
+    params: {
+      breakoutLookback: 24,
+      confirmationBars: 2,
+      exitLookback: 8,
+      volatilityLookback: 12,
+      minBreakoutPct: 0.012,
+      minVolatilityPct: 0.002,
+      leverage: 4,
+      stopLossPct: 0.08,
+      positionPct: 0.55,
+    },
+    universe: ['BTCUSDT'],
+    timeframe: '1h',
+  };
+  const strategies: Strategy[] = [movingAverage, meanReversion, breakout];
   const scenario: Scenario = {
     id: 'sc1', name: '多头挤压', dimension: 'sentiment', sourceSkill: 'sentiment-analyst',
     narrative: '资金费率极值后瀑布', severity: 3,
@@ -72,10 +96,11 @@ test('契约：四大核心类型可构造且字段齐全', () => {
   assert.equal(scenario.shock.kind, 'squeeze');
   assert.deepEqual(
     strategies.map(strategy => strategy.archetype),
-    ['ma-cross', 'rsi-bollinger-mean-reversion'],
+    ['ma-cross', 'rsi-bollinger-mean-reversion', 'breakout-confirmation'],
   );
   assert.equal(signalPeriod(movingAverage), 8);
   assert.equal(signalPeriod(meanReversion), 14);
+  assert.equal(signalPeriod(breakout), 24);
   assert.equal(meanReversion.params.trendFilterPeriod, 50);
   assert.equal(meanReversion.params.trendFilterThreshold, 0.03);
 });

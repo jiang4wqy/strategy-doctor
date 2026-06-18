@@ -29,16 +29,17 @@ http://127.0.0.1:8080/showcase
 ```
 
 This route does not require a Web access code. It renders the same diagnosis
-workspace with pre-generated MA and RSI/Bollinger evidence so reviewers can see
-the product surface without receiving private credentials.
+workspace with pre-generated MA, RSI/Bollinger, and confirmed-breakout evidence
+so reviewers can see the product surface without receiving private credentials.
 
 ## Canonical strategy examples
 
-The two executable strategy inputs used by CLI, Web/API samples, and release
+The three executable strategy inputs used by CLI, Web/API samples, and release
 tests are:
 
 - `examples/trend-follower.json`
 - `examples/rsi-bollinger.json`
+- `examples/breakout-confirmation.json`
 
 ## Reproducible sample artifacts
 
@@ -50,6 +51,9 @@ tests are:
 | `examples/submission/rsi-diagnose-request.json` | RSI/Bollinger diagnosis API request |
 | `examples/submission/rsi-scorecard.json` | RSI/Bollinger full scorecard output |
 | `examples/submission/rsi-diagnosis-view.json` | RSI/Bollinger Web/API chart-ready output |
+| `examples/submission/breakout-diagnose-request.json` | Confirmed-breakout diagnosis API request |
+| `examples/submission/breakout-scorecard.json` | Confirmed-breakout full scorecard output |
+| `examples/submission/breakout-diagnosis-view.json` | Confirmed-breakout Web/API chart-ready output |
 | `examples/submission/api-call-log.jsonl` | Submission-grade API call log sample |
 
 All sample outputs use seed `42`, held-out seed `100042`, style
@@ -66,15 +70,15 @@ npm.cmd run verify
 Latest local result:
 
 ```text
-229 tests
-228 passed
+244 tests
+243 passed
 1 skipped: live Bitget public-data smoke
 0 failed
 
 Coverage:
-Lines 96.35%
-Branches 89.35%
-Functions 99.10%
+Lines 96.38%
+Branches 88.96%
+Functions 99.16%
 
 TypeScript:
 core passed
@@ -121,4 +125,5 @@ environment variable. Do not commit Playbook credentials.
 - Demo video URL, three minutes or less.
 - Optional social post URL with the required Bitget tag/mention.
 - Playbook published URL after managed sandbox run succeeds.
+- Submission form draft: `docs/SUBMISSION_FORM.md`.
 - This evidence document URL.

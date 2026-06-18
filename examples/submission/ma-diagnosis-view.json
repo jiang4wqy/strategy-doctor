@@ -2670,6 +2670,48 @@
     "robustnessGain": 2,
     "returnDelta": 0.3712
   },
+  "deployment": {
+    "score": 21,
+    "status": "blocked",
+    "headline": "Do not publish before risk repair",
+    "gates": [
+      {
+        "key": "liquidation-free",
+        "label": "No liquidation in treatment",
+        "passed": false,
+        "value": "2 liquidations"
+      },
+      {
+        "key": "drawdown-budget",
+        "label": "Worst drawdown under 35%",
+        "passed": false,
+        "value": "99.9%"
+      },
+      {
+        "key": "survival-rate",
+        "label": "At least 80% scenarios survived",
+        "passed": false,
+        "value": "0.0%"
+      },
+      {
+        "key": "held-out-robustness",
+        "label": "Held-out robustness improved",
+        "passed": true,
+        "value": "+2"
+      },
+      {
+        "key": "return-tradeoff",
+        "label": "Held-out return cost within 15%",
+        "passed": true,
+        "value": "+37.1%"
+      }
+    ],
+    "blockers": [
+      "No liquidation in treatment: 2 liquidations",
+      "Worst drawdown under 35%: 99.9%",
+      "At least 80% scenarios survived: 0.0%"
+    ]
+  },
   "charts": {
     "treatmentEquity": [
       {

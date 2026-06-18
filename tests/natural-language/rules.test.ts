@@ -60,6 +60,34 @@ test('parseWithRules extracts equivalent RSI Bollinger strategies', () => {
   }
 });
 
+test('parseWithRules extracts confirmed breakout strategies', () => {
+  const draft = parseWithRules(
+    'BTCUSDT 1h confirmed breakout, breakout lookback 24, '
+    + 'confirmation bars 2, exit lookback 8, volatility lookback 12, '
+    + 'minimum breakout 1.2%, minimum volatility 0.2%, 4x leverage, '
+    + '8% stop loss, 55% position.',
+  );
+
+  assert.equal(draft.strategy.archetype, 'breakout-confirmation');
+  if (draft.strategy.archetype !== 'breakout-confirmation') {
+    assert.fail('expected breakout strategy');
+  }
+  assert.deepEqual(draft.strategy.params, {
+    breakoutLookback: 24,
+    confirmationBars: 2,
+    exitLookback: 8,
+    volatilityLookback: 12,
+    minBreakoutPct: 0.012,
+    minVolatilityPct: 0.002,
+    leverage: 4,
+    stopLossPct: 0.08,
+    positionPct: 0.55,
+  });
+  assert.equal(draft.strategy.timeframe, '1h');
+  assert.equal(draft.source, 'rules');
+  assert.equal(draft.warnings.length, 0);
+});
+
 test('parseWithRules reports ambiguous and forbidden descriptions', () => {
   assert.throws(
     () => parseWithRules('combine MA crossover and RSI Bollinger'),

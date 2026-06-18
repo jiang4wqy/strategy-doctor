@@ -1656,6 +1656,44 @@
     "robustnessGain": 50,
     "returnDelta": 0.0027
   },
+  "deployment": {
+    "score": 54,
+    "status": "watch",
+    "headline": "Publish only after manual review",
+    "gates": [
+      {
+        "key": "liquidation-free",
+        "label": "No liquidation in treatment",
+        "passed": true,
+        "value": "0 liquidations"
+      },
+      {
+        "key": "drawdown-budget",
+        "label": "Worst drawdown under 35%",
+        "passed": true,
+        "value": "25.6%"
+      },
+      {
+        "key": "survival-rate",
+        "label": "At least 80% scenarios survived",
+        "passed": true,
+        "value": "80.0%"
+      },
+      {
+        "key": "held-out-robustness",
+        "label": "Held-out robustness improved",
+        "passed": true,
+        "value": "+50"
+      },
+      {
+        "key": "return-tradeoff",
+        "label": "Held-out return cost within 15%",
+        "passed": true,
+        "value": "+0.3%"
+      }
+    ],
+    "blockers": []
+  },
   "charts": {
     "treatmentEquity": [
       {

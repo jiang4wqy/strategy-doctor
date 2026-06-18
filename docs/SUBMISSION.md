@@ -48,9 +48,10 @@ Four supported entry points:
 # CLI
 npm.cmd run demo
 
-# Explicit two-strategy CLI regression
+# Explicit three-strategy CLI regression
 node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/breakout-confirmation.json --style conservative --seed 42 --candidates 6
 
 # Web/API
 $env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
@@ -72,6 +73,7 @@ node examples/agent-client.ts
 - Protected React diagnosis workspace
 - Natural-language strategy draft with explicit confirmation boundary
 - Five-dimension visual diagnosis and local result history
+- Playbook readiness score with explicit deployment gates
 - REST endpoints for capability discovery, parsing, and diagnosis
 - OpenAPI 3.0 document
 - Native TypeScript Client and copy-ready examples
@@ -94,10 +96,11 @@ The public P1 Web/API intentionally uses offline `MockBacktester`. This keeps th
 - Rate limits, body limits, same-origin checks, and diagnosis concurrency limits protect the preview service.
 - Anthropic and live Bitget calls are disabled in CI and opt-in locally.
 - CI enforces 90% lines, 80% branches, and 95% functions, plus Web tests, typechecking, build, demo, and Playwright acceptance.
+- Deployment readiness blocks Playbook publication when liquidation, excess drawdown, poor survival rate, negative held-out robustness, or unacceptable return cost appears.
 
 ## Scope
 
-- Two registered strategies: `ma-cross` and `rsi-bollinger-mean-reversion`
+- Three registered strategies: `ma-cross`, `rsi-bollinger-mean-reversion`, and `breakout-confirmation`
 - One symbol per diagnosis
 - Supported timeframes: `1h`, `4h`, `1d`
 - No arbitrary strategy DSL or dynamic code execution

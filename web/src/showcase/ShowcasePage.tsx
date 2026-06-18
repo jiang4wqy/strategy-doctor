@@ -14,6 +14,7 @@ const DiagnosisWorkspace = lazy(async () => {
 const labels = {
   ma: 'MA trend follower',
   rsi: 'RSI/Bollinger mean reversion',
+  breakout: 'Confirmed breakout',
 } as const;
 
 export function ShowcasePage() {
@@ -39,11 +40,11 @@ export function ShowcasePage() {
         <dl className="showcase-proof">
           <div>
             <dt>Verify</dt>
-            <dd>228 passed / 1 skipped</dd>
+            <dd>243 passed / 1 skipped</dd>
           </div>
           <div>
             <dt>Coverage</dt>
-            <dd>96.35% lines</dd>
+            <dd>96.38% lines</dd>
           </div>
           <div>
             <dt>Mode</dt>

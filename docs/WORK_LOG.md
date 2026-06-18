@@ -24,7 +24,8 @@ The original role worktrees were not modified by this final polishing branch:
 ### Public reviewer UI
 
 - Added a no-login showcase route at `http://127.0.0.1:8080/showcase`.
-- The showcase renders real generated MA and RSI/Bollinger diagnosis outputs.
+- The showcase renders real generated MA, RSI/Bollinger, and confirmed-breakout diagnosis outputs.
+- Added a Playbook readiness panel with deployment gates and a reviewer-friendly readiness status.
 - The protected Web/API workspace remains available at `/`.
 
 Files:
@@ -33,18 +34,40 @@ Files:
 - `web/src/showcase/showcase-data.ts`
 - `web/src/App.tsx`
 - `web/src/App.test.tsx`
+- `web/src/components/DeploymentReadinessPanel.tsx`
 - `web/src/styles/layout.css`
+
+### Strategy coverage upgrade
+
+- Added `breakout-confirmation`, a third registered strategy archetype.
+- The strategy waits for confirmed range expansion, applies a volatility gate,
+  and exits when the breakout fails.
+- Natural-language parsing can now recognize confirmed-breakout descriptions.
+- CLI, Web/API capabilities, TypeScript client contracts, release artifacts,
+  and tests all exercise the third strategy.
+
+Files:
+
+- `src/strategy/adapters/breakout-confirmation.ts`
+- `examples/breakout-confirmation.json`
+- `tests/strategy/breakout-confirmation.test.ts`
+- `src/contracts.ts`
+- `src/strategy/parse.ts`
+- `src/strategy/registry.ts`
+- `src/natural-language/rules.ts`
 
 ### Submission evidence package
 
-- Added reproducible API request/output artifacts for both supported strategies.
+- Added reproducible API request/output artifacts for all three supported strategies.
 - Added a submission evidence document that maps Bitget requirements to repository proof.
+- Added a submission form draft for fast copy/paste into the hackathon form.
 - Added a local runner script for dependency install, verification, Web build, and Playbook validation.
 
 Files:
 
 - `examples/submission/*`
 - `docs/SUBMISSION_EVIDENCE.md`
+- `docs/SUBMISSION_FORM.md`
 - `scripts/run-local-submission.ps1`
 
 ### Bitget Playbook bridge
@@ -99,14 +122,14 @@ Final local run on 2026-06-18:
 |---|---|
 | `scripts/run-local-submission.ps1` | Passed |
 | npm audit during install | 0 vulnerabilities |
-| Core coverage suite | 232 tests, 231 passed, 1 skipped |
-| Coverage | Lines 96.36%, branches 89.44%, functions 99.10% |
+| Core coverage suite | 244 tests, 243 passed, 1 skipped |
+| Coverage | Lines 96.38%, branches 88.96%, functions 99.16% |
 | TypeScript core | Passed |
 | TypeScript Web | Passed |
 | Offline CLI demo | Passed |
 | Web production build | Passed |
 | Playbook validator | Validation PASSED |
-| No-login `/showcase` smoke | Passed with Microsoft Edge through Playwright |
+| No-login `/showcase` smoke | Passed with Microsoft Edge through Playwright, including `Confirmed breakout` |
 
 The skipped test is the opt-in live Bitget public-data smoke test. It is skipped
 by default so CI and local submission checks stay offline and deterministic.

@@ -111,7 +111,7 @@ test('CLI preserves the frozen MA golden JSON output', () => {
   assert.equal(output.trim(), golden.trim());
 });
 
-test('CLI completes the full workflow for both registered strategies', () => {
+test('CLI completes the full workflow for registered strategies', () => {
   const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
   const examples = [
     {
@@ -121,6 +121,10 @@ test('CLI completes the full workflow for both registered strategies', () => {
     {
       path: '../examples/rsi-bollinger.json',
       archetype: 'rsi-bollinger-mean-reversion',
+    },
+    {
+      path: '../examples/breakout-confirmation.json',
+      archetype: 'breakout-confirmation',
     },
   ];
 
@@ -168,12 +172,14 @@ test('CLI completes the full workflow for both registered strategies', () => {
     );
     assert.ok(Number.isFinite(card.tradeoff.robustnessGain));
     assert.ok(Number.isFinite(card.tradeoff.returnCost));
-    if (example.archetype === 'rsi-bollinger-mean-reversion') {
+    if (example.archetype !== 'ma-cross') {
       assert.ok(
         card.evaluations.every(evaluation =>
           evaluation.metrics.numTrades > 0
         ),
       );
+    }
+    if (example.archetype === 'rsi-bollinger-mean-reversion') {
       assert.ok(card.deaths.length > 0);
       assert.ok(Object.keys(card.prescription.changes).length > 0);
     }

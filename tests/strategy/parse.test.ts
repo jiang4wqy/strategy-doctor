@@ -38,6 +38,25 @@ const validMeanReversionStrategy = {
   timeframe: '4h',
 };
 
+const validBreakoutStrategy = {
+  id: 'bo-001',
+  name: 'BTC confirmed breakout',
+  archetype: 'breakout-confirmation',
+  params: {
+    breakoutLookback: 24,
+    confirmationBars: 2,
+    exitLookback: 8,
+    volatilityLookback: 12,
+    minBreakoutPct: 0.012,
+    minVolatilityPct: 0.002,
+    leverage: 4,
+    stopLossPct: 0.08,
+    positionPct: 0.55,
+  },
+  universe: ['BTCUSDT'],
+  timeframe: '1h',
+};
+
 test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
@@ -63,6 +82,14 @@ test('parseStrategy accepts the enhanced mean-reversion strategy', () => {
     strategy.params.trendFilterThreshold,
     validMeanReversionStrategy.params.trendFilterThreshold,
   );
+});
+
+test('parseStrategy accepts a confirmed breakout strategy', () => {
+  const strategy = parseStrategy(validBreakoutStrategy);
+
+  assert.deepEqual(strategy, validBreakoutStrategy);
+  assert.equal(strategy.params.breakoutLookback, 24);
+  assert.equal(strategy.params.confirmationBars, 2);
 });
 
 test('parseStrategy rejects malformed identity and market fields', () => {
@@ -132,6 +159,25 @@ test('parseStrategy rejects invalid parameter invariants', () => {
       () => parseStrategy({
         ...validStrategy,
         params: { ...validStrategy.params, ...patch },
+      }),
+      /strategy/i,
+    );
+  }
+});
+
+test('parseStrategy rejects invalid breakout invariants', () => {
+  for (const patch of [
+    { breakoutLookback: 4 },
+    { confirmationBars: 0 },
+    { exitLookback: 24 },
+    { volatilityLookback: 2 },
+    { minBreakoutPct: 0 },
+    { minVolatilityPct: -0.1 },
+  ]) {
+    assert.throws(
+      () => parseStrategy({
+        ...validBreakoutStrategy,
+        params: { ...validBreakoutStrategy.params, ...patch },
       }),
       /strategy/i,
     );

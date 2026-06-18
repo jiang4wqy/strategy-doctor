@@ -23,7 +23,11 @@ const EXPECTED_DIMENSIONS: Dimension[] = [
   'technical',
 ];
 const EXPECTED_STYLES = ['aggressive', 'conservative', 'trend'];
-const SUBMISSION_PREFIXES = ['ma', 'rsi'] as const;
+const SUBMISSION_ARTIFACTS = {
+  ma: 'ma-cross',
+  rsi: 'rsi-bollinger-mean-reversion',
+  breakout: 'breakout-confirmation',
+} as const satisfies Record<string, StrategyArchetype>;
 const SECRET_LIKE_PATTERN = /(?:playbook\s+key|GETAGENT_ACCESS_KEY)\s*[:=]\s*['"]?(?!<|replace-|demo-)[A-Za-z0-9_-]{12,}/i;
 const EXAMPLES: {
   path: string;
@@ -37,6 +41,10 @@ const EXAMPLES: {
     path: 'examples/rsi-bollinger.json',
     archetype: 'rsi-bollinger-mean-reversion',
   },
+  {
+    path: 'examples/breakout-confirmation.json',
+    archetype: 'breakout-confirmation',
+  },
 ];
 
 interface SubmissionApiLogEntry {
@@ -49,6 +57,8 @@ interface SubmissionApiLogEntry {
   latencyMs: number;
   evaluations: number;
   selectedStyleRiskScore: number;
+  deploymentStatus: string;
+  deploymentScore: number;
   deaths: string[];
 }
 
@@ -78,7 +88,7 @@ const runCliJson = (relativePath: string): Scorecard => {
   return JSON.parse(output) as Scorecard;
 };
 
-test('public release docs reference executable two-strategy CLI examples', () => {
+test('public release docs reference executable registered strategy examples', () => {
   for (const docPath of [
     'README.md',
     'docs/DEMO.md',
@@ -180,20 +190,26 @@ test('submission sample inputs and outputs are reproducible reviewer artifacts',
     .trim()
     .split('\n')
     .map(line => JSON.parse(line) as SubmissionApiLogEntry);
-  assert.equal(apiLog.length, SUBMISSION_PREFIXES.length);
+  assert.equal(apiLog.length, Object.keys(SUBMISSION_ARTIFACTS).length);
   assert.deepEqual(
     apiLog.map(item => item.status),
-    [200, 200],
+    Array.from(
+      { length: Object.keys(SUBMISSION_ARTIFACTS).length },
+      () => 200,
+    ),
   );
   assert.ok(apiLog.every(item => (
     item.endpoint === 'POST /api/v1/diagnoses'
     && item.requestId.startsWith('req_submission_')
     && item.evaluations === EXPECTED_DIMENSIONS.length
     && Number.isFinite(item.latencyMs)
-    && item.deaths.length > 0
+    && Number.isFinite(item.deploymentScore)
+    && ['ready', 'watch', 'blocked'].includes(item.deploymentStatus)
   )));
 
-  for (const prefix of SUBMISSION_PREFIXES) {
+  for (const [prefix, expectedArchetype] of Object.entries(
+    SUBMISSION_ARTIFACTS,
+  )) {
     const request = readRepoJson<DiagnoseRequest>(
       `examples/submission/${prefix}-diagnose-request.json`,
     );
@@ -204,9 +220,6 @@ test('submission sample inputs and outputs are reproducible reviewer artifacts',
       `examples/submission/${prefix}-diagnosis-view.json`,
     );
 
-    const expectedArchetype = prefix === 'ma'
-      ? 'ma-cross'
-      : 'rsi-bollinger-mean-reversion';
     assert.equal(request.strategy.archetype, expectedArchetype);
     assert.equal(request.style, 'conservative');
     assert.equal(request.seed, 42);
@@ -224,7 +237,11 @@ test('submission sample inputs and outputs are reproducible reviewer artifacts',
       EXPECTED_DIMENSIONS,
     );
     assert.equal(view.charts.riskRadar.length, EXPECTED_DIMENSIONS.length);
-    assert.ok(view.charts.parameterChanges.length > 0);
+    assert.ok(Number.isFinite(view.deployment.score));
+    assert.ok(['ready', 'watch', 'blocked'].includes(view.deployment.status));
+    if (expectedArchetype !== 'breakout-confirmation') {
+      assert.ok(view.charts.parameterChanges.length > 0);
+    }
     assert.ok(Number.isFinite(view.summary.riskScore));
   }
 });

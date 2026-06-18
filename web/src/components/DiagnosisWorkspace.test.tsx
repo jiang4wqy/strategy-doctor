@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import {
   diagnosisFixture,
@@ -37,11 +37,16 @@ describe('DiagnosisWorkspace', () => {
       />,
     );
 
-    expect(screen.getByText('42')).toBeTruthy();
-    expect(screen.getByText('42.0%')).toBeTruthy();
-    expect(screen.getByText('27')).toBeTruthy();
-    expect(screen.getByText('+12')).toBeTruthy();
-    expect(screen.getByText('-2.0%')).toBeTruthy();
+    const summary = screen.getByRole('region', { name: 'Diagnosis summary' });
+    expect(within(summary).getByText('42')).toBeTruthy();
+    expect(within(summary).getByText('42.0%')).toBeTruthy();
+    expect(within(summary).getByText('27')).toBeTruthy();
+    expect(within(summary).getByText('+12')).toBeTruthy();
+    expect(within(summary).getByText('-2.0%')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Playbook readiness',
+    })).toBeTruthy();
+    expect(screen.getByText('Publish only after manual review')).toBeTruthy();
     expect(screen.getAllByRole('img')).toHaveLength(4);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
     expect(screen.getByText(

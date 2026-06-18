@@ -60,7 +60,7 @@ Reviewer evidence index:
 4. 展示识别出的 `rsi-bollinger-mean-reversion`、参数、assumptions 和 warnings。
 5. 说明参数仍可编辑，解析不会自动执行诊断。
 
-> P1 只映射两个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
+> P1 只映射三个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
 
 ## 1:20-2:20 五维诊断与可视化
 
@@ -85,6 +85,10 @@ node src/cli.ts examples/trend-follower.json `
   --seed 42 `
   --candidates 6
 node src/cli.ts examples/rsi-bollinger.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
+node src/cli.ts examples/breakout-confirmation.json `
   --style conservative `
   --seed 42 `
   --candidates 6

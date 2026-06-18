@@ -40,6 +40,18 @@ test('buildDefaultStrategy applies deterministic market defaults and clones data
   assert.notEqual(first.universe, definition.example.universe);
 });
 
+test('buildDefaultStrategy copies breakout defaults from capability metadata', () => {
+  const strategy = buildDefaultStrategy('breakout-confirmation');
+  const definition = strategyRegistry.getDefinition('breakout-confirmation');
+
+  assert.equal(strategy.id, 'natural-breakout-confirmation');
+  assert.equal(strategy.params.breakoutLookback, 24);
+  assert.equal(strategy.params.confirmationBars, 2);
+  for (const parameter of definition.parameters) {
+    assert.equal(strategy.params[parameter.key], parameter.defaultValue);
+  }
+});
+
 test('DescriptionParseError preserves stable parser details', () => {
   const error = new DescriptionParseError(
     'UNSUPPORTED_STRATEGY_DESCRIPTION',

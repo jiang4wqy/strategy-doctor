@@ -9,6 +9,7 @@ import type {
   DiagnosisView,
   ParameterChange,
 } from '../platform/contracts.ts';
+import { assessDeploymentReadiness } from './deployability.ts';
 import {
   getStrategyAdapter,
   type AnyStrategyAdapter,
@@ -84,6 +85,7 @@ export function buildDiagnosisView(
       robustnessGain: doctor.scorecard.tradeoff.robustnessGain,
       returnDelta: doctor.scorecard.tradeoff.returnCost,
     },
+    deployment: assessDeploymentReadiness(doctor.scorecard, request.style),
     charts: {
       treatmentEquity: doctor.scorecard.evaluations.map(evaluation => ({
         dimension: evaluation.dimension,

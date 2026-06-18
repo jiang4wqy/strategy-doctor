@@ -39,7 +39,7 @@ describe('App workflow', () => {
     expect(screen.getByRole('heading', {
       name: 'Strategy Doctor public showcase',
     })).toBeTruthy();
-    expect(screen.getByText('228 passed / 1 skipped')).toBeTruthy();
+    expect(screen.getByText('243 passed / 1 skipped')).toBeTruthy();
     expect(screen.getByRole('button', {
       name: 'MA trend follower',
       pressed: true,
@@ -47,8 +47,14 @@ describe('App workflow', () => {
     expect(screen.getByRole('button', {
       name: 'RSI/Bollinger mean reversion',
     })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'Confirmed breakout',
+    })).toBeTruthy();
     expect(await screen.findByRole('region', {
       name: 'Diagnosis summary',
+    })).toBeTruthy();
+    expect(await screen.findByRole('region', {
+      name: 'Playbook readiness',
     })).toBeTruthy();
     expect(screen.queryByLabelText('Access code')).toBeNull();
 
@@ -91,6 +97,9 @@ describe('App workflow', () => {
 
     expect(await screen.findByRole('region', {
       name: 'Diagnosis summary',
+    })).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Playbook readiness',
     })).toBeTruthy();
     expect(screen.getByRole('region', {
       name: 'Diagnosis charts',
