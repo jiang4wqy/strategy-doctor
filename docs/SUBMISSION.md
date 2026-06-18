@@ -48,6 +48,10 @@ Four supported entry points:
 # CLI
 npm.cmd run demo
 
+# Explicit two-strategy CLI regression
+node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
+
 # Web/API
 $env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
 $env:DOCTOR_SESSION_SECRET='demo-session-secret-at-least-32-chars'

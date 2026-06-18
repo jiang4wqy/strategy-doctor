@@ -69,6 +69,10 @@ BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
 
 ```powershell
 npm.cmd run demo
+node src/cli.ts examples/trend-follower.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
 node src/cli.ts examples/rsi-bollinger.json `
   --style conservative `
   --seed 42 `

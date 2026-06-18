@@ -46,7 +46,16 @@ npm.cmd run verify
 npm.cmd run demo
 ```
 
-另一个策略示例：
+等价的显式 MA 趋势跟随命令：
+
+```powershell
+node src/cli.ts examples/trend-follower.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
+```
+
+RSI/Bollinger 均值回归示例：
 
 ```powershell
 node src/cli.ts examples/rsi-bollinger.json `
