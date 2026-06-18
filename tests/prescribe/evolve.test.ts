@@ -201,6 +201,17 @@ test('prescribe rejects an empty treatment set and invalid candidate count', asy
     ),
     /candidates/,
   );
+  await assert.rejects(
+    prescribe(
+      fragile,
+      [death],
+      treatmentScenarios(),
+      new MockBacktester(),
+      getProfile('conservative'),
+      { candidates: 1, seed: 1.5 },
+    ),
+    /seed/,
+  );
 });
 
 test('prescribe delegates mutation policy and labels to the strategy adapter', async () => {

@@ -55,6 +55,31 @@ test('shared engine rejects invalid prices and adapter mismatches', () => {
     );
   }
 
+  for (const patch of [
+    { leverage: 0 },
+    { leverage: Number.POSITIVE_INFINITY },
+    { stopLossPct: 0 },
+    { stopLossPct: 1 },
+    { stopLossPct: Number.NaN },
+    { positionPct: 0 },
+    { positionPct: 1.1 },
+  ]) {
+    assert.throws(
+      () => runStrategyOnPrices(
+        {
+          ...strategy,
+          params: {
+            ...strategy.params,
+            ...patch,
+          },
+        },
+        [100, 101],
+        maCrossAdapter,
+      ),
+      /risk parameters/i,
+    );
+  }
+
   const rsiStrategy: RsiBollingerStrategy = {
     id: 'rsi',
     name: 'mean reversion',
