@@ -159,9 +159,10 @@ export async function buildServer(
 
   app.setNotFoundHandler((request, reply) => {
     const isApiRequest = request.url.startsWith('/api/');
+    const isAssetRequest = request.url.startsWith('/assets/');
     const isPageRequest = request.method === 'GET'
       || request.method === 'HEAD';
-    if (!isApiRequest && isPageRequest && hasWebBuild) {
+    if (!isApiRequest && !isAssetRequest && isPageRequest && hasWebBuild) {
       return reply.type('text/html').sendFile('index.html');
     }
     const message = !isApiRequest && isPageRequest

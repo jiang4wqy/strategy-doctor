@@ -117,6 +117,7 @@ http://127.0.0.1:8080/showcase
 
 - `docs/SUBMISSION_EVIDENCE.md`
 - `docs/PLAYBOOK_EVIDENCE.md`
+- `submission-package/index.md` after running `npm.cmd run submission:package`
 - `examples/submission/api-call-log.jsonl`
 - `examples/submission/*-diagnose-request.json`
 - `examples/submission/*-scorecard.json`

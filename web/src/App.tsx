@@ -126,7 +126,7 @@ export function App({ client = defaultClient }: AppProps) {
 
   return (
     <main className="app-shell">
-      <Suspense fallback={<p aria-live="polite">Loading visual analysis…</p>}>
+      <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
           request={state.request}
           requestId={state.requestId}

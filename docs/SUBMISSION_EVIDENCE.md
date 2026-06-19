@@ -88,6 +88,25 @@ Demo:
 passed
 ```
 
+## Submission package generator
+
+Command:
+
+```powershell
+npm.cmd run submission:package
+```
+
+Output:
+
+```text
+submission-package/index.md
+submission-package/summary.json
+submission-package/artifacts/*
+```
+
+The generated folder is intentionally ignored by Git. It is a local reviewer
+bundle for form filling, video prep, and external AI review.
+
 ## Playbook bridge
 
 The official GetAgent skill was installed outside the repository at:

@@ -26,6 +26,9 @@ Write-Host "== Validate Playbook package =="
 python "$GetAgentSkill\scripts\validate.py" `
   "examples\playbook\strategy-doctor-adaptive-playbook"
 
+Write-Host "== Generate submission package index =="
+& "$NodeHome\npm.cmd" run submission:package
+
 Write-Host "== Manual smoke commands =="
 Write-Host "Start Web/API:"
 Write-Host "  `$env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'"

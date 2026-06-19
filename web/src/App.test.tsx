@@ -40,6 +40,11 @@ describe('App workflow', () => {
       name: 'Strategy Doctor public showcase',
     })).toBeTruthy();
     expect(screen.getByText('243 passed / 1 skipped')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Judge summary' })).toBeTruthy();
+    expect(screen.getByText('Playbook pre-publication risk auditor')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Strategy comparison',
+    })).toBeTruthy();
     expect(screen.getByRole('button', {
       name: 'MA trend follower',
       pressed: true,

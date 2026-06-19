@@ -89,6 +89,22 @@ Files:
 
 - `tests/integration/release-artifacts.test.ts`
 
+### Judge-facing showcase and packaging
+
+- Added a public no-login showcase summary with judge pitch, three-strategy comparison, and Playbook readiness evidence.
+- Added a local submission package index generator so reviewers can inspect artifact hashes without committing generated bundles.
+- Fixed Web static asset fallback so missing `/assets/*.js` files return a real 404 instead of `index.html`, preventing blank pages after rebuilds.
+
+Files:
+
+- `web/src/showcase/ShowcasePage.tsx`
+- `web/src/styles/layout.css`
+- `web/src/App.tsx`
+- `src/server/app.ts`
+- `tests/server/static-assets.test.ts`
+- `scripts/generate-submission-package.mjs`
+- `scripts/run-local-submission.ps1`
+
 ## Validation commands
 
 Use the bundled Node/npm installed on D drive:
@@ -114,22 +130,27 @@ Then open:
 http://127.0.0.1:8080/showcase
 ```
 
+If you rebuild Web assets while the server is already running, restart the
+server before browser smoke testing so the static file handler sees the latest
+hashed asset names.
+
 ## Latest local validation result
 
-Final local run on 2026-06-18:
+Final local run on 2026-06-20:
 
 | Check | Result |
 |---|---|
 | `scripts/run-local-submission.ps1` | Passed |
-| npm audit during install | 0 vulnerabilities |
+| npm audit during install | 1 high severity advisory reported by npm |
 | Core coverage suite | 244 tests, 243 passed, 1 skipped |
-| Coverage | Lines 96.38%, branches 88.96%, functions 99.16% |
+| Coverage | Lines 96.38%, branches 88.97%, functions 99.16% |
 | TypeScript core | Passed |
 | TypeScript Web | Passed |
 | Offline CLI demo | Passed |
 | Web production build | Passed |
 | Playbook validator | Validation PASSED |
-| No-login `/showcase` smoke | Passed with Microsoft Edge through Playwright, including `Confirmed breakout` |
+| Submission package index | Generated locally under `submission-package/` |
+| No-login `/showcase` smoke | Passed in the in-app browser, including judge summary, strategy comparison, `Confirmed breakout`, and Playbook readiness |
 
 The skipped test is the opt-in live Bitget public-data smoke test. It is skipped
 by default so CI and local submission checks stay offline and deterministic.
