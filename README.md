@@ -1,23 +1,43 @@
 # Strategy Doctor
 
-> 别人生成交易策略，我们负责找出它最可能怎样失败，并验证修补是否真的更稳。
+> Trading Agents do not mainly need another strategy generator. They need a
+> pre-publication doctor that can prove how a strategy fails before it reaches
+> a sandbox or live account.
 
-Strategy Doctor 是 Bitget AI Base Camp Hackathon Track 2 的策略诊断基础设施。它把结构化策略放入五维确定性压力场景，找出每个维度的最坏结果，解释死因，给出参数处方，再使用独立 held-out 场景复测。
+Strategy Doctor 是 Bitget AI Base Camp Hackathon Track 2 的策略体检基础设施。核心论点很简单：AI 可以快速生成交易想法，但真正稀缺的是发布前的失败发现、死因解释、受约束修复和独立复测。没有这一层，Agent 只是更快地把未经验证的策略推向交易环境。
 
-P1 同时提供 CLI、受保护的 Web 工作台、REST API 和 TypeScript Client。Web/API 默认使用离线 `MockBacktester`，不读取交易账户、余额、持仓或私有 Bitget 凭证，也不提交订单。
+项目把结构化策略放入五维确定性压力场景，找出每个维度的最坏结果，解释 liquidation、drawdown、stop-loss bleed 等死因，只修改与死因相关的参数，再用独立 held-out 场景报告风险收益取舍。输出不是“保证赚钱”，而是“是否值得进入下一步 Playbook sandbox / Agent 集成”的证据。
 
-Submission reviewers can open the no-login showcase route after starting the
-service:
+P1 同时提供 CLI、无登录 showcase、受保护 Web 工作台、REST API、MCP 工具和 TypeScript Client。Web/API 默认使用离线 `MockBacktester`，不读取交易账户、余额、持仓或私有 Bitget 凭证，也不提交订单。
+
+## 官方评审路径
+
+启动服务后，评委可以先打开无登录 showcase：
 
 ```text
 http://127.0.0.1:8080/showcase
 ```
 
-## 1 分钟评审路径
-
-1. 打开 `http://127.0.0.1:8080/showcase`，先看四种策略在同一风险契约下的部署状态。
-2. 进入受保护工作台，点击 `ATR Trend Breakout` 模板，确认参数后运行诊断。
+1. 看四种策略在同一风险契约下的部署状态：MA、RSI/Bollinger、Confirmed Breakout、ATR Trend Breakout。
+2. 在受保护工作台点击 `ATR Trend Breakout` 模板，确认参数后运行诊断。
 3. 查看第一屏 verdict、Before/After 修复对比、五维压力图表和开发者复现面板。
+4. 运行 API 自检和 usage record 生成命令，证明它不是只会本地 CLI demo。
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
+npm.cmd run api:check
+npm.cmd run submission:usage-record
+```
+
+提交证据位于 `examples/submission/`：真实 API call log、四个诊断请求、四个 scorecard、四个 Web/API diagnosis view。
+
+## 为什么属于 Track 2
+
+- **帮助 Agent 跑得更好**：在策略进入 Playbook 或执行 Agent 前先发现隐藏风险。
+- **开发者可接入**：REST、OpenAPI、TypeScript Client、MCP 和 CLI 共用同一策略契约。
+- **可复现使用记录**：`examples/submission/api-call-log.jsonl` 记录真实 API 调用时间、requestId、状态、延迟和诊断结果摘要。
+- **不是概念 Demo**：无登录 showcase、自动测试、样例输入输出和提交包生成器都可以独立运行。
 
 ## 核心能力
 
@@ -127,6 +147,12 @@ API 接入自检：
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 npm.cmd run api:check
+```
+
+生成官方提交用 usage record：
+
+```powershell
+npm.cmd run submission:usage-record
 ```
 
 ### 4. TypeScript

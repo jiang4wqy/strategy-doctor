@@ -24,7 +24,6 @@ const copyTargets = [
   'examples/rsi-bollinger.json',
   'examples/breakout-confirmation.json',
   'examples/atr-trend-breakout.json',
-  'examples/submission/api-call-log.jsonl',
   'examples/playbook/strategy-doctor-adaptive-playbook/manifest.yaml',
   'examples/playbook/strategy-doctor-adaptive-playbook/README.md',
 ];
@@ -33,6 +32,23 @@ const scorecards = [
   ['ma', 'examples/submission/ma-scorecard.json'],
   ['rsi', 'examples/submission/rsi-scorecard.json'],
   ['breakout', 'examples/submission/breakout-scorecard.json'],
+  ['atr', 'examples/submission/atr-scorecard.json'],
+];
+
+const submissionArtifacts = [
+  'examples/submission/api-call-log.jsonl',
+  'examples/submission/ma-diagnose-request.json',
+  'examples/submission/ma-scorecard.json',
+  'examples/submission/ma-diagnosis-view.json',
+  'examples/submission/rsi-diagnose-request.json',
+  'examples/submission/rsi-scorecard.json',
+  'examples/submission/rsi-diagnosis-view.json',
+  'examples/submission/breakout-diagnose-request.json',
+  'examples/submission/breakout-scorecard.json',
+  'examples/submission/breakout-diagnosis-view.json',
+  'examples/submission/atr-diagnose-request.json',
+  'examples/submission/atr-scorecard.json',
+  'examples/submission/atr-diagnosis-view.json',
 ];
 
 function readRepo(path) {
@@ -53,12 +69,11 @@ function copyRepoFile(path) {
 rmSync(outputDir, { recursive: true, force: true });
 mkdirSync(artifactDir, { recursive: true });
 
-for (const target of copyTargets) {
+for (const target of [...copyTargets, ...submissionArtifacts]) {
   copyRepoFile(target);
 }
 
 const strategySummaries = scorecards.map(([id, path]) => {
-  copyRepoFile(path);
   const scorecard = JSON.parse(readRepo(path));
   const conservative = scorecard.perStyle.conservative;
   return {
@@ -87,7 +102,7 @@ const manifest = {
     playbookValidator: 'Validation PASSED',
   },
   strategies: strategySummaries,
-  artifacts: [...copyTargets, ...scorecards.map(([, path]) => path)].map(path => {
+  artifacts: [...copyTargets, ...submissionArtifacts].map(path => {
     const content = readRepo(path);
     return {
       path,

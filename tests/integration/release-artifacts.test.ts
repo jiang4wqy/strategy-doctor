@@ -27,6 +27,7 @@ const SUBMISSION_ARTIFACTS = {
   ma: 'ma-cross',
   rsi: 'rsi-bollinger-mean-reversion',
   breakout: 'breakout-confirmation',
+  atr: 'atr-trend-breakout',
 } as const satisfies Record<string, StrategyArchetype>;
 const SECRET_LIKE_PATTERN = /(?:playbook\s+key|GETAGENT_ACCESS_KEY)\s*[:=]\s*['"]?(?!<|replace-|demo-)[A-Za-z0-9_-]{12,}/i;
 const EXAMPLES: {
@@ -54,16 +55,19 @@ const EXAMPLES: {
 interface SubmissionApiLogEntry {
   timestamp: string;
   endpoint: string;
-  requestId: string;
-  strategyId: string;
-  archetype: StrategyArchetype;
+  requestId: string | null;
+  strategyId?: string;
+  archetype?: StrategyArchetype;
   status: number;
   latencyMs: number;
-  evaluations: number;
-  selectedStyleRiskScore: number;
-  deploymentStatus: string;
-  deploymentScore: number;
-  deaths: string[];
+  purpose: string;
+  evaluations?: number;
+  selectedStyleRiskScore?: number;
+  deploymentStatus?: string;
+  deploymentScore?: number;
+  deaths?: string[];
+  capabilityCount?: number;
+  parsedArchetype?: StrategyArchetype;
 }
 
 const readRepoText = (relativePath: string): string =>
@@ -194,21 +198,39 @@ test('submission sample inputs and outputs are reproducible reviewer artifacts',
     .trim()
     .split('\n')
     .map(line => JSON.parse(line) as SubmissionApiLogEntry);
-  assert.equal(apiLog.length, Object.keys(SUBMISSION_ARTIFACTS).length);
+  const diagnosisEntries = apiLog.filter(
+    item => item.endpoint === 'POST /api/v1/diagnoses',
+  );
+
+  assert.equal(diagnosisEntries.length, Object.keys(SUBMISSION_ARTIFACTS).length);
   assert.deepEqual(
     apiLog.map(item => item.status),
-    Array.from(
-      { length: Object.keys(SUBMISSION_ARTIFACTS).length },
-      () => 200,
-    ),
+    Array.from({ length: apiLog.length }, () => 200),
   );
+  assert.deepEqual(
+    apiLog.map(item => item.endpoint),
+    [
+      'GET /api/v1/health',
+      'GET /api/v1/capabilities',
+      'GET /api/v1/openapi.json',
+      'POST /api/v1/strategies/parse',
+      'POST /api/v1/diagnoses',
+      'POST /api/v1/diagnoses',
+      'POST /api/v1/diagnoses',
+      'POST /api/v1/diagnoses',
+    ],
+  );
+  assert.equal(apiLog[1]?.capabilityCount, EXAMPLES.length);
+  assert.equal(apiLog[3]?.parsedArchetype, 'atr-trend-breakout');
   assert.ok(apiLog.every(item => (
-    item.endpoint === 'POST /api/v1/diagnoses'
-    && item.requestId.startsWith('req_submission_')
-    && item.evaluations === EXPECTED_DIMENSIONS.length
+    Number.isFinite(Date.parse(item.timestamp))
     && Number.isFinite(item.latencyMs)
+  )));
+  assert.ok(diagnosisEntries.every(item => (
+    item.requestId?.startsWith('req_')
+    && item.evaluations === EXPECTED_DIMENSIONS.length
     && Number.isFinite(item.deploymentScore)
-    && ['ready', 'watch', 'blocked'].includes(item.deploymentStatus)
+    && ['ready', 'watch', 'blocked'].includes(item.deploymentStatus ?? '')
   )));
 
   for (const [prefix, expectedArchetype] of Object.entries(

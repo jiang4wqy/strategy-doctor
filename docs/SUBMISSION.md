@@ -9,7 +9,19 @@
 
 ## One-line pitch
 
-Strategy Doctor is the diagnostic layer for trading Agents: it discovers a strategy's worst reproducible market failures, explains the causes, proposes constrained parameter fixes, and validates the risk-return tradeoff on independent held-out scenarios.
+Strategy Doctor is the pre-publication risk doctor for trading Agents: before a generated strategy reaches Playbook sandbox or live execution, it proves how the strategy fails, repairs only failure-related parameters, and validates the risk-return tradeoff on independent held-out scenarios.
+
+## Core thesis
+
+The next bottleneck in Agentic Trading is not idea generation. Agents can already
+produce strategies quickly. The missing infrastructure is an auditable layer that
+answers whether a generated strategy deserves to be deployed at all.
+
+Strategy Doctor makes that deployment decision explicit. It treats each strategy
+as a bounded capability, attacks it with deterministic market stress, explains
+the death causes, applies constrained parameter repair, and reports the held-out
+cost of becoming safer. This is why the project is Track 2 infrastructure rather
+than another trading bot.
 
 ## 为什么属于 Track 2
 
@@ -29,6 +41,7 @@ Trading Agents can generate strategies, but commonly lack a trustworthy way to a
 - Which parameter should change?
 - Did the patch improve robustness without hiding the return cost?
 - Can another Agent discover and invoke this capability safely?
+- Is the result backed by reproducible API usage records instead of screenshots?
 
 ## Solution
 
@@ -83,6 +96,27 @@ node examples/agent-client.ts
 - OpenAPI 3.0 document
 - Native TypeScript Client and copy-ready examples
 - Existing deterministic CLI
+
+## Verifiable usage record
+
+The official Track 2 checklist accepts API logs, sample input/output files, or
+developer integration records. Strategy Doctor includes all three lightweight
+forms:
+
+- `examples/submission/api-call-log.jsonl`: 8 real REST calls generated against
+  the local Web/API service, including health, capabilities, OpenAPI, natural
+  language parse, and four diagnosis calls.
+- `examples/submission/*-diagnose-request.json`: reproducible diagnosis inputs.
+- `examples/submission/*-scorecard.json`: full deterministic scorecards.
+- `examples/submission/*-diagnosis-view.json`: chart-ready Web/API outputs.
+
+Refresh the usage record with:
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run submission:usage-record
+```
 
 ## Bitget integration
 
@@ -147,6 +181,8 @@ for the Bitget Playbook bridge.
 - [x] Three-minute demo script
 - [x] No-login public showcase route
 - [x] Reproducible sample input/output artifacts
+- [x] Submission-grade API usage record with timestamps, request IDs, and latency
+- [x] Four-strategy submission artifacts including ATR trend breakout
 - [x] Validated GetAgent Playbook package
 - [ ] Record and upload demo video
 - [ ] Fill video URL
@@ -154,12 +190,14 @@ for the Bitget Playbook bridge.
 - [ ] Fill published Playbook URL after managed run
 - [ ] Submit before 2026-06-24
 
-## P1.1
+## Deferred backlog
 
-The next integration surface is a thin MCP adapter exposing:
+Kept out of the current documentation/evidence pass until the local submission
+materials are stable:
 
-- `list_strategy_capabilities`
-- `parse_strategy_description`
-- `diagnose_strategy`
-
-It will call the existing REST Client rather than duplicate diagnosis logic.
+- Push the two local `main` commits after GitHub credentials are available.
+- Replace local `/showcase` with a public deployment URL.
+- Record and upload the three-minute demo video if the protected workspace is
+shown.
+- Publish the Playbook package after a managed sandbox run with a private
+Playbook key.

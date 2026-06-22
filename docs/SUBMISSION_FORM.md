@@ -14,7 +14,7 @@ Strategy Doctor
 One-line pitch:
 
 ```text
-Strategy Doctor is a Playbook pre-publication risk auditor for trading Agents: it finds how a strategy fails, repairs only failure-related parameters, validates the trade-off on held-out scenarios, and reports whether it is safe enough for Playbook sandbox publication.
+Strategy Doctor is the pre-publication risk doctor for trading Agents: before a generated strategy reaches Playbook sandbox or live execution, it proves how the strategy fails, repairs only failure-related parameters, and validates the risk-return tradeoff on independent held-out scenarios.
 ```
 
 Track:
@@ -48,14 +48,37 @@ Published Playbook:
 TODO: add Bitget Playbook published URL after managed upload/backtest/publish
 ```
 
-## What It Does
+## Four-Part Project Description
 
-Strategy Doctor sits between AI strategy generation and deployment. Instead of
-claiming that a generated strategy is ready to trade, it subjects registered
-strategies to five deterministic stress dimensions: macro, market intelligence,
-news, sentiment, and technical whipsaw. It explains failure causes, proposes a
-constrained prescription, validates the patch on held-out scenarios, and returns
-a Playbook readiness score with explicit deployment gates.
+### 1. Problem
+
+Trading Agents can already generate strategy ideas quickly, but they commonly
+lack a trustworthy pre-deployment check. A single backtest does not explain
+which unseen market regime breaks the strategy, why it fails, or whether a
+parameter patch only hides risk.
+
+### 2. Thesis
+
+The missing Track 2 infrastructure is a strategy doctor, not another strategy
+generator. Before an Agent publishes to Playbook sandbox or hands a strategy to
+an execution layer, it should run a reproducible failure diagnosis, receive a
+constrained repair, and see the held-out cost of becoming safer.
+
+### 3. Implementation
+
+Strategy Doctor treats every strategy as a registered capability. It validates
+the strategy contract, attacks it across five deterministic stress dimensions
+— macro, market intelligence, news, sentiment, and technical whipsaw — selects
+the worst scenario per dimension, explains death causes, mutates only
+failure-related parameters, and validates the patched strategy on independent
+held-out scenarios.
+
+### 4. View on AI Trading
+
+Agentic trading should make risk more inspectable, not just make strategy
+generation faster. Strategy Doctor turns generated strategies into auditable
+deployment decisions: Ready, Watch, or Blocked, with the exact evidence behind
+that verdict.
 
 ## Why It Fits Track 2
 
@@ -76,6 +99,8 @@ a Playbook readiness score with explicit deployment gates.
   filter.
 - `breakout-confirmation`: confirmed range breakout with volatility gate and
   invalidation exit.
+- `atr-trend-breakout`: ATR-aware trend breakout with volatility-sized stop
+  sensitivity.
 
 ## Key Differentiators
 
@@ -93,24 +118,31 @@ a Playbook readiness score with explicit deployment gates.
 Local validation command:
 
 ```powershell
-cd D:\github\strategy-doctor-submission
-powershell -ExecutionPolicy Bypass -File .\scripts\run-local-submission.ps1
+npm.cmd ci
+npm.cmd run verify
 ```
 
 Manual local demo:
 
 ```powershell
-$env:PATH='D:\tools\node-v24.14.0-win-x64;' + $env:PATH
 $env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
 $env:DOCTOR_SESSION_SECRET='demo-session-secret-at-least-32-chars'
 $env:DOCTOR_API_KEYS='demo-private-agent-key'
-D:\tools\node-v24.14.0-win-x64\npm.cmd run web
+npm.cmd run web
 ```
 
 Open:
 
 ```text
 http://127.0.0.1:8080/showcase
+```
+
+Usage record refresh:
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run submission:usage-record
 ```
 
 ## Evidence Files
@@ -126,9 +158,10 @@ http://127.0.0.1:8080/showcase
 
 ## Video Outline
 
-1. Open `/showcase` and show the three registered strategies.
+1. Open `/showcase` and show the four registered strategies.
 2. Explain that Strategy Doctor audits before Playbook publication.
 3. Show five-dimensional stress results and failure causes.
 4. Show targeted parameter prescription and held-out trade-off.
 5. Show the Playbook readiness panel.
-6. Show the validated Playbook package and evidence docs.
+6. Show `npm run api:check` and `npm run submission:usage-record`.
+7. Show the validated Playbook package and evidence docs.

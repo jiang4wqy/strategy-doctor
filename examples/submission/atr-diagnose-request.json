@@ -1,0 +1,23 @@
+{
+  "strategy": {
+    "id": "atr-breakout-001",
+    "name": "BTC ATR trend breakout",
+    "archetype": "atr-trend-breakout",
+    "params": {
+      "atrPeriod": 14,
+      "breakoutLookback": 20,
+      "atrStopMultiple": 2.5,
+      "trendMaPeriod": 50,
+      "leverage": 5,
+      "stopLossPct": 0.12,
+      "positionPct": 0.6
+    },
+    "universe": [
+      "BTCUSDT"
+    ],
+    "timeframe": "4h"
+  },
+  "style": "conservative",
+  "seed": 42,
+  "candidates": 6
+}

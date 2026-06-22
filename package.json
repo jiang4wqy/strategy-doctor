@@ -27,6 +27,7 @@
     "api:check": "node scripts/check-api-config.mjs",
     "mcp": "node src/mcp/server.ts",
     "snapshots:refresh": "node src/scripts/refresh-snapshots.ts",
+    "submission:usage-record": "node scripts/generate-submission-usage-record.mjs",
     "submission:package": "node scripts/generate-submission-package.mjs",
     "verify": "npm run test:coverage && npm run typecheck && npm run demo"
   },

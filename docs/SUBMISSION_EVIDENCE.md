@@ -1,6 +1,6 @@
 # Strategy Doctor Submission Evidence
 
-更新时间：2026-06-18（UTC+8）
+更新时间：2026-06-22（UTC）
 
 ## Official checklist mapping
 
@@ -9,7 +9,7 @@
 | Public GitHub repository with README | `README.md`, `docs/API.md`, `docs/SETUP.md`, `docs/DEMO.md` |
 | Real runnable demo, not a concept-only deck | `npm.cmd run verify`, `npm.cmd run web`, `/showcase` no-login public route |
 | Track 2 developer-facing integration | REST API, OpenAPI, TypeScript Client, PowerShell sample, capability discovery |
-| API logs / sample input-output / reproducible run records | `examples/submission/*`, `examples/agent-curl.ps1`, `examples/agent-client.ts` |
+| API logs / sample input-output / reproducible run records | `examples/submission/api-call-log.jsonl`, four `*-diagnose-request.json`, four `*-scorecard.json`, four `*-diagnosis-view.json`, `examples/agent-curl.ps1`, `examples/agent-client.ts` |
 | Demo video if public UI requires login | `/showcase` is no-login; protected workspace still has a video-ready script in `docs/DEMO.md` |
 | Crypto or AI connection | Bitget public market snapshots, Bitget public OHLCV path, AI strategy parsing, Strategy Doctor diagnosis |
 | No private-account risk | Default Web/API/CLI use offline `MockBacktester`; live paths read public data only |
@@ -56,10 +56,38 @@ tests are:
 | `examples/submission/breakout-diagnose-request.json` | Confirmed-breakout diagnosis API request |
 | `examples/submission/breakout-scorecard.json` | Confirmed-breakout full scorecard output |
 | `examples/submission/breakout-diagnosis-view.json` | Confirmed-breakout Web/API chart-ready output |
-| `examples/submission/api-call-log.jsonl` | Submission-grade API call log sample |
+| `examples/submission/atr-diagnose-request.json` | ATR trend-breakout diagnosis API request |
+| `examples/submission/atr-scorecard.json` | ATR trend-breakout full scorecard output |
+| `examples/submission/atr-diagnosis-view.json` | ATR trend-breakout Web/API chart-ready output |
+| `examples/submission/api-call-log.jsonl` | Submission-grade API call log with timestamps, request IDs, latency, endpoint, and result summary |
 
 All sample outputs use seed `42`, held-out seed `100042`, style
 `conservative`, and candidate count `6`.
+
+## Current API usage record
+
+Command:
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run submission:usage-record
+```
+
+Latest generated log:
+
+```text
+examples/submission/api-call-log.jsonl
+8 calls:
+- GET /api/v1/health
+- GET /api/v1/capabilities
+- GET /api/v1/openapi.json
+- POST /api/v1/strategies/parse
+- POST /api/v1/diagnoses for ma-cross
+- POST /api/v1/diagnoses for rsi-bollinger-mean-reversion
+- POST /api/v1/diagnoses for breakout-confirmation
+- POST /api/v1/diagnoses for atr-trend-breakout
+```
 
 ## Verification result
 
