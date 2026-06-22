@@ -44,6 +44,7 @@ describe('diagnosis charts', () => {
     expect(screen.getByRole('img', {
       name: 'Held-out equity comparison',
     })).toBeTruthy();
+    expect(screen.getByText(/This is the honesty check/)).toBeTruthy();
     expect(mocks.setOption).toHaveBeenCalledWith(
       expect.objectContaining({
         series: expect.arrayContaining([
@@ -88,12 +89,15 @@ describe('diagnosis charts', () => {
     expect(screen.getByRole('img', {
       name: 'Five-dimension risk radar',
     })).toBeTruthy();
+    expect(screen.getByText(/Each axis is one stress dimension/)).toBeTruthy();
     expect(screen.getByRole('img', {
       name: 'Scenario damage timeline',
     })).toBeTruthy();
+    expect(screen.getByText(/Bars are ordered by damage score/)).toBeTruthy();
     expect(screen.getByRole('img', {
       name: 'Parameter changes',
     })).toBeTruthy();
+    expect(screen.getByText(/black-box rewrite/)).toBeTruthy();
     expect(mocks.setOption).toHaveBeenCalledWith(
       expect.objectContaining({
         radar: expect.objectContaining({

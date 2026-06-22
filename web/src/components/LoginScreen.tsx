@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { ApiIntegrationPanel } from './ApiIntegrationPanel.tsx';
 
 export interface LoginScreenProps {
   onLogin(accessCode: string): Promise<void>;
@@ -26,29 +27,32 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
   return (
     <main className="login-shell">
-      <section className="login-card" aria-labelledby="login-title">
-        <p className="eyebrow">Adversarial strategy lab</p>
-        <h1 id="login-title">Strategy Doctor</h1>
-        <p>
-          Enter the shared preview code to inspect deterministic failure
-          diagnoses and targeted repairs.
-        </p>
-        <form onSubmit={submit}>
-          <label htmlFor="access-code">Access code</label>
-          <input
-            id="access-code"
-            type="password"
-            autoComplete="current-password"
-            value={accessCode}
-            disabled={loading}
-            onChange={event => setAccessCode(event.target.value)}
-          />
-          {error ? <p role="alert">{error}</p> : null}
-          <button type="submit" disabled={loading || accessCode.length === 0}>
-            {loading ? 'Checking access…' : 'Enter workspace'}
-          </button>
-        </form>
-      </section>
+      <div className="login-layout">
+        <section className="login-card" aria-labelledby="login-title">
+          <p className="eyebrow">Adversarial strategy lab</p>
+          <h1 id="login-title">Strategy Doctor</h1>
+          <p>
+            Enter the shared preview code to inspect deterministic failure
+            diagnoses and targeted repairs.
+          </p>
+          <form onSubmit={submit}>
+            <label htmlFor="access-code">Access code</label>
+            <input
+              id="access-code"
+              type="password"
+              autoComplete="current-password"
+              value={accessCode}
+              disabled={loading}
+              onChange={event => setAccessCode(event.target.value)}
+            />
+            {error ? <p role="alert">{error}</p> : null}
+            <button type="submit" disabled={loading || accessCode.length === 0}>
+              {loading ? 'Checking access…' : 'Enter workspace'}
+            </button>
+          </form>
+        </section>
+        <ApiIntegrationPanel />
+      </div>
     </main>
   );
 }

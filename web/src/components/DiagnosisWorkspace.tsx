@@ -82,6 +82,19 @@ export function DiagnosisWorkspace({
         ))}
       </section>
 
+      <section
+        className="chart-explainer"
+        aria-label="How to read diagnosis charts"
+      >
+        <p className="eyebrow">Reading the evidence</p>
+        <h2>What the charts prove</h2>
+        <p>
+          The charts separate repair quality from backtest luck: they show
+          unseen held-out behavior, which market dimension caused the damage,
+          and exactly which parameters changed.
+        </p>
+      </section>
+
       <section className="chart-grid" aria-label="Diagnosis charts">
         <EquityComparisonChart charts={view.charts} />
         <RiskRadarChart risks={view.charts.riskRadar} />

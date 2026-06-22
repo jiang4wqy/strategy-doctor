@@ -121,6 +121,14 @@ Invoke-RestMethod `
 
 完整请求示例见 [API 文档](docs/API.md) 和 `examples/agent-curl.ps1`。
 
+API 接入自检：
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
+npm.cmd run api:check
+```
+
 ### 4. TypeScript
 
 保持 Web/API 进程运行：

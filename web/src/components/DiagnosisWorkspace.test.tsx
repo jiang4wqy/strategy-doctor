@@ -54,6 +54,10 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByRole('region', {
       name: 'Playbook readiness',
     })).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'How to read diagnosis charts',
+    })).toBeTruthy();
+    expect(screen.getByText('What the charts prove')).toBeTruthy();
     expect(screen.getAllByText('Publish only after manual review')).toHaveLength(2);
     expect(screen.getAllByRole('img')).toHaveLength(4);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
@@ -63,6 +67,8 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('Confirmed Strategy JSON')).toBeTruthy();
     expect(screen.getByText('curl request')).toBeTruthy();
     expect(screen.getByText('TypeScript client example')).toBeTruthy();
+    expect(screen.getByText('Terminal API check')).toBeTruthy();
+    expect(screen.getByText('API mode')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'OpenAPI schema' })).toHaveProperty(
       'href',
       expect.stringContaining('/api/v1/openapi.json'),

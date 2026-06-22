@@ -1,9 +1,11 @@
 # Strategy Doctor API v1
 
-Strategy Doctor exposes deterministic five-dimension diagnosis for two registered strategy archetypes:
+Strategy Doctor exposes deterministic five-dimension diagnosis for four registered strategy archetypes:
 
 - `ma-cross`
 - `rsi-bollinger-mean-reversion`
+- `breakout-confirmation`
+- `atr-trend-breakout`
 
 The public Web/API uses offline `MockBacktester`. It does not read account data or private Bitget credentials and cannot submit orders.
 
@@ -37,6 +39,20 @@ Authorization: Bearer replace-this-with-a-private-agent-key
 The Web client posts the access code to `POST /api/v1/auth`. A successful login creates a signed, HttpOnly, SameSite=Lax session cookie. `DELETE /api/v1/auth` clears it.
 
 `GET /api/v1/health` is public. All capability, parsing, diagnosis, and OpenAPI routes require a Bearer key or valid browser session.
+
+## Terminal API verification
+
+Use this before a review or Agent integration demo to prove the service is not
+only a local CLI workflow:
+
+```powershell
+$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+$env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
+npm.cmd run api:check
+```
+
+The check calls public health, authenticated capabilities, and authenticated
+OpenAPI. It retries each request up to three times and never prints the key.
 
 ## Common envelope
 
@@ -258,7 +274,7 @@ Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL chan
 
 - One `*USDT` symbol per diagnosis
 - Timeframes: `1h`, `4h`, `1d`
-- Two registered archetypes only
+- Four registered archetypes only
 - Offline `MockBacktester` for public Web/API
 - No database; browser history stays local
 - No fees, slippage, funding, latency, or order-book fill model

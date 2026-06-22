@@ -9,6 +9,11 @@ describe('LoginScreen', () => {
     const user = userEvent.setup();
     render(<LoginScreen onLogin={login} />);
 
+    expect(screen.getByRole('heading', {
+      name: 'API is configured outside the browser',
+    })).toBeTruthy();
+    expect(screen.getAllByText(/npm run api:check/)).toHaveLength(2);
+
     await user.type(screen.getByLabelText('Access code'), 'team-code');
     await user.click(screen.getByRole('button', { name: 'Enter workspace' }));
 

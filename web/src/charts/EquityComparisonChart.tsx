@@ -72,6 +72,10 @@ export function EquityComparisonChart({
           </select>
         </label>
       </div>
+      <p className="chart-description">
+        Original and patched curves are replayed on held-out scenarios that
+        were not used to choose the repair. This is the honesty check.
+      </p>
       <div
         ref={chartRef}
         className="chart-canvas"

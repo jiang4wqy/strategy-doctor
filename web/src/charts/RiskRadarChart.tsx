@@ -35,6 +35,10 @@ export function RiskRadarChart({ risks }: RiskRadarChartProps) {
     <section className="chart-panel">
       <p className="eyebrow">Treatment set</p>
       <h3>Five-dimension risk</h3>
+      <p className="chart-description">
+        Each axis is one stress dimension. Larger values mean that dimension
+        inflicted more damage on the strategy.
+      </p>
       <div
         ref={chartRef}
         className="chart-canvas"

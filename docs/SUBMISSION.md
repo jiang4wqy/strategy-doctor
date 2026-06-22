@@ -65,6 +65,9 @@ $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
 .\examples\agent-curl.ps1
 
+# API verification
+npm.cmd run api:check
+
 # TypeScript
 node examples/agent-client.ts
 ```

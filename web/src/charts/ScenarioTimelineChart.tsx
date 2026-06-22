@@ -36,6 +36,10 @@ export function ScenarioTimelineChart({
     <section className="chart-panel">
       <p className="eyebrow">Server-ranked damage</p>
       <h3>Scenario timeline</h3>
+      <p className="chart-description">
+        Bars are ordered by damage score, so the largest bars explain the
+        failure modes that blocked deployment.
+      </p>
       <div
         ref={chartRef}
         className="chart-canvas"

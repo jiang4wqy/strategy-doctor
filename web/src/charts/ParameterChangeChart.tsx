@@ -45,6 +45,10 @@ export function ParameterChangeChart({
     <section className="chart-panel">
       <p className="eyebrow">Targeted repair</p>
       <h3>Parameter changes</h3>
+      <p className="chart-description">
+        Only parameters touched by the prescription are shown, making the
+        risk trade-off auditable instead of a black-box rewrite.
+      </p>
       <div
         ref={chartRef}
         className="chart-canvas"

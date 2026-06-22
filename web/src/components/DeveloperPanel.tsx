@@ -15,6 +15,9 @@ export function DeveloperPanel({
   -H "Content-Type: application/json" \\
   --data '${JSON.stringify(request)}'`;
   const typescript = `const result = await doctor.diagnose(${requestJson});`;
+  const apiCheck = `export STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+export STRATEGY_DOCTOR_API_KEY='<private-agent-key>'
+npm run api:check`;
 
   return (
     <aside className="developer-panel" aria-labelledby="developer-title">
@@ -25,7 +28,15 @@ export function DeveloperPanel({
           <dt>Request ID</dt>
           <dd><code>{requestId}</code></dd>
         </div>
+        <div>
+          <dt>API mode</dt>
+          <dd>Browser session for reviewers; Bearer key for Agents.</dd>
+        </div>
       </dl>
+      <p className="api-note">
+        Official API verification should call health, capabilities, and
+        OpenAPI before submitting a diagnosis request.
+      </p>
       <details>
         <summary>Confirmed Strategy JSON</summary>
         <pre>{JSON.stringify(request.strategy, null, 2)}</pre>
@@ -37,6 +48,10 @@ export function DeveloperPanel({
       <details>
         <summary>TypeScript client example</summary>
         <pre>{typescript}</pre>
+      </details>
+      <details>
+        <summary>Terminal API check</summary>
+        <pre>{apiCheck}</pre>
       </details>
       <a href="/api/v1/openapi.json" target="_blank" rel="noreferrer">
         OpenAPI schema
