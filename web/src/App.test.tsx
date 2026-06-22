@@ -40,6 +40,13 @@ describe('App workflow', () => {
       name: 'Strategy Doctor public showcase',
     })).toBeTruthy();
     expect(screen.getByText('269 passed / 2 skipped')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Submission evidence chain',
+    })).toBeTruthy();
+    expect(screen.getByRole('heading', {
+      name: 'From public demo to reproducible API calls',
+    })).toBeTruthy();
+    expect(screen.getByText('8 REST calls + 4 reproducible diagnoses')).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Judge summary' })).toBeTruthy();
     expect(screen.getByText('Playbook pre-publication risk auditor')).toBeTruthy();
     expect(screen.getByRole('region', {
@@ -61,6 +68,7 @@ describe('App workflow', () => {
     expect(screen.getByRole('heading', {
       name: 'Four archetypes, one risk contract',
     })).toBeTruthy();
+    expect(screen.getByText('api:check verifies health, capabilities, OpenAPI')).toBeTruthy();
     expect(await screen.findByRole('region', {
       name: 'Diagnosis summary',
     })).toBeTruthy();

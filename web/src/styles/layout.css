@@ -144,13 +144,16 @@
   display: grid;
   min-height: 12.5rem;
   align-content: start;
-  gap: 0.35rem;
+  gap: var(--space-2);
   padding: var(--space-3);
   text-align: left;
   overflow-wrap: anywhere;
+  border-color: rgba(102, 212, 208, 0.28);
+  background:
+    linear-gradient(180deg, rgba(102, 212, 208, 0.08), rgba(7, 17, 31, 0.18));
 }
 
-.strategy-template span,
+.strategy-template .template-type,
 .strategy-template code {
   color: var(--amber);
   font-family: var(--mono);
@@ -163,15 +166,41 @@
   line-height: 1.2;
 }
 
-.strategy-template em,
-.strategy-template small {
+.strategy-template dl {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.strategy-template div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.strategy-template dt {
+  color: var(--quiet);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+}
+
+.strategy-template dd {
+  margin: 0;
   color: var(--muted);
-  font-style: normal;
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .strategy-template code {
   margin-top: var(--space-1);
   color: var(--ice-soft);
+}
+
+.template-action {
+  align-self: end;
+  color: var(--ice-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .form-footer,
@@ -634,6 +663,36 @@ th {
   font-size: clamp(2.3rem, 7vw, 5.4rem);
 }
 
+.showcase-hero p {
+  max-width: 72ch;
+  color: var(--muted);
+}
+
+.showcase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.showcase-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.65rem;
+  padding: 0.66rem 0.9rem;
+  border: 1px solid rgba(102, 212, 208, 0.42);
+  border-radius: var(--radius-sm);
+  color: var(--ice-soft);
+  background: rgba(8, 21, 34, 0.68);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.showcase-actions a:first-child {
+  color: var(--ink-950);
+  background: var(--ice);
+}
+
 .showcase-proof {
   display: grid;
   gap: var(--space-2);
@@ -661,6 +720,66 @@ th {
   margin: 0;
   color: var(--ice-soft);
   font-weight: 800;
+}
+
+.submission-evidence {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.85fr) minmax(24rem, 1.15fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.submission-evidence h2 {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.55rem, 2.8vw, 2.35rem);
+}
+
+.submission-evidence p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.submission-evidence ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.submission-evidence li {
+  display: grid;
+  min-height: 9.5rem;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid rgba(74, 112, 139, 0.68);
+  border-radius: var(--radius-sm);
+  background: rgba(7, 17, 31, 0.72);
+}
+
+.submission-evidence li span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(102, 212, 208, 0.45);
+  border-radius: 999px;
+  color: var(--ice-soft);
+  font-family: var(--mono);
+  font-weight: 900;
+}
+
+.submission-evidence li strong {
+  color: var(--text);
+}
+
+.submission-evidence li small {
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .judge-summary {
@@ -739,15 +858,41 @@ th {
   padding: var(--space-3);
 }
 
-.strategy-comparison article > strong {
+.strategy-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.strategy-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--amber);
+  content: "";
+}
+
+.strategy-card-ready::before {
+  background: var(--positive);
+}
+
+.strategy-card-blocked::before {
+  background: var(--risk);
+}
+
+.status-pill {
+  width: fit-content;
+  padding: 0.32rem 0.62rem;
+  border: 1px solid rgba(217, 164, 65, 0.45);
+  border-radius: 999px;
   color: var(--amber);
-  font-size: 1.5rem;
+  background: rgba(217, 164, 65, 0.1);
+  font-size: 0.82rem;
   text-transform: capitalize;
 }
 
 .strategy-comparison dl {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
   margin: 0;
 }
@@ -820,8 +965,13 @@ th {
   }
 
   .judge-summary,
+  .submission-evidence,
   .strategy-comparison {
     grid-template-columns: 1fr;
+  }
+
+  .submission-evidence ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .stress-strip {
@@ -856,6 +1006,7 @@ th {
   .diagnosis-hero-metrics,
   .deployment-gates,
   .judge-grid,
+  .submission-evidence ol,
   .stress-strip,
   .parameter-grid,
   .strategy-template-strip {

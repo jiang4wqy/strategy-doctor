@@ -115,11 +115,20 @@ export function StrategyComposer({
             onClick={() => void applyTemplate(template.description)}
             type="button"
           >
-            <span>{template.archetype}</span>
+            <span className="template-type">{template.archetype}</span>
             <strong>{template.name}</strong>
-            <em>{template.market}</em>
-            <small>{template.risk}</small>
+            <dl>
+              <div>
+                <dt>Best in</dt>
+                <dd>{template.market}</dd>
+              </div>
+              <div>
+                <dt>Main risk</dt>
+                <dd>{template.risk}</dd>
+              </div>
+            </dl>
             <code>{template.params}</code>
+            <span className="template-action">Use template</span>
           </button>
         ))}
       </div>

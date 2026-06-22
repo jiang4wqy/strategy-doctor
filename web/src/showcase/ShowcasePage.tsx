@@ -21,9 +21,20 @@ const labels = {
 const judgeHighlights = [
   ['Positioning', 'Playbook pre-publication risk auditor'],
   ['Strategies', 'MA, RSI/Bollinger, breakout, ATR breakout'],
-  ['Evidence', 'API logs, scorecards, Web/API/MCP'],
+  ['Usage record', '8 REST calls + 4 reproducible diagnoses'],
   ['Safety', 'No account access, no order execution'],
 ] as const;
+
+const evidenceSteps = [
+  ['1', 'Public demo', '/showcase needs no reviewer login'],
+  ['2', 'API proof', 'api:check verifies health, capabilities, OpenAPI'],
+  ['3', 'Usage record', 'submission:usage-record writes request IDs and latency'],
+  ['4', 'Artifacts', 'Four request, scorecard, and diagnosis-view bundles'],
+] as const;
+
+function percent(value: number) {
+  return `${value >= 0 ? '+' : ''}${(value * 100).toFixed(1)}%`;
+}
 
 export function ShowcasePage() {
   const [selectedId, setSelectedId] = useState(showcaseDiagnoses[0].id);
@@ -40,11 +51,16 @@ export function ShowcasePage() {
           <p className="eyebrow">Bitget AI Hackathon · Track 2 Trading Infra</p>
           <h1>Strategy Doctor public showcase</h1>
           <p>
-            A read-only, no-login evidence view for Track 2 trading
-            infrastructure: parse strategies, stress them across five market
-            dimensions, repair parameters, and expose the workflow through
-            Web, REST, and MCP entry points.
+            A no-login evidence view for Track 2 infrastructure: generated
+            strategies are treated as deployment candidates, attacked across
+            five market dimensions, repaired with bounded parameter changes,
+            and exposed through Web, REST, MCP, and reproducible artifacts.
           </p>
+          <div className="showcase-actions" aria-label="Reviewer actions">
+            <a href="#strategy-comparison">Compare strategies</a>
+            <a href="#submission-evidence">Review evidence</a>
+            <a href="/">Open workspace</a>
+          </div>
         </div>
         <dl className="showcase-proof">
           <div>
@@ -61,6 +77,31 @@ export function ShowcasePage() {
           </div>
         </dl>
       </header>
+
+      <section
+        className="submission-evidence"
+        id="submission-evidence"
+        aria-label="Submission evidence chain"
+      >
+        <div>
+          <p className="eyebrow">Submission evidence</p>
+          <h2>From public demo to reproducible API calls</h2>
+          <p>
+            This page is intentionally read-only. The protected workspace is for
+            live diagnosis; this showcase gives judges a stable path to inspect
+            the product and verify the same workflow from the terminal.
+          </p>
+        </div>
+        <ol>
+          {evidenceSteps.map(([index, title, detail]) => (
+            <li key={title}>
+              <span>{index}</span>
+              <strong>{title}</strong>
+              <small>{detail}</small>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <section className="judge-summary" aria-label="Judge summary">
         <div className="judge-pitch">
@@ -83,15 +124,24 @@ export function ShowcasePage() {
         </div>
       </section>
 
-      <section className="strategy-comparison" aria-label="Strategy comparison">
+      <section
+        className="strategy-comparison"
+        id="strategy-comparison"
+        aria-label="Strategy comparison"
+      >
         <div className="comparison-heading">
           <p className="eyebrow">Strategy comparison</p>
           <h2>Four archetypes, one risk contract</h2>
         </div>
         {showcaseDiagnoses.map(item => (
-          <article key={item.id}>
+          <article
+            className={`strategy-card strategy-card-${item.view.deployment.status}`}
+            key={item.id}
+          >
             <span>{labels[item.id as keyof typeof labels]}</span>
-            <strong>{item.view.deployment.status}</strong>
+            <strong className="status-pill">
+              {item.view.deployment.status}
+            </strong>
             <dl>
               <div>
                 <dt>Risk</dt>
@@ -104,6 +154,10 @@ export function ShowcasePage() {
               <div>
                 <dt>Ready</dt>
                 <dd>{item.view.deployment.score}/100</dd>
+              </div>
+              <div>
+                <dt>Return</dt>
+                <dd>{percent(item.view.summary.returnDelta)}</dd>
               </div>
             </dl>
           </article>

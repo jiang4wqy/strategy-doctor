@@ -97,6 +97,9 @@ describe('StrategyComposer', () => {
     expect(screen.getByRole('button', {
       name: /ATR Trend Breakout/i,
     })).toBeTruthy();
+    expect(screen.getAllByText('Best in')).toHaveLength(4);
+    expect(screen.getByText('ATR stop too tight in chop')).toBeTruthy();
+    expect(screen.getAllByText('Use template')).toHaveLength(4);
 
     await user.click(screen.getByRole('button', {
       name: /ATR Trend Breakout/i,
