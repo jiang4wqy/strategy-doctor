@@ -6,6 +6,25 @@ import type {
 } from '../contracts.ts';
 import type { AnyStrategyAdapter } from '../strategy/registry.ts';
 
+function assertCommonRiskParameters(strategy: Strategy): void {
+  const { leverage, stopLossPct, positionPct } = strategy.params;
+  if (
+    !Number.isFinite(leverage)
+    || leverage < 1
+    || !Number.isFinite(stopLossPct)
+    || stopLossPct <= 0
+    || stopLossPct > 0.99
+    || !Number.isFinite(positionPct)
+    || positionPct <= 0
+    || positionPct > 1
+  ) {
+    throw new Error(
+      'strategy risk parameters must satisfy leverage >= 1, '
+        + '0 < stopLossPct <= 0.99, and 0 < positionPct <= 1',
+    );
+  }
+}
+
 export function runStrategyOnPrices(
   strategy: Strategy,
   prices: readonly number[],
@@ -22,6 +41,7 @@ export function runStrategyOnPrices(
       `strategy adapter archetype mismatch: ${strategy.archetype} vs ${adapter.archetype}`,
     );
   }
+  assertCommonRiskParameters(strategy);
 
   const { leverage, stopLossPct, positionPct } = strategy.params;
   let equity = 1;
