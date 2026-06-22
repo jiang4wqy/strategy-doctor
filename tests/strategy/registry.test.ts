@@ -2,11 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
 import type {
+  AtrTrendBreakoutParams,
   BreakoutConfirmationParams,
   MaCrossParams,
   RsiBollingerParams,
   StrategyArchetype,
 } from '../../src/contracts.ts';
+import {
+  atrTrendBreakoutAdapter,
+} from '../../src/strategy/adapters/atr-trend-breakout.ts';
 import {
   breakoutConfirmationAdapter,
 } from '../../src/strategy/adapters/breakout-confirmation.ts';
@@ -51,6 +55,16 @@ const breakoutParams: BreakoutConfirmationParams = {
   positionPct: 0.55,
 };
 
+const atrBreakoutParams: AtrTrendBreakoutParams = {
+  atrPeriod: 14,
+  breakoutLookback: 20,
+  atrStopMultiple: 2.5,
+  trendMaPeriod: 50,
+  leverage: 5,
+  stopLossPct: 0.12,
+  positionPct: 0.6,
+};
+
 test('registry returns the registered moving-average adapter', () => {
   assert.equal(getStrategyAdapter('ma-cross').archetype, 'ma-cross');
 });
@@ -69,16 +83,24 @@ test('registry returns the registered breakout adapter', () => {
   );
 });
 
+test('registry returns the registered ATR trend breakout adapter', () => {
+  assert.equal(
+    getStrategyAdapter('atr-trend-breakout'),
+    atrTrendBreakoutAdapter,
+  );
+});
+
 test('registry exposes immutable strategy capability definitions', () => {
   const definitions = strategyRegistry.listDefinitions();
 
-  assert.equal(definitions.length, 3);
+  assert.equal(definitions.length, 4);
   assert.deepEqual(
     definitions.map(definition => definition.archetype),
     [
       'ma-cross',
       'rsi-bollinger-mean-reversion',
       'breakout-confirmation',
+      'atr-trend-breakout',
     ],
   );
   assert.equal(
@@ -96,6 +118,12 @@ test('registry exposes immutable strategy capability definitions', () => {
       .getDefinition('breakout-confirmation')
       .parameters[0].key,
     'breakoutLookback',
+  );
+  assert.equal(
+    strategyRegistry
+      .getDefinition('atr-trend-breakout')
+      .parameters[0].key,
+    'atrPeriod',
   );
   assert.ok(Object.isFrozen(definitions));
   assert.ok(Object.isFrozen(definitions[0]));
@@ -285,6 +313,25 @@ test('default registry constructs the breakout confirmation strategy', () => {
 
   assert.equal(parsed.archetype, 'breakout-confirmation');
   assert.deepEqual(parsed.params, breakoutParams);
+});
+
+test('default registry constructs the ATR trend breakout strategy', () => {
+  const strategy = {
+    id: 'atr-breakout',
+    name: 'ATR trend breakout',
+    universe: ['BTCUSDT'],
+    timeframe: '4h',
+  };
+  const parsed = {
+    ...strategy,
+    archetype: 'atr-trend-breakout' as const,
+    params: getStrategyAdapter(
+      'atr-trend-breakout',
+    ).parseParams(atrBreakoutParams),
+  };
+
+  assert.equal(parsed.archetype, 'atr-trend-breakout');
+  assert.deepEqual(parsed.params, atrBreakoutParams);
 });
 
 test('registry preserves discrimination for a runtime archetype', () => {

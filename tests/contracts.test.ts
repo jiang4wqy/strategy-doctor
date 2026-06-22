@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { StrategyValidationError } from '../src/contracts.ts';
 import type {
+  AtrTrendBreakoutStrategy,
   BreakoutConfirmationStrategy,
   MaCrossStrategy,
   Metrics,
@@ -23,6 +24,8 @@ function signalPeriod(
       return strategy.params.rsiPeriod;
     case 'breakout-confirmation':
       return strategy.params.breakoutLookback;
+    case 'atr-trend-breakout':
+      return strategy.params.atrPeriod;
   }
 }
 
@@ -69,7 +72,28 @@ test('契约：四大核心类型可构造且字段齐全', () => {
     universe: ['BTCUSDT'],
     timeframe: '1h',
   };
-  const strategies: Strategy[] = [movingAverage, meanReversion, breakout];
+  const atrBreakout: AtrTrendBreakoutStrategy = {
+    id: 's4',
+    name: 'ATR trend breakout',
+    archetype: 'atr-trend-breakout',
+    params: {
+      atrPeriod: 14,
+      breakoutLookback: 20,
+      atrStopMultiple: 2.5,
+      trendMaPeriod: 50,
+      leverage: 5,
+      stopLossPct: 0.12,
+      positionPct: 0.6,
+    },
+    universe: ['BTCUSDT'],
+    timeframe: '4h',
+  };
+  const strategies: Strategy[] = [
+    movingAverage,
+    meanReversion,
+    breakout,
+    atrBreakout,
+  ];
   const scenario: Scenario = {
     id: 'sc1', name: '多头挤压', dimension: 'sentiment', sourceSkill: 'sentiment-analyst',
     narrative: '资金费率极值后瀑布', severity: 3,
@@ -96,11 +120,17 @@ test('契约：四大核心类型可构造且字段齐全', () => {
   assert.equal(scenario.shock.kind, 'squeeze');
   assert.deepEqual(
     strategies.map(strategy => strategy.archetype),
-    ['ma-cross', 'rsi-bollinger-mean-reversion', 'breakout-confirmation'],
+    [
+      'ma-cross',
+      'rsi-bollinger-mean-reversion',
+      'breakout-confirmation',
+      'atr-trend-breakout',
+    ],
   );
   assert.equal(signalPeriod(movingAverage), 8);
   assert.equal(signalPeriod(meanReversion), 14);
   assert.equal(signalPeriod(breakout), 24);
+  assert.equal(signalPeriod(atrBreakout), 14);
   assert.equal(meanReversion.params.trendFilterPeriod, 50);
   assert.equal(meanReversion.params.trendFilterThreshold, 0.03);
 });

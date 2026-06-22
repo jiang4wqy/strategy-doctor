@@ -57,6 +57,23 @@ const validBreakoutStrategy = {
   timeframe: '1h',
 };
 
+const validAtrBreakoutStrategy = {
+  id: 'atr-001',
+  name: 'BTC ATR trend breakout',
+  archetype: 'atr-trend-breakout',
+  params: {
+    atrPeriod: 14,
+    breakoutLookback: 20,
+    atrStopMultiple: 2.5,
+    trendMaPeriod: 50,
+    leverage: 5,
+    stopLossPct: 0.12,
+    positionPct: 0.6,
+  },
+  universe: ['BTCUSDT'],
+  timeframe: '4h',
+};
+
 test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
@@ -90,6 +107,14 @@ test('parseStrategy accepts a confirmed breakout strategy', () => {
   assert.deepEqual(strategy, validBreakoutStrategy);
   assert.equal(strategy.params.breakoutLookback, 24);
   assert.equal(strategy.params.confirmationBars, 2);
+});
+
+test('parseStrategy accepts an ATR trend breakout strategy', () => {
+  const strategy = parseStrategy(validAtrBreakoutStrategy);
+
+  assert.deepEqual(strategy, validAtrBreakoutStrategy);
+  assert.equal(strategy.params.atrPeriod, 14);
+  assert.equal(strategy.params.atrStopMultiple, 2.5);
 });
 
 test('parseStrategy rejects malformed identity and market fields', () => {
@@ -178,6 +203,28 @@ test('parseStrategy rejects invalid breakout invariants', () => {
       () => parseStrategy({
         ...validBreakoutStrategy,
         params: { ...validBreakoutStrategy.params, ...patch },
+      }),
+      /strategy/i,
+    );
+  }
+});
+
+test('parseStrategy rejects invalid ATR breakout invariants', () => {
+  for (const patch of [
+    { atrPeriod: 1 },
+    { atrPeriod: 14.5 },
+    { breakoutLookback: 4 },
+    { atrStopMultiple: 0 },
+    { atrStopMultiple: 10.1 },
+    { trendMaPeriod: 1 },
+    { leverage: 0 },
+    { stopLossPct: 1 },
+    { positionPct: 0 },
+  ]) {
+    assert.throws(
+      () => parseStrategy({
+        ...validAtrBreakoutStrategy,
+        params: { ...validAtrBreakoutStrategy.params, ...patch },
       }),
       /strategy/i,
     );

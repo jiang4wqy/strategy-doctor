@@ -15,12 +15,13 @@ const labels = {
   ma: 'MA trend follower',
   rsi: 'RSI/Bollinger mean reversion',
   breakout: 'Confirmed breakout',
+  atr: 'ATR trend breakout',
 } as const;
 
 const judgeHighlights = [
   ['Positioning', 'Playbook pre-publication risk auditor'],
-  ['Strategies', 'MA, RSI/Bollinger, confirmed breakout'],
-  ['Evidence', 'API logs, scorecards, Playbook package'],
+  ['Strategies', 'MA, RSI/Bollinger, breakout, ATR breakout'],
+  ['Evidence', 'API logs, scorecards, Web/API/MCP'],
   ['Safety', 'No account access, no order execution'],
 ] as const;
 
@@ -39,19 +40,20 @@ export function ShowcasePage() {
           <p className="eyebrow">Bitget AI Hackathon · Track 2 Trading Infra</p>
           <h1>Strategy Doctor public showcase</h1>
           <p>
-            A read-only, no-login evidence view for the submitted strategy
-            diagnosis workflow. The protected Web/API workspace remains
-            available at the root path.
+            A read-only, no-login evidence view for Track 2 trading
+            infrastructure: parse strategies, stress them across five market
+            dimensions, repair parameters, and expose the workflow through
+            Web, REST, and MCP entry points.
           </p>
         </div>
         <dl className="showcase-proof">
           <div>
             <dt>Verify</dt>
-            <dd>243 passed / 1 skipped</dd>
+            <dd>269 passed / 2 skipped</dd>
           </div>
           <div>
             <dt>Coverage</dt>
-            <dd>96.38% lines</dd>
+            <dd>96.58% lines</dd>
           </div>
           <div>
             <dt>Mode</dt>
@@ -65,10 +67,10 @@ export function ShowcasePage() {
           <p className="eyebrow">Judge summary</p>
           <h2>Audit before Playbook publication</h2>
           <p>
-            Strategy Doctor diagnoses how a trading strategy fails under five
-            market stress dimensions, applies adapter-scoped repairs, validates
-            held-out trade-offs, and reports whether the strategy is ready for
-            Bitget Playbook sandbox publication.
+            Strategy Doctor turns strategy ideas into reproducible risk
+            contracts. Each adapter owns its signal logic and repair policy,
+            while the shared engine reports failures, held-out trade-offs, and
+            deployment readiness for Agent and API users.
           </p>
         </div>
         <div className="judge-grid">
@@ -84,7 +86,7 @@ export function ShowcasePage() {
       <section className="strategy-comparison" aria-label="Strategy comparison">
         <div className="comparison-heading">
           <p className="eyebrow">Strategy comparison</p>
-          <h2>Three archetypes, one risk contract</h2>
+          <h2>Four archetypes, one risk contract</h2>
         </div>
         {showcaseDiagnoses.map(item => (
           <article key={item.id}>

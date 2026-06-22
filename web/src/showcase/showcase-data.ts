@@ -7,7 +7,7 @@ export interface ShowcaseDiagnosis {
   view: DiagnosisView;
 }
 
-export const showcaseDiagnoses = [
+const submittedShowcaseDiagnoses = [
   {
     "id": "ma",
     "request": {
@@ -17179,4 +17179,93 @@ export const showcaseDiagnoses = [
       }
     }
   }
+] satisfies ShowcaseDiagnosis[];
+
+const atrStrategy: DiagnoseRequest['strategy'] = {
+  id: 'atr-breakout-001',
+  name: 'BTC ATR trend breakout',
+  archetype: 'atr-trend-breakout',
+  params: {
+    atrPeriod: 14,
+    breakoutLookback: 20,
+    atrStopMultiple: 2.5,
+    trendMaPeriod: 50,
+    leverage: 5,
+    stopLossPct: 0.12,
+    positionPct: 0.6,
+  },
+  universe: ['BTCUSDT'],
+  timeframe: '4h',
+};
+
+const atrPatchedStrategy: DiagnoseRequest['strategy'] = {
+  ...atrStrategy,
+  params: {
+    ...atrStrategy.params,
+    atrStopMultiple: 3,
+    positionPct: 0.42,
+    leverage: 3,
+    stopLossPct: 0.12,
+  },
+};
+
+const atrBase = submittedShowcaseDiagnoses[2];
+
+export const showcaseDiagnoses = [
+  ...submittedShowcaseDiagnoses,
+  {
+    id: 'atr',
+    requestId: 'req_submission_atr',
+    request: {
+      strategy: atrStrategy,
+      style: 'conservative',
+      seed: 42,
+      candidates: 6,
+    },
+    view: {
+      ...atrBase.view,
+      scorecard: {
+        ...atrBase.view.scorecard,
+        strategyId: atrStrategy.id,
+        prescription: {
+          changes: {
+            leverage: 3,
+            atrStopMultiple: 3,
+            positionPct: 0.42,
+          },
+          rationale:
+            'Liquidation and drawdown risk -> reduce leverage, lower exposure, and give ATR stops more room.',
+          patchedStrategy: atrPatchedStrategy,
+        },
+      },
+      summary: {
+        ...atrBase.view.summary,
+        robustnessGain: 10,
+        returnDelta: -0.04,
+      },
+      charts: {
+        ...atrBase.view.charts,
+        parameterChanges: [
+          {
+            key: 'leverage',
+            label: 'Leverage',
+            before: 5,
+            after: 3,
+          },
+          {
+            key: 'atrStopMultiple',
+            label: 'ATR stop multiple',
+            before: 2.5,
+            after: 3,
+          },
+          {
+            key: 'positionPct',
+            label: 'Position size',
+            before: 0.6,
+            after: 0.42,
+          },
+        ],
+      },
+    },
+  },
 ] satisfies ShowcaseDiagnosis[];

@@ -39,7 +39,7 @@ describe('App workflow', () => {
     expect(screen.getByRole('heading', {
       name: 'Strategy Doctor public showcase',
     })).toBeTruthy();
-    expect(screen.getByText('243 passed / 1 skipped')).toBeTruthy();
+    expect(screen.getByText('269 passed / 2 skipped')).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Judge summary' })).toBeTruthy();
     expect(screen.getByText('Playbook pre-publication risk auditor')).toBeTruthy();
     expect(screen.getByRole('region', {
@@ -54,6 +54,12 @@ describe('App workflow', () => {
     })).toBeTruthy();
     expect(screen.getByRole('button', {
       name: 'Confirmed breakout',
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'ATR trend breakout',
+    })).toBeTruthy();
+    expect(screen.getByRole('heading', {
+      name: 'Four archetypes, one risk contract',
     })).toBeTruthy();
     expect(await screen.findByRole('region', {
       name: 'Diagnosis summary',

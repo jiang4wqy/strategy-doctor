@@ -48,10 +48,11 @@ Four supported entry points:
 # CLI
 npm.cmd run demo
 
-# Explicit three-strategy CLI regression
+# Explicit four-strategy CLI regression
 node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/breakout-confirmation.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/atr-trend-breakout.json --style conservative --seed 42 --candidates 6
 
 # Web/API
 $env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
@@ -71,8 +72,9 @@ node examples/agent-client.ts
 ## Product surface
 
 - Protected React diagnosis workspace
+- Strategy template workbench for MA, RSI/Bollinger, confirmed breakout, and ATR trend breakout
 - Natural-language strategy draft with explicit confirmation boundary
-- Five-dimension visual diagnosis and local result history
+- Judge-ready verdict, Before/After repair comparison, five-dimension visual diagnosis, and local result history
 - Playbook readiness score with explicit deployment gates
 - REST endpoints for capability discovery, parsing, and diagnosis
 - OpenAPI 3.0 document
@@ -100,7 +102,7 @@ The public P1 Web/API intentionally uses offline `MockBacktester`. This keeps th
 
 ## Scope
 
-- Three registered strategies: `ma-cross`, `rsi-bollinger-mean-reversion`, and `breakout-confirmation`
+- Four registered strategies: `ma-cross`, `rsi-bollinger-mean-reversion`, `breakout-confirmation`, and `atr-trend-breakout`
 - One symbol per diagnosis
 - Supported timeframes: `1h`, `4h`, `1d`
 - No arbitrary strategy DSL or dynamic code execution
@@ -132,7 +134,7 @@ for the Bitget Playbook bridge.
 ## Checklist
 
 - [x] Five-dimensional deterministic diagnosis
-- [x] Two strategy adapters
+- [x] Four strategy adapters
 - [x] Prescription and independent held-out validation
 - [x] Protected Web workspace
 - [x] REST API and TypeScript Client

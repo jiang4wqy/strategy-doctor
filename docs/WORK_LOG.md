@@ -1,23 +1,17 @@
 # Work Log
 
-Updated: 2026-06-18, Asia/Shanghai
+Updated: 2026-06-22, UTC
 
 ## Active delivery branch
 
-This is the protected local merge branch for final hackathon polishing:
+This is the active local branch for Track 2 strategy and reviewer UI polishing:
 
 | Item | Value |
 |---|---|
-| Local path | `D:\github\strategy-doctor-submission` |
-| Branch | `submission/hackathon-final-polish` |
-| Base | `origin/main` |
-| Included C commit | `15199e3 fix: harden generic risk engine inputs` |
-| Included D commits | `95d7af5 test: lock release artifact workflows`, `6eedd12 docs: add team work log` |
-
-The original role worktrees were not modified by this final polishing branch:
-
-- C original: `D:\github\strategy-doctor`, branch `feat/generic-risk-engine`
-- D original: `D:\github\strategy-doctor-d-acceptance`, branch `test/multi-strategy-acceptance`
+| Local path | `/data/wuzuo.jiang/strategy-doctor` |
+| Branch | `feature/track2-strategy-ui-polish` |
+| Base | `main` |
+| Merge target | `main` |
 
 ## What changed in this polishing pass
 
@@ -142,8 +136,8 @@ Final local run on 2026-06-20:
 |---|---|
 | `scripts/run-local-submission.ps1` | Passed |
 | npm audit during install | 1 high severity advisory reported by npm |
-| Core coverage suite | 244 tests, 243 passed, 1 skipped |
-| Coverage | Lines 96.38%, branches 88.97%, functions 99.16% |
+| Core coverage suite | 271 tests, 269 passed, 2 skipped |
+| Coverage | Lines 96.58%, branches 88.93%, functions 99.20% |
 | TypeScript core | Passed |
 | TypeScript Web | Passed |
 | Offline CLI demo | Passed |
@@ -160,9 +154,9 @@ by default so CI and local submission checks stay offline and deterministic.
 GitHub push may still depend on local network access to `github.com:443`.
 When the network is available:
 
-```powershell
-cd D:\github\strategy-doctor-submission
-git push origin submission/hackathon-final-polish
+```bash
+cd /data/wuzuo.jiang/strategy-doctor
+git push origin main
 ```
 
-Then open a PR into `main`.
+Then deploy the freshly built Web assets on the server.

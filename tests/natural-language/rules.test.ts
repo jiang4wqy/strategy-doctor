@@ -88,6 +88,39 @@ test('parseWithRules extracts confirmed breakout strategies', () => {
   assert.equal(draft.warnings.length, 0);
 });
 
+test('parseWithRules extracts ATR trend breakout strategies', () => {
+  const english = parseWithRules(
+    'BTCUSDT 4h ATR breakout, ATR period 14, breakout lookback 20, '
+    + 'ATR stop 2.5, trend MA 50, 5x leverage, 12% stop loss, 60% position.',
+  );
+  const chinese = parseWithRules(
+    'BTC 四小时 ATR 趋势突破，ATR 周期 14，突破窗口 20，'
+    + 'ATR 2.5 倍，趋势均线周期 50，5 倍杠杆，止损 12%，仓位 60%。',
+  );
+  const volatility = parseWithRules('BTC 波动率突破');
+
+  for (const draft of [english, chinese]) {
+    assert.equal(draft.strategy.archetype, 'atr-trend-breakout');
+    if (draft.strategy.archetype !== 'atr-trend-breakout') {
+      assert.fail('expected ATR trend breakout strategy');
+    }
+    assert.deepEqual(draft.strategy.params, {
+      atrPeriod: 14,
+      breakoutLookback: 20,
+      atrStopMultiple: 2.5,
+      trendMaPeriod: 50,
+      leverage: 5,
+      stopLossPct: 0.12,
+      positionPct: 0.6,
+    });
+    assert.equal(draft.strategy.timeframe, '4h');
+    assert.equal(draft.source, 'rules');
+    assert.equal(draft.warnings.length, 0);
+  }
+
+  assert.equal(volatility.strategy.archetype, 'atr-trend-breakout');
+});
+
 test('parseWithRules reports ambiguous and forbidden descriptions', () => {
   assert.throws(
     () => parseWithRules('combine MA crossover and RSI Bollinger'),

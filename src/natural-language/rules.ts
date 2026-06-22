@@ -37,6 +37,16 @@ const BREAKOUT_TERMS = [
   /range expansion/i,
   /confirmed breakout/i,
   /confirmation/i,
+  /突破/,
+];
+const ATR_BREAKOUT_TERMS = [
+  /\batr\b/i,
+  /average true range/i,
+  /atr stop/i,
+  /volatility breakout/i,
+  /波动率突破/,
+  /ATR\s*止损/i,
+  /ATR\s*趋势突破/i,
 ];
 const FORBIDDEN_TERMS = [
   /\bgrid\b/i,
@@ -277,6 +287,44 @@ function extractBreakoutParams(
   );
 }
 
+function extractAtrBreakoutParams(
+  description: string,
+  params: Record<string, number>,
+  explicitFields: Set<string>,
+): void {
+  assignExplicit(params, explicitFields, 'atrPeriod', firstNumber(
+    description,
+    [
+      /\batr\s*period\s*[:=]?\s*(\d+)/i,
+      /average\s*true\s*range(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /ATR\s*周期\s*[:：=]?\s*(\d+)/i,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'breakoutLookback', firstNumber(
+    description,
+    [
+      /breakout\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /range\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /突破(?:窗口|周期)?\s*[:：=]?\s*(\d+)/,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'atrStopMultiple', firstNumber(
+    description,
+    [
+      /atr\s*stop(?:\s*multiple)?\s*[:=]?\s*(\d+(?:\.\d+)?)/i,
+      /(\d+(?:\.\d+)?)\s*x\s*atr/i,
+      /ATR\s*(\d+(?:\.\d+)?)\s*倍/,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'trendMaPeriod', firstNumber(
+    description,
+    [
+      /trend\s*(?:ma|moving average)(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /趋势(?:均线|过滤)?(?:周期)?\s*[:：=]?\s*(\d+)/,
+    ],
+  ));
+}
+
 function buildAssumptions(
   strategy: Strategy,
   explicitFields: ReadonlySet<string>,
@@ -321,12 +369,19 @@ export function parseWithRules(description: string): StrategyDraft {
     );
   }
 
+  const matchesAtrBreakout = matchedCount(normalized, ATR_BREAKOUT_TERMS) > 0;
   const matchedMaTerms = matchedCount(normalized, MA_TERMS);
-  const matchesMa = matchedMaTerms > 0;
+  const matchesMa = matchedMaTerms > 0 && !matchesAtrBreakout;
   const matchesRsi = matchedCount(normalized, RSI_TERMS) > 0
     && matchedCount(normalized, BOLLINGER_TERMS) > 0;
-  const matchesBreakout = matchedCount(normalized, BREAKOUT_TERMS) > 0;
-  const matchedFamilies = [matchesMa, matchesRsi, matchesBreakout]
+  const matchesBreakout = matchedCount(normalized, BREAKOUT_TERMS) > 0
+    && !matchesAtrBreakout;
+  const matchedFamilies = [
+    matchesMa,
+    matchesRsi,
+    matchesBreakout,
+    matchesAtrBreakout,
+  ]
     .filter(Boolean).length;
   if (matchedFamilies > 1) {
     throw new DescriptionParseError(
@@ -347,7 +402,9 @@ export function parseWithRules(description: string): StrategyDraft {
     ? 'ma-cross'
     : matchesRsi
       ? 'rsi-bollinger-mean-reversion'
-      : 'breakout-confirmation';
+      : matchesAtrBreakout
+        ? 'atr-trend-breakout'
+        : 'breakout-confirmation';
   const market = extractMarket(normalized);
   const defaultStrategy = buildDefaultStrategy(archetype, market);
   const params = {
@@ -366,6 +423,8 @@ export function parseWithRules(description: string): StrategyDraft {
     extractMaParams(normalized, params, explicitFields);
   } else if (archetype === 'rsi-bollinger-mean-reversion') {
     extractRsiParams(normalized, params, explicitFields);
+  } else if (archetype === 'atr-trend-breakout') {
+    extractAtrBreakoutParams(normalized, params, explicitFields);
   } else {
     extractBreakoutParams(normalized, params, explicitFields);
   }
@@ -378,7 +437,9 @@ export function parseWithRules(description: string): StrategyDraft {
     ? (matchedMaTerms >= 2 ? 0.78 : 0.68)
     : archetype === 'rsi-bollinger-mean-reversion'
       ? 0.80
-      : 0.82;
+      : archetype === 'atr-trend-breakout'
+        ? 0.84
+        : 0.82;
   const confidence = Math.min(
     0.98,
     recognitionConfidence + explicitFields.size * 0.02,

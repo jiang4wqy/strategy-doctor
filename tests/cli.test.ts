@@ -126,6 +126,10 @@ test('CLI completes the full workflow for registered strategies', () => {
       path: '../examples/breakout-confirmation.json',
       archetype: 'breakout-confirmation',
     },
+    {
+      path: '../examples/atr-trend-breakout.json',
+      archetype: 'atr-trend-breakout',
+    },
   ];
 
   for (const example of examples) {

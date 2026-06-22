@@ -36,6 +36,7 @@ function parseArchetype(value: unknown): StrategyArchetype {
     value !== 'ma-cross'
     && value !== 'rsi-bollinger-mean-reversion'
     && value !== 'breakout-confirmation'
+    && value !== 'atr-trend-breakout'
   ) {
     fail(
       `unsupported strategy archetype: ${String(value)}`,

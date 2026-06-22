@@ -29,17 +29,19 @@ http://127.0.0.1:8080/showcase
 ```
 
 This route does not require a Web access code. It renders the same diagnosis
-workspace with pre-generated MA, RSI/Bollinger, and confirmed-breakout evidence
-so reviewers can see the product surface without receiving private credentials.
+workspace with pre-generated MA, RSI/Bollinger, confirmed-breakout, and
+ATR trend-breakout evidence so reviewers can see the product surface without
+receiving private credentials.
 
 ## Canonical strategy examples
 
-The three executable strategy inputs used by CLI, Web/API samples, and release
+The four executable strategy inputs used by CLI, Web/API samples, and release
 tests are:
 
 - `examples/trend-follower.json`
 - `examples/rsi-bollinger.json`
 - `examples/breakout-confirmation.json`
+- `examples/atr-trend-breakout.json`
 
 ## Reproducible sample artifacts
 
@@ -70,15 +72,15 @@ npm.cmd run verify
 Latest local result:
 
 ```text
-244 tests
-243 passed
-1 skipped: live Bitget public-data smoke
+271 tests
+269 passed
+2 skipped: live Bitget public-data smoke and intentionally disabled external smoke
 0 failed
 
 Coverage:
-Lines 96.38%
-Branches 88.96%
-Functions 99.16%
+Lines 96.58%
+Branches 88.93%
+Functions 99.20%
 
 TypeScript:
 core passed

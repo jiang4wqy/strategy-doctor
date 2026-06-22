@@ -44,6 +44,13 @@ export interface BreakoutConfirmationParams extends CommonRiskParams {
   minVolatilityPct: number;
 }
 
+export interface AtrTrendBreakoutParams extends CommonRiskParams {
+  atrPeriod: number;
+  breakoutLookback: number;
+  atrStopMultiple: number;
+  trendMaPeriod: number;
+}
+
 export interface StrategyBase {
   id: string;
   name: string;
@@ -66,10 +73,16 @@ export interface BreakoutConfirmationStrategy extends StrategyBase {
   params: BreakoutConfirmationParams;
 }
 
+export interface AtrTrendBreakoutStrategy extends StrategyBase {
+  archetype: 'atr-trend-breakout';
+  params: AtrTrendBreakoutParams;
+}
+
 export type Strategy =
   | MaCrossStrategy
   | RsiBollingerStrategy
-  | BreakoutConfirmationStrategy;
+  | BreakoutConfirmationStrategy
+  | AtrTrendBreakoutStrategy;
 export type StrategyParams = Strategy['params'];
 export type StrategyArchetype = Strategy['archetype'];
 
@@ -77,6 +90,7 @@ export interface ParamsByArchetype {
   'ma-cross': MaCrossParams;
   'rsi-bollinger-mean-reversion': RsiBollingerParams;
   'breakout-confirmation': BreakoutConfirmationParams;
+  'atr-trend-breakout': AtrTrendBreakoutParams;
 }
 
 export type StrategyByArchetype<A extends StrategyArchetype> =
@@ -85,7 +99,8 @@ export type StrategyByArchetype<A extends StrategyArchetype> =
 export type StrategyParamKey =
   | keyof MaCrossParams
   | keyof RsiBollingerParams
-  | keyof BreakoutConfirmationParams;
+  | keyof BreakoutConfirmationParams
+  | keyof AtrTrendBreakoutParams;
 
 export type ParameterChanges =
   Partial<Record<StrategyParamKey, number>>;

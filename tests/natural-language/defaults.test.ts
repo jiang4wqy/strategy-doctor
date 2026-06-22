@@ -52,6 +52,18 @@ test('buildDefaultStrategy copies breakout defaults from capability metadata', (
   }
 });
 
+test('buildDefaultStrategy copies ATR breakout defaults from capability metadata', () => {
+  const strategy = buildDefaultStrategy('atr-trend-breakout');
+  const definition = strategyRegistry.getDefinition('atr-trend-breakout');
+
+  assert.equal(strategy.id, 'natural-atr-trend-breakout');
+  assert.equal(strategy.params.atrPeriod, 14);
+  assert.equal(strategy.params.atrStopMultiple, 2.5);
+  for (const parameter of definition.parameters) {
+    assert.equal(strategy.params[parameter.key], parameter.defaultValue);
+  }
+});
+
 test('DescriptionParseError preserves stable parser details', () => {
   const error = new DescriptionParseError(
     'UNSUPPORTED_STRATEGY_DESCRIPTION',

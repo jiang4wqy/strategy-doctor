@@ -34,7 +34,10 @@ test('typed client completes the real API workflow', async t => {
     candidates: 6,
   });
 
-  assert.equal(capabilities.length, 3);
+  assert.equal(capabilities.length, 4);
+  assert.ok(capabilities.some(
+    capability => capability.archetype === 'atr-trend-breakout',
+  ));
   assert.equal(
     draft.strategy.archetype,
     'rsi-bollinger-mean-reversion',

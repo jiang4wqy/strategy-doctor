@@ -15,6 +15,8 @@ import {
   DeploymentReadinessPanel,
 } from './DeploymentReadinessPanel.tsx';
 import { DeveloperPanel } from './DeveloperPanel.tsx';
+import { DiagnosisHero } from './DiagnosisHero.tsx';
+import { RepairComparisonPanel } from './RepairComparisonPanel.tsx';
 import { ScenarioTable } from './ScenarioTable.tsx';
 import { SummaryCards } from './SummaryCards.tsx';
 
@@ -65,9 +67,11 @@ export function DiagnosisWorkspace({
         </div>
       </header>
 
-      <SummaryCards summary={view.summary} />
+      <DiagnosisHero view={view} />
 
+      <SummaryCards summary={view.summary} />
       <DeploymentReadinessPanel deployment={view.deployment} />
+      <RepairComparisonPanel request={request} view={view} />
 
       <section className="stress-strip" aria-label="Five-dimension stress trace">
         {view.charts.riskRadar.map(risk => (

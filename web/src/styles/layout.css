@@ -53,6 +53,8 @@
 .prescription-panel,
 .developer-panel,
 .deployment-panel,
+.diagnosis-hero,
+.repair-comparison-panel,
 .chart-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -80,6 +82,47 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.strategy-template-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.strategy-template {
+  display: grid;
+  min-height: 12.5rem;
+  align-content: start;
+  gap: 0.35rem;
+  padding: var(--space-3);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.strategy-template span,
+.strategy-template code {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.67rem;
+}
+
+.strategy-template strong {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.strategy-template em,
+.strategy-template small {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.strategy-template code {
+  margin-top: var(--space-1);
+  color: var(--ice-soft);
 }
 
 .form-footer,
@@ -174,6 +217,75 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--space-3);
+}
+
+.diagnosis-hero {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.95fr) minmax(24rem, 1.35fr);
+  gap: var(--space-4);
+  align-items: stretch;
+  padding: var(--space-4);
+  border-top: 3px solid var(--amber);
+}
+
+.diagnosis-hero-ready {
+  border-top-color: var(--positive);
+}
+
+.diagnosis-hero-blocked {
+  border-top-color: var(--risk);
+}
+
+.diagnosis-hero-lead {
+  display: grid;
+  align-content: center;
+}
+
+.diagnosis-hero-lead h2 {
+  margin-bottom: var(--space-2);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+}
+
+.diagnosis-hero-lead p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.diagnosis-hero-lead strong {
+  color: var(--ice-soft);
+  text-transform: capitalize;
+}
+
+.diagnosis-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.diagnosis-hero-metrics div {
+  display: grid;
+  align-content: space-between;
+  min-height: 7rem;
+  padding: var(--space-3);
+  border: 1px solid rgba(74, 112, 139, 0.68);
+  border-radius: var(--radius-sm);
+  background: rgba(7, 17, 31, 0.62);
+}
+
+.diagnosis-hero-metrics dt {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.diagnosis-hero-metrics dd {
+  margin: var(--space-3) 0 0;
+  color: var(--ice-soft);
+  font-family: var(--mono);
+  font-size: clamp(1.25rem, 2.2vw, 2rem);
+  font-weight: 900;
 }
 
 .summary-card {
@@ -312,8 +424,40 @@
 .chart-panel,
 .scenario-section,
 .prescription-panel,
-.developer-panel {
+.developer-panel,
+.repair-comparison-panel {
   padding: var(--space-4);
+}
+
+.repair-comparison-panel {
+  display: grid;
+  grid-template-columns: minmax(17rem, 0.85fr) minmax(20rem, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.repair-comparison-panel h2 {
+  margin-bottom: var(--space-2);
+}
+
+.repair-comparison-panel p {
+  color: var(--muted);
+}
+
+.repair-table-wrap {
+  overflow-x: auto;
+}
+
+.repair-table-wrap table {
+  min-width: 24rem;
+}
+
+.repair-rationale {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-3);
+  border-left: 3px solid var(--ice);
+  background: rgba(102, 212, 208, 0.08);
 }
 
 .chart-canvas {
@@ -507,7 +651,7 @@ th {
 }
 
 .strategy-comparison {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: var(--space-4) 0 0;
 }
 
@@ -584,6 +728,15 @@ th {
 }
 
 @media (max-width: 960px) {
+  .strategy-template-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .diagnosis-hero,
+  .repair-comparison-panel {
+    grid-template-columns: 1fr;
+  }
+
   .summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -630,10 +783,12 @@ th {
   }
 
   .summary-grid,
+  .diagnosis-hero-metrics,
   .deployment-gates,
   .judge-grid,
   .stress-strip,
-  .parameter-grid {
+  .parameter-grid,
+  .strategy-template-strip {
     grid-template-columns: 1fr;
   }
 

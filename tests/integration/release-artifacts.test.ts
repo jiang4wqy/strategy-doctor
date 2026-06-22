@@ -45,6 +45,10 @@ const EXAMPLES: {
     path: 'examples/breakout-confirmation.json',
     archetype: 'breakout-confirmation',
   },
+  {
+    path: 'examples/atr-trend-breakout.json',
+    archetype: 'atr-trend-breakout',
+  },
 ];
 
 interface SubmissionApiLogEntry {

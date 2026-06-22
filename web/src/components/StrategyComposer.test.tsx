@@ -72,4 +72,41 @@ describe('StrategyComposer', () => {
     );
     expect(input.value).toBe('custom grid strategy');
   });
+
+  it('renders strategy templates and parses the selected template', async () => {
+    const parse = vi.fn(async () => ({
+      apiVersion: 'v1' as const,
+      requestId: 'req-parse',
+      data: draftFixture,
+    }));
+    const changed = vi.fn();
+    const parsed = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <StrategyComposer
+        client={fakeClient(parse)}
+        description=""
+        onDescriptionChange={changed}
+        onParsed={parsed}
+      />,
+    );
+
+    expect(screen.getByRole('button', {
+      name: /Moving Average Trend/i,
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: /ATR Trend Breakout/i,
+    })).toBeTruthy();
+
+    await user.click(screen.getByRole('button', {
+      name: /ATR Trend Breakout/i,
+    }));
+
+    expect(parse).toHaveBeenCalledWith(expect.stringContaining('ATR breakout'));
+    expect(changed).toHaveBeenCalledWith(expect.stringContaining('ATR breakout'));
+    expect(parsed).toHaveBeenCalledWith(
+      expect.stringContaining('ATR breakout'),
+      draftFixture,
+    );
+  });
 });

@@ -22,7 +22,7 @@ npm.cmd run web
 打开 `http://127.0.0.1:8080`。提前准备以下描述：
 
 ```text
-BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
+BTCUSDT 4h ATR breakout, ATR period 14, breakout lookback 20, ATR stop 2.5, trend MA 50
 ```
 
 评委无需登录的展示页：
@@ -55,12 +55,12 @@ Reviewer evidence index:
 ## 0:45-1:20 自然语言到可确认策略
 
 1. 输入 Web access code。
-2. 粘贴中文 RSI/Bollinger 描述。
+2. 点击 `ATR Trend Breakout` 模板，或粘贴上面的 ATR 描述。
 3. 提交解析。
-4. 展示识别出的 `rsi-bollinger-mean-reversion`、参数、assumptions 和 warnings。
+4. 展示识别出的 `atr-trend-breakout`、参数、assumptions 和 warnings。
 5. 说明参数仍可编辑，解析不会自动执行诊断。
 
-> P1 只映射三个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
+> P1 只映射四个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
 
 ## 1:20-2:20 五维诊断与可视化
 
@@ -92,9 +92,13 @@ node src/cli.ts examples/breakout-confirmation.json `
   --style conservative `
   --seed 42 `
   --candidates 6
+node src/cli.ts examples/atr-trend-breakout.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
 ```
 
-> MA 趋势跟随与 RSI+Bollinger 均值回归共用诊断基础设施，但保留各自的交易决策、参数契约和处方逻辑。
+> MA、RSI+Bollinger、confirmed breakout 与 ATR trend breakout 共用诊断基础设施，但保留各自的交易决策、参数契约和处方逻辑。
 
 ## 2:45-3:00 Track 2 总结
 

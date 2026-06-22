@@ -88,7 +88,7 @@ test('health is public while capabilities require authentication', async t => {
     headers: bearer,
   });
   assert.equal(capabilities.statusCode, 200);
-  assert.equal(capabilities.json().data.length, 3);
+  assert.equal(capabilities.json().data.length, 4);
 });
 
 test('diagnosis route returns the shared DiagnosisView envelope', async t => {

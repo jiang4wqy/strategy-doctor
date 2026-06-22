@@ -37,6 +37,14 @@ describe('DiagnosisWorkspace', () => {
       />,
     );
 
+    expect(screen.getByRole('region', {
+      name: 'Judge-ready diagnosis summary',
+    })).toBeTruthy();
+    expect(screen.getByText('Risk repair delta')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Before and after repair comparison',
+    })).toBeTruthy();
+    expect(screen.getByText('Leverage')).toBeTruthy();
     const summary = screen.getByRole('region', { name: 'Diagnosis summary' });
     expect(within(summary).getByText('42')).toBeTruthy();
     expect(within(summary).getByText('42.0%')).toBeTruthy();
@@ -46,12 +54,12 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByRole('region', {
       name: 'Playbook readiness',
     })).toBeTruthy();
-    expect(screen.getByText('Publish only after manual review')).toBeTruthy();
+    expect(screen.getAllByText('Publish only after manual review')).toHaveLength(2);
     expect(screen.getAllByRole('img')).toHaveLength(4);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
-    expect(screen.getByText(
+    expect(screen.getAllByText(
       'Lower leverage and tighten the stop loss.',
-    )).toBeTruthy();
+    )).toHaveLength(2);
     expect(screen.getByText('Confirmed Strategy JSON')).toBeTruthy();
     expect(screen.getByText('curl request')).toBeTruthy();
     expect(screen.getByText('TypeScript client example')).toBeTruthy();
