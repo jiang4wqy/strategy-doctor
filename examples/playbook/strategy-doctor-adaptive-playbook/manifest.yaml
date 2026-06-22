@@ -1,0 +1,82 @@
+name: strategy-doctor-risk-gated-btc
+display_name: "Strategy Doctor Risk-Gated BTC"
+version: "1.0.0"
+description: "BTC perpetual trend signal prepared from Strategy Doctor risk diagnostics"
+long_description: |
+  This Playbook is a risk-gated BTC perpetual strategy designed to sit after a
+  Strategy Doctor diagnosis step. Its thesis is that a trading agent should not
+  move directly from an idea to execution. The idea should first be challenged
+  against hostile market regimes, then only a simple, transparent signal should
+  be carried into managed backtesting and publishing. The Playbook therefore
+  focuses on a directional BTC signal whose risk budget is deliberately modest
+  and whose behavior can be explained to subscribers without relying on hidden
+  discretionary judgment.
+
+  Entry decisions follow broad trend alignment. When the shorter reading of
+  price action begins to lead the slower market baseline upward, the strategy
+  treats the environment as constructive and opens long exposure. When that
+  alignment is absent, the Playbook waits rather than forcing activity. The
+  package is intentionally signal-only, so it emits a clear directional signal
+  for the managed runtime instead of placing orders directly from local code.
+
+  Exits work by loss of alignment. If the same trend relationship that justified
+  the entry fades or reverses, the strategy closes the signal and returns to a
+  neutral stance. This keeps the package easy to audit: the same regime read
+  controls entry and exit, and the Playbook does not hide a second unrelated
+  rule behind the subscriber interface.
+
+  Subscribers can tune leverage and margin budget. Raising leverage amplifies
+  both favorable movement and drawdown, while lowering it makes the strategy
+  less sensitive to adverse gaps. Margin budget is the capital allowance used
+  for reporting strategy return and should be set to an amount the subscriber
+  is comfortable risking inside this Playbook.
+
+  The main risks are choppy markets, sudden news gaps, and fast reversals after
+  a directional move has already started. The Strategy Doctor companion report
+  is included in the repository to show those failure modes before publication.
+  Historical backtests and managed sandbox runs are evidence, not a promise of
+  future profitability, and live execution can still suffer slippage, fees, and
+  unsuitable market regimes.
+market_type: contract
+trading_symbols: ["BTCUSDT"]
+tags: ["btc", "risk", "strategy-doctor", "contract", "diagnostic"]
+
+decision_mode: deterministic
+backtest_support: full
+runtime_profile: deterministic
+execution_mode: signal_only
+follow_trade_supported: false
+
+strategy_config:
+  trading_symbols: ["BTCUSDT"]
+  fast_period: 12
+  slow_period: 26
+  leverage: 3
+  margin_budget: "100"
+
+user_config_schema:
+  trading_symbols:
+    type: array
+    item_type: string
+    default: ["BTCUSDT"]
+    options: ["BTCUSDT"]
+    aliases:
+      btc: BTCUSDT
+      bitcoin: BTCUSDT
+    min_items: 1
+    max_items: 1
+    label: "Trading symbol"
+  leverage:
+    type: integer
+    default: 3
+    min: 1
+    max: 10
+    aliases:
+      3x: 3
+      5x: 5
+    label: "Leverage"
+  margin_budget:
+    type: string
+    default: "100"
+    pattern: "^[0-9]+(\\.[0-9]+)?$"
+    label: "Margin budget USDT"

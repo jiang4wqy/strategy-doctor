@@ -189,6 +189,47 @@ export const diagnosisFixture = {
     robustnessGain: 12,
     returnDelta: -0.02,
   },
+  deployment: {
+    score: 58,
+    status: 'watch',
+    headline: 'Publish only after manual review',
+    gates: [
+      {
+        key: 'liquidation-free',
+        label: 'No liquidation in treatment',
+        passed: false,
+        value: '1 liquidation',
+      },
+      {
+        key: 'drawdown-budget',
+        label: 'Worst drawdown under 35%',
+        passed: false,
+        value: '42.0%',
+      },
+      {
+        key: 'survival-rate',
+        label: 'At least 80% scenarios survived',
+        passed: true,
+        value: '80.0%',
+      },
+      {
+        key: 'held-out-robustness',
+        label: 'Held-out robustness improved',
+        passed: true,
+        value: '+12',
+      },
+      {
+        key: 'return-tradeoff',
+        label: 'Held-out return cost within 15%',
+        passed: true,
+        value: '-2.0%',
+      },
+    ],
+    blockers: [
+      'No liquidation in treatment: 1 liquidation',
+      'Worst drawdown under 35%: 42.0%',
+    ],
+  },
   charts: {
     treatmentEquity: [
       { dimension: 'sentiment', equity: [1, 0.9, 1.1] },

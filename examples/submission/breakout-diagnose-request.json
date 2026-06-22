@@ -1,0 +1,25 @@
+{
+  "strategy": {
+    "id": "breakout-confirmation-001",
+    "name": "BTC confirmed breakout",
+    "archetype": "breakout-confirmation",
+    "params": {
+      "breakoutLookback": 24,
+      "confirmationBars": 2,
+      "exitLookback": 8,
+      "volatilityLookback": 12,
+      "minBreakoutPct": 0.012,
+      "minVolatilityPct": 0.002,
+      "leverage": 4,
+      "stopLossPct": 0.08,
+      "positionPct": 0.55
+    },
+    "universe": [
+      "BTCUSDT"
+    ],
+    "timeframe": "1h"
+  },
+  "style": "conservative",
+  "seed": 42,
+  "candidates": 6
+}

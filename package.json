@@ -26,6 +26,7 @@
     "demo:live": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --backtest bitget",
     "mcp": "node src/mcp/server.ts",
     "snapshots:refresh": "node src/scripts/refresh-snapshots.ts",
+    "submission:package": "node scripts/generate-submission-package.mjs",
     "verify": "npm run test:coverage && npm run typecheck && npm run demo"
   },
   "devDependencies": {

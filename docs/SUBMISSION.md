@@ -48,6 +48,11 @@ Four supported entry points:
 # CLI
 npm.cmd run demo
 
+# Explicit three-strategy CLI regression
+node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
+node src/cli.ts examples/breakout-confirmation.json --style conservative --seed 42 --candidates 6
+
 # Web/API
 $env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
 $env:DOCTOR_SESSION_SECRET='demo-session-secret-at-least-32-chars'
@@ -68,6 +73,7 @@ node examples/agent-client.ts
 - Protected React diagnosis workspace
 - Natural-language strategy draft with explicit confirmation boundary
 - Five-dimension visual diagnosis and local result history
+- Playbook readiness score with explicit deployment gates
 - REST endpoints for capability discovery, parsing, and diagnosis
 - OpenAPI 3.0 document
 - Native TypeScript Client and copy-ready examples
@@ -90,10 +96,11 @@ The public P1 Web/API intentionally uses offline `MockBacktester`. This keeps th
 - Rate limits, body limits, same-origin checks, and diagnosis concurrency limits protect the preview service.
 - Anthropic and live Bitget calls are disabled in CI and opt-in locally.
 - CI enforces 90% lines, 80% branches, and 95% functions, plus Web tests, typechecking, build, demo, and Playwright acceptance.
+- Deployment readiness blocks Playbook publication when liquidation, excess drawdown, poor survival rate, negative held-out robustness, or unacceptable return cost appears.
 
 ## Scope
 
-- Two registered strategies: `ma-cross` and `rsi-bollinger-mean-reversion`
+- Three registered strategies: `ma-cross`, `rsi-bollinger-mean-reversion`, and `breakout-confirmation`
 - One symbol per diagnosis
 - Supported timeframes: `1h`, `4h`, `1d`
 - No arbitrary strategy DSL or dynamic code execution
@@ -111,7 +118,16 @@ npm.cmd run verify
 npm.cmd run web
 ```
 
-See [DEMO.md](DEMO.md) for the three-minute Web-first script and [API.md](API.md) for developer integration.
+Open the no-login public showcase at:
+
+```text
+http://127.0.0.1:8080/showcase
+```
+
+See [DEMO.md](DEMO.md) for the three-minute Web-first script,
+[API.md](API.md) for developer integration, [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
+for reproducible artifacts, and [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md)
+for the Bitget Playbook bridge.
 
 ## Checklist
 
@@ -124,8 +140,13 @@ See [DEMO.md](DEMO.md) for the three-minute Web-first script and [API.md](API.md
 - [x] Automated core, Web, integration, and browser gates
 - [x] Temporary team-sharing instructions
 - [x] Three-minute demo script
+- [x] No-login public showcase route
+- [x] Reproducible sample input/output artifacts
+- [x] Validated GetAgent Playbook package
 - [ ] Record and upload demo video
 - [ ] Fill video URL
+- [ ] Fill public showcase URL
+- [ ] Fill published Playbook URL after managed run
 - [ ] Submit before 2026-06-24
 
 ## P1.1

@@ -31,6 +31,41 @@ vi.mock('./charts/ParameterChangeChart.tsx', () => ({
 }));
 
 describe('App workflow', () => {
+  it('renders a public no-login showcase route', async () => {
+    window.history.pushState({}, '', '/showcase');
+
+    render(<App />);
+
+    expect(screen.getByRole('heading', {
+      name: 'Strategy Doctor public showcase',
+    })).toBeTruthy();
+    expect(screen.getByText('243 passed / 1 skipped')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Judge summary' })).toBeTruthy();
+    expect(screen.getByText('Playbook pre-publication risk auditor')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Strategy comparison',
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'MA trend follower',
+      pressed: true,
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'RSI/Bollinger mean reversion',
+    })).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'Confirmed breakout',
+    })).toBeTruthy();
+    expect(await screen.findByRole('region', {
+      name: 'Diagnosis summary',
+    })).toBeTruthy();
+    expect(await screen.findByRole('region', {
+      name: 'Playbook readiness',
+    })).toBeTruthy();
+    expect(screen.queryByLabelText('Access code')).toBeNull();
+
+    window.history.pushState({}, '', '/');
+  });
+
   it('moves from login to a fully named diagnosis workspace', async () => {
     const client: ApiClient = {
       login: vi.fn(async () => undefined),
@@ -67,6 +102,9 @@ describe('App workflow', () => {
 
     expect(await screen.findByRole('region', {
       name: 'Diagnosis summary',
+    })).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Playbook readiness',
     })).toBeTruthy();
     expect(screen.getByRole('region', {
       name: 'Diagnosis charts',

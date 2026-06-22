@@ -25,6 +25,17 @@ npm.cmd run web
 BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
 ```
 
+评委无需登录的展示页：
+
+```text
+http://127.0.0.1:8080/showcase
+```
+
+Reviewer evidence index:
+
+- `docs/SUBMISSION_EVIDENCE.md`
+- `docs/PLAYBOOK_EVIDENCE.md`
+
 ## 0:00-0:20 问题
 
 > 大多数工具帮助用户生成策略，却很少回答策略会在哪种陌生行情中失败、为什么失败、应该改哪个参数，以及修改能否在独立场景中继续成立。Strategy Doctor 是策略生成器和执行系统之间的诊断层。
@@ -49,7 +60,7 @@ BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
 4. 展示识别出的 `rsi-bollinger-mean-reversion`、参数、assumptions 和 warnings。
 5. 说明参数仍可编辑，解析不会自动执行诊断。
 
-> P1 只映射两个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
+> P1 只映射三个经过验证的 archetype。无法可靠识别时会明确报错，不会假装支持任意策略。
 
 ## 1:20-2:20 五维诊断与可视化
 
@@ -69,7 +80,15 @@ BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30
 
 ```powershell
 npm.cmd run demo
+node src/cli.ts examples/trend-follower.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
 node src/cli.ts examples/rsi-bollinger.json `
+  --style conservative `
+  --seed 42 `
+  --candidates 6
+node src/cli.ts examples/breakout-confirmation.json `
   --style conservative `
   --seed 42 `
   --candidates 6
@@ -80,6 +99,10 @@ node src/cli.ts examples/rsi-bollinger.json `
 ## 2:45-3:00 Track 2 总结
 
 > Strategy Doctor 不是另一个策略生成器，而是 Agent 开发中缺失的可解释诊断层。REST、TypeScript、OpenAPI 和能力发现让现有 Agent 可以直接接入；封闭 capability definitions 让后续策略和薄 MCP adapter 能在不复制核心逻辑的情况下扩展。
+
+如果展示 Playbook 闭环，打开 `docs/PLAYBOOK_EVIDENCE.md`，说明
+`examples/playbook/strategy-doctor-adaptive-playbook` 已通过官方 GetAgent
+validator，发布阶段只需要使用参赛账户的 Playbook API key 走上传、回测和发布。
 
 最后说明安全边界：
 

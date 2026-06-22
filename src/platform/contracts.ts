@@ -104,6 +104,23 @@ export interface ScenarioTimelineItem {
   maxDrawdownPct: number;
 }
 
+export type DeploymentReadinessStatus = 'ready' | 'watch' | 'blocked';
+
+export interface DeploymentGate {
+  key: string;
+  label: string;
+  passed: boolean;
+  value: string;
+}
+
+export interface DeploymentReadiness {
+  score: number;
+  status: DeploymentReadinessStatus;
+  headline: string;
+  gates: DeploymentGate[];
+  blockers: string[];
+}
+
 export interface DiagnosisView {
   scorecard: Scorecard;
   summary: {
@@ -113,6 +130,7 @@ export interface DiagnosisView {
     robustnessGain: number;
     returnDelta: number;
   };
+  deployment: DeploymentReadiness;
   charts: {
     treatmentEquity: DimensionEquity[];
     heldOutComparison: DimensionEquityComparison[];

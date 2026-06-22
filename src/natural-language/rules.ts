@@ -32,6 +32,12 @@ const BOLLINGER_TERMS = [
   /超买/,
   /超卖/,
 ];
+const BREAKOUT_TERMS = [
+  /breakout/i,
+  /range expansion/i,
+  /confirmed breakout/i,
+  /confirmation/i,
+];
 const FORBIDDEN_TERMS = [
   /\bgrid\b/i,
   /网格/,
@@ -215,6 +221,62 @@ function extractRsiParams(
   );
 }
 
+function extractBreakoutParams(
+  description: string,
+  params: Record<string, number>,
+  explicitFields: Set<string>,
+): void {
+  assignExplicit(params, explicitFields, 'breakoutLookback', firstNumber(
+    description,
+    [
+      /breakout\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /range\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /lookback\s*(\d+)\s*(?:bars?)?\s*breakout/i,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'confirmationBars', firstNumber(
+    description,
+    [
+      /confirmation(?:\s*bars?)?\s*[:=]?\s*(\d+)/i,
+      /confirm(?:ed|ation)?\s*(\d+)\s*bars?/i,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'exitLookback', firstNumber(
+    description,
+    [
+      /exit\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /invalidation(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+    ],
+  ));
+  assignExplicit(params, explicitFields, 'volatilityLookback', firstNumber(
+    description,
+    [
+      /volatility\s*lookback(?:\s*period)?\s*[:=]?\s*(\d+)/i,
+      /realized\s*movement(?:\s*lookback)?\s*[:=]?\s*(\d+)/i,
+    ],
+  ));
+  const breakoutPct = firstNumber(description, [
+    /(\d+(?:\.\d+)?)\s*%\s*(?:minimum\s*)?breakout/i,
+    /min(?:imum)?\s*breakout\s*(\d+(?:\.\d+)?)\s*%/i,
+  ]);
+  assignExplicit(
+    params,
+    explicitFields,
+    'minBreakoutPct',
+    breakoutPct === undefined ? undefined : breakoutPct / 100,
+  );
+  const volatilityPct = firstNumber(description, [
+    /(\d+(?:\.\d+)?)\s*%\s*(?:minimum\s*)?volatility/i,
+    /min(?:imum)?\s*volatility\s*(\d+(?:\.\d+)?)\s*%/i,
+  ]);
+  assignExplicit(
+    params,
+    explicitFields,
+    'minVolatilityPct',
+    volatilityPct === undefined ? undefined : volatilityPct / 100,
+  );
+}
+
 function buildAssumptions(
   strategy: Strategy,
   explicitFields: ReadonlySet<string>,
@@ -263,14 +325,17 @@ export function parseWithRules(description: string): StrategyDraft {
   const matchesMa = matchedMaTerms > 0;
   const matchesRsi = matchedCount(normalized, RSI_TERMS) > 0
     && matchedCount(normalized, BOLLINGER_TERMS) > 0;
-  if (matchesMa && matchesRsi) {
+  const matchesBreakout = matchedCount(normalized, BREAKOUT_TERMS) > 0;
+  const matchedFamilies = [matchesMa, matchesRsi, matchesBreakout]
+    .filter(Boolean).length;
+  if (matchedFamilies > 1) {
     throw new DescriptionParseError(
       'AMBIGUOUS_DESCRIPTION',
-      'Describe either MA crossover or RSI Bollinger, not both.',
+      'Describe one registered strategy archetype at a time.',
       false,
     );
   }
-  if (!matchesMa && !matchesRsi) {
+  if (matchedFamilies === 0) {
     throw new DescriptionParseError(
       'UNSUPPORTED_STRATEGY_DESCRIPTION',
       'The description does not match a registered strategy.',
@@ -280,7 +345,9 @@ export function parseWithRules(description: string): StrategyDraft {
 
   const archetype: StrategyArchetype = matchesMa
     ? 'ma-cross'
-    : 'rsi-bollinger-mean-reversion';
+    : matchesRsi
+      ? 'rsi-bollinger-mean-reversion'
+      : 'breakout-confirmation';
   const market = extractMarket(normalized);
   const defaultStrategy = buildDefaultStrategy(archetype, market);
   const params = {
@@ -297,8 +364,10 @@ export function parseWithRules(description: string): StrategyDraft {
   extractCommonParams(normalized, params, explicitFields);
   if (archetype === 'ma-cross') {
     extractMaParams(normalized, params, explicitFields);
-  } else {
+  } else if (archetype === 'rsi-bollinger-mean-reversion') {
     extractRsiParams(normalized, params, explicitFields);
+  } else {
+    extractBreakoutParams(normalized, params, explicitFields);
   }
 
   const strategy = parseStrategy({
@@ -307,7 +376,9 @@ export function parseWithRules(description: string): StrategyDraft {
   });
   const recognitionConfidence = archetype === 'ma-cross'
     ? (matchedMaTerms >= 2 ? 0.78 : 0.68)
-    : 0.80;
+    : archetype === 'rsi-bollinger-mean-reversion'
+      ? 0.80
+      : 0.82;
   const confidence = Math.min(
     0.98,
     recognitionConfidence + explicitFields.size * 0.02,

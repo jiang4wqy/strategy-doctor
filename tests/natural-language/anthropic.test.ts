@@ -86,6 +86,7 @@ test('parseWithAnthropic sends only capability-constrained JSON instructions', a
   assert.match(system, /do not generate source code/i);
   assert.match(system, /"ma-cross"/);
   assert.match(system, /"rsi-bollinger-mean-reversion"/);
+  assert.match(system, /"breakout-confirmation"/);
   assert.doesNotMatch(system, /snapshot|account|position history/i);
   assert.ok(result?.assumptions.some(
     assumption => assumption.field === 'strategy.params.rsiPeriod',

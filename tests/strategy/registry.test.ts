@@ -2,10 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
 import type {
+  BreakoutConfirmationParams,
   MaCrossParams,
   RsiBollingerParams,
   StrategyArchetype,
 } from '../../src/contracts.ts';
+import {
+  breakoutConfirmationAdapter,
+} from '../../src/strategy/adapters/breakout-confirmation.ts';
 import { maCrossAdapter } from '../../src/strategy/adapters/ma-cross.ts';
 import { rsiBollingerAdapter } from '../../src/strategy/adapters/rsi-bollinger.ts';
 import {
@@ -35,6 +39,18 @@ const meanReversionParams: RsiBollingerParams = {
   positionPct: 0.5,
 };
 
+const breakoutParams: BreakoutConfirmationParams = {
+  breakoutLookback: 24,
+  confirmationBars: 2,
+  exitLookback: 8,
+  volatilityLookback: 12,
+  minBreakoutPct: 0.012,
+  minVolatilityPct: 0.002,
+  leverage: 4,
+  stopLossPct: 0.08,
+  positionPct: 0.55,
+};
+
 test('registry returns the registered moving-average adapter', () => {
   assert.equal(getStrategyAdapter('ma-cross').archetype, 'ma-cross');
 });
@@ -46,13 +62,24 @@ test('registry returns the registered mean-reversion adapter', () => {
   );
 });
 
+test('registry returns the registered breakout adapter', () => {
+  assert.equal(
+    getStrategyAdapter('breakout-confirmation'),
+    breakoutConfirmationAdapter,
+  );
+});
+
 test('registry exposes immutable strategy capability definitions', () => {
   const definitions = strategyRegistry.listDefinitions();
 
-  assert.equal(definitions.length, 2);
+  assert.equal(definitions.length, 3);
   assert.deepEqual(
     definitions.map(definition => definition.archetype),
-    ['ma-cross', 'rsi-bollinger-mean-reversion'],
+    [
+      'ma-cross',
+      'rsi-bollinger-mean-reversion',
+      'breakout-confirmation',
+    ],
   );
   assert.equal(
     strategyRegistry.getDefinition('ma-cross').parameters[0].key,
@@ -63,6 +90,12 @@ test('registry exposes immutable strategy capability definitions', () => {
       .getDefinition('rsi-bollinger-mean-reversion')
       .parameters[0].key,
     'rsiPeriod',
+  );
+  assert.equal(
+    strategyRegistry
+      .getDefinition('breakout-confirmation')
+      .parameters[0].key,
+    'breakoutLookback',
   );
   assert.ok(Object.isFrozen(definitions));
   assert.ok(Object.isFrozen(definitions[0]));
@@ -233,6 +266,25 @@ test('default registry constructs the enhanced mean-reversion strategy', () => {
 
   assert.equal(parsed.archetype, 'rsi-bollinger-mean-reversion');
   assert.deepEqual(parsed.params, meanReversionParams);
+});
+
+test('default registry constructs the breakout confirmation strategy', () => {
+  const strategy = {
+    id: 'breakout',
+    name: 'confirmed breakout',
+    universe: ['BTCUSDT'],
+    timeframe: '1h',
+  };
+  const parsed = {
+    ...strategy,
+    archetype: 'breakout-confirmation' as const,
+    params: getStrategyAdapter(
+      'breakout-confirmation',
+    ).parseParams(breakoutParams),
+  };
+
+  assert.equal(parsed.archetype, 'breakout-confirmation');
+  assert.deepEqual(parsed.params, breakoutParams);
 });
 
 test('registry preserves discrimination for a runtime archetype', () => {

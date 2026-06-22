@@ -7,7 +7,7 @@ import {
 test('default services expose registered capabilities and local parsing', async () => {
   const services = createDefaultServices();
 
-  assert.equal(services.capabilities().length, 2);
+  assert.equal(services.capabilities().length, 3);
   const draft = await services.parse(
     'BTC 4小时 RSI 14 配合布林带 20 和趋势过滤器 50',
   );

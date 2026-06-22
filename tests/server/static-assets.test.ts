@@ -54,6 +54,17 @@ test('server hosts the Web build and preserves API not-found envelopes', async t
   );
   assert.match(asset.body, /strategyDoctorLoaded/);
 
+  const missingAsset = await app.inject({
+    method: 'GET',
+    url: '/assets/missing.js',
+  });
+  assert.equal(missingAsset.statusCode, 404);
+  assert.doesNotMatch(
+    missingAsset.headers['content-type'] ?? '',
+    /^text\/html/,
+  );
+  assert.equal(missingAsset.json().error.code, 'INVALID_REQUEST');
+
   const history = await app.inject({
     method: 'GET',
     url: '/history',

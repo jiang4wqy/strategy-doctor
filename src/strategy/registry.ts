@@ -6,6 +6,9 @@ import type {
   StrategyByArchetype,
   StrategyDefinition,
 } from '../contracts.ts';
+import {
+  breakoutConfirmationAdapter,
+} from './adapters/breakout-confirmation.ts';
 import { maCrossAdapter } from './adapters/ma-cross.ts';
 import { rsiBollingerAdapter } from './adapters/rsi-bollinger.ts';
 
@@ -80,6 +83,7 @@ export function createStrategyRegistry(
 export const strategyRegistry = createStrategyRegistry([
   maCrossAdapter,
   rsiBollingerAdapter,
+  breakoutConfirmationAdapter,
 ]);
 
 export function getStrategyAdapter<A extends StrategyArchetype>(
