@@ -47,6 +47,13 @@ function createFakeClient(): StrategyDoctorClient {
       return {
         scorecard: {} as DiagnosisView['scorecard'],
         summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, robustnessGain: 5, returnDelta: 0.1 },
+        deployment: {
+          score: 70,
+          status: 'watch',
+          headline: 'Publish only after manual review',
+          gates: [],
+          blockers: [],
+        },
         charts: {
           treatmentEquity: [],
           heldOutComparison: [],
