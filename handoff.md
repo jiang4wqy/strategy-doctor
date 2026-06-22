@@ -1,29 +1,30 @@
 # Strategy Doctor Handoff
 
-更新时间：2026-06-15（Asia/Shanghai）
+更新时间：2026-06-22（UTC）
 
 ## 当前结论
 
-P1 developer platform 已在以下分支完成：
+P1 developer platform 与 Track 2 提交强化已合入并推送到：
 
 ```text
-codex/p1-developer-platform
+main
 ```
 
-已验证的功能包括：
+当前已验证功能包括：
 
-- 两个注册策略：`ma-cross`、`rsi-bollinger-mean-reversion`。
+- 四个注册策略：`ma-cross`、`rsi-bollinger-mean-reversion`、
+  `breakout-confirmation`、`atr-trend-breakout`。
 - Fastify REST API v1、OpenAPI、Web access code、Bearer API key。
 - 限流、同源 mutation 保护、请求体限制、诊断并发限制。
 - 中英文自然语言解析，无法识别、歧义和未支持策略返回稳定错误。
-- TypeScript Client、PowerShell/curl 示例和 Agent 接入文档。
+- TypeScript Client、MCP adapter、PowerShell/curl 示例和 Agent 接入文档。
 - React/Vite Web：登录、自然语言输入、显式参数确认、诊断、四类图表、
   JSON/Markdown 导出、本地最近 10 条历史。
+- 无登录 `/showcase` 评委展示页和 `/developer` Agent/API 接入页。
 - Fastify 同源托管 React build，并保留 `/api/*` JSON 404。
-- 真实 Client/API 集成测试和 Chromium Playwright 验收。
-
-P1.1 的薄 MCP adapter 尚未开始。按现有计划，它应在 P1 合并后单独进入
-`codex/p1-mcp`，只调用 REST/TypeScript Client，不复制诊断核心。
+- usage record 生成、submission artifacts、部署模板、healthcheck 和
+  preview access helper。
+- 真实 Client/API 集成测试、Web 测试和核心覆盖率门槛。
 
 ## 已验证提交
 
@@ -54,26 +55,30 @@ eec8a4e docs: publish the developer platform workflow
 
 ## 最终验证
 
-2026-06-15 在 Windows、Node.js 24.14.1 上执行：
+2026-06-22 在 Node.js 24 上执行：
 
 ```text
-npm.cmd ci
+npm run test:coverage
+271 tests: 269 passed, 2 skipped, 0 failed
+coverage: lines 96.58%, branches 88.99%, functions 99.20%
+
+npm run test:web
+11 files, 22 tests passed
+
+npm run typecheck
 PASS
 
-npm.cmd run verify
-227 core tests: 226 passed, 1 skipped, 0 failed
-coverage: lines 96.35%, branches 89.28%, functions 99.10%
-core + Web TypeScript typecheck: PASS
-offline CLI demo: PASS
-
-npm.cmd run test:web
-11 files, 19 tests passed
-
-npm.cmd run build:web
+npm run build:web
 PASS
 
-npm.cmd run test:e2e
-3 Chromium tests passed
+npm run demo
+PASS
+
+npm run api:check
+PASS
+
+npm run healthcheck
+PASS
 ```
 
 Playwright 覆盖：
@@ -175,7 +180,7 @@ npm.cmd run web
 
 - 公共 Web/API 固定使用离线 `MockBacktester`，不读取账户、余额、持仓或私钥，
   也不会下单。
-- 只支持单 symbol、`*USDT`、`1h/4h/1d` 和两个已注册策略。
+- 只支持单 symbol、`*USDT`、`1h/4h/1d` 和四个已注册策略。
 - Quick Tunnel 仅用于临时演示；URL 重启后变化，终端和本地服务必须持续运行。
 - 仓库未自动创建永久云部署。
 - GitHub branch protection、required review、CODEOWNERS review 仍需仓库 owner
@@ -184,12 +189,16 @@ npm.cmd run web
 
 ## 下一步
 
-1. 审查并合并 `codex/p1-developer-platform`。
-2. 在 GitHub 开启 `main` branch protection 和 required review。
-3. 如需临时团队预览，启动 `npm.cmd run web` 后运行：
+1. 打通公开 URL，推荐 Cloudflare Tunnel 或 Nginx 反代。
+2. 录制三分钟 demo 视频，优先展示 `/showcase`、`/developer` 和一次
+   ATR 工作台诊断。
+3. 填写 `docs/SUBMISSION_FORM.md` 中的 public URL、video URL 和可选
+   Playbook URL。
+4. 可选：在 GitHub 创建 `track2-final` tag，并开启 `main` branch
+   protection。
+
+如需临时团队预览，启动 `npm.cmd run web` 后运行：
 
 ```powershell
 cloudflared tunnel --url http://localhost:8080
 ```
-
-4. P1 合并后，从最新 `main` 创建 `codex/p1-mcp`，执行集成计划 Task 8。

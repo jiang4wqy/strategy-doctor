@@ -2,25 +2,17 @@
 
 本规范是仓库内当前有效的协作基线。扩展说明见
 `docs/Strategy-Doctor-团队协同分工方案.docx`，但其中旧分支命令仅作历史参考；
-实际分支操作以本文件为准。P1 接口以
-`docs/superpowers/specs/2026-06-14-developer-platform-design.md` 为准，执行
-顺序以 `docs/superpowers/plans/2026-06-14-developer-platform-master-plan.md`
-为准。
+实际分支操作以本文件为准。`docs/superpowers/**` 记录 P0/P1 历史计划和
+当时的两策略边界；当前 `main` 已进入 Track 2 提交收口状态，实际功能以
+README、API capabilities 和当前测试为准。
 
 ## 1. 分支与 worktree
 
-- `main`：唯一公共基线和 PR 目标，不直接开发。
-- P1 集成分支：`codex/p1-developer-platform`。
-- Foundation 分支：`codex/p1-foundation`，必须最先完成。
-- Foundation 合并后，从同一提交创建四个并行分支：
-  - API：`codex/p1-api`
-  - 自然语言：`codex/p1-natural-language`
-  - Web：`codex/p1-web`
-  - Client/文档：`codex/p1-client-docs`
-- P1.1 MCP 使用 `codex/p1-mcp`，只能在 P1 REST 契约稳定后开始。
-- 每位成员只在分配给自己的一个分支和 worktree 中修改和提交。
-- Wave 2 分支先合入 `codex/p1-developer-platform`，完整验收后再由集成人
-  创建 PR 合入 `main`。
+- `main`：当前唯一公共基线和提交目标。
+- 已合并的历史实现分支已删除，远端当前只保留 `main`。
+- 小修可以直接在 `main` 上完成并立即验证；多人并行或高风险改动应从
+  `main` 创建短生命周期分支，完成后通过 PR 合回 `main`。
+- 每位成员只在自己的分支和 worktree 中修改和提交。
 - 禁止多人共享同一个工作目录，禁止在他人的 checkout 中切分支。
 - 共享分支禁止 force-push、rebase 和历史重写。
 
@@ -29,14 +21,12 @@
 ```powershell
 git clone https://github.com/jiang4wqy/strategy-doctor.git
 cd strategy-doctor
-git switch <分配给自己的 codex/p1-* 分支>
+git switch main
 git pull
 ```
 
-不要执行 `git switch main` 后直接修改。需要同步公共进展时，在自己的分支执行
-`git fetch origin`，Wave 2 成员再执行
-`git merge origin/codex/p1-developer-platform`。只有集成人在最终 P1 PR 前同步
-`origin/main`。
+需要同步公共进展时执行 `git pull origin main`。需要创建短分支时使用
+`git switch -c <topic-branch>`。
 
 ## 2. 文件 ownership
 
@@ -48,14 +38,14 @@ git pull
 | Web | `web/**` | React 参考客户端、ECharts、history、导出 |
 | Client/文档 | `src/client/**`、`tests/client/**`、Agent 示例、`docs/API.md` | TypeScript client 与开发者接入材料 |
 | Integration/QA | parse route/default wiring、`tests/e2e/**`、CI、README、SETUP、DEMO、SUBMISSION、handoff | 合并、真实 API 联调、浏览器验收、Quick Tunnel |
-| MCP | `src/mcp/**`、`tests/mcp/**`、MCP 专属依赖 | P1.1 stdio MCP adapter |
+| MCP | `src/mcp/**`、`tests/mcp/**`、MCP 专属依赖 | stdio MCP adapter |
 
 一个文件同一时间只能有一个 owner。跨 ownership 修改必须在 PR 的
 “跨模块依赖”中写明，并由文件 owner 与 Foundation/集成 owner 共同解决冲突。
 
 集成边界：
 
-- Wave 2 只能从同一个已验证 Foundation commit 创建。
+- 历史 P1 并行分支只能作为参考，不再作为当前分支流程。
 - API 不修改 application、registry、平台 DTO 或 Web。
 - 自然语言只导出 parser，不注册 Fastify route。
 - Web 只通过 `import type` 消费 `src/platform/contracts.ts`，不导入 server、
@@ -83,17 +73,14 @@ P1 新增的 `src/platform/contracts.ts` 在 Foundation 合并后同样冻结。
 
 ## 4. 合并顺序
 
-P1 固定顺序：
+当前仓库已完成 P1 和 Track 2 提交强化，不再使用历史 Wave 1/Wave 2 合并
+顺序。后续改动按风险排序：
 
-1. Foundation：治理、依赖、能力定义、共享 DTO、detailed held-out、
-   application service、CLI 兼容。
-2. 从同一 Foundation commit 同时启动 API、自然语言、Web、Client/文档。
-3. 各支线完成规格审查和代码质量审查。
-4. 按 API → 自然语言 → Client/文档 → Web 顺序合入集成分支。
-5. Integration：parse route、default services、static serving、真实 Client
-   联调、Playwright、CI、Quick Tunnel 文档。
-6. P1 完整验收后合入 `main`。
-7. MCP 从已合入 P1 的稳定 REST 契约开始。
+1. 文档、提交材料、部署说明等低风险改动可以直接验证后提交。
+2. Web/API 行为改动必须先补测试，再运行 Web、typecheck、build 和相关 API
+   检查。
+3. 策略契约或 registry 改动必须补 runtime parser、capability、自然语言、
+   示例和诊断测试，再运行完整覆盖率门槛。
 
 ## 5. PR 规则
 
@@ -104,8 +91,7 @@ P1 固定顺序：
 - 普通模块 PR 至少由集成 owner 和相邻模块 owner 审查。
 - 冲突由文件 owner 与集成 owner 共同解决，禁止直接选择整文件
   ours/theirs。
-- Wave 2 PR 的 base branch 是 `codex/p1-developer-platform`；最终 P1 PR 的
-  base branch 才是 `main`。
+- PR 的 base branch 是 `main`。
 - 合并前在个人分支合并最新目标分支，禁止对已共享分支 rebase。
 
 仓库当前使用 `@jiang4wqy` 作为集成 owner。其他成员的 GitHub 用户名确认后，
@@ -123,12 +109,12 @@ P1 固定顺序：
 - 未提交 secret、临时文件、缓存或 `node_modules`。
 - PR 描述记录测试数量、coverage、skip 和已知限制。
 
-P1 最终验收还必须满足：
+当前最终验收还必须满足：
 
 - 原 155-test 基线继续通过，MA golden JSON 保持逐字节一致。
 - Web、REST、TypeScript client 和 CLI 使用同一个 application service。
-- API capabilities 暴露两个已注册策略和参数 bounds。
-- 本地中文/英文描述只映射 MA 或 RSI/Bollinger；不支持时返回稳定错误。
+- API capabilities 暴露四个已注册策略和参数 bounds。
+- 本地中文/英文描述只映射四个已注册策略；不支持时返回稳定错误。
 - Web 必须显式确认参数后才诊断，并显示四类图表。
 - browser history 仅保存在本地，最多十条。
 - 公共预览必须有 access code/Bearer key、rate limit 和并发限制。

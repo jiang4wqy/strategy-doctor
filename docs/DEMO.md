@@ -2,6 +2,10 @@
 
 这份脚本以 Web 为主，CLI 与开发者接口作为可信度证明。主演示使用离线 `MockBacktester`，不展示任何密钥。
 
+建议录一个前端主导的视频即可：评委最需要看到的是产品如何解决问题、
+如何复现、以及为什么符合 Track 2。终端命令只作为证据闪过，不需要把
+全部命令现场跑完。
+
 ## 演示前
 
 ```powershell
@@ -62,6 +66,12 @@ Reviewer evidence index:
 - `npm run healthcheck` 与 `npm run submission:usage-record` 证明服务和记录可复现。
 - 自然语言解析不会绕过结构化校验与确认边界。
 
+屏幕操作：
+
+1. 打开 `/showcase`，停在顶部一句话说明和四策略证据。
+2. 点击 `Developer API` 或切到 `/developer`。
+3. 指一下 `API verification flow` 和 `Copy-ready commands`，说明 Agent 可以按这个路径接入。
+
 ## 0:45-1:20 自然语言到可确认策略
 
 1. 输入 Web access code。
@@ -86,29 +96,23 @@ Reviewer evidence index:
 
 刷新页面，从本地历史重新打开结果，证明浏览器端最近记录可恢复。
 
-## 2:20-2:45 第二种策略与 CLI
+## 2:20-2:45 复现证据
 
-```powershell
-npm.cmd run demo
-node src/cli.ts examples/trend-follower.json `
-  --style conservative `
-  --seed 42 `
-  --candidates 6
-node src/cli.ts examples/rsi-bollinger.json `
-  --style conservative `
-  --seed 42 `
-  --candidates 6
-node src/cli.ts examples/breakout-confirmation.json `
-  --style conservative `
-  --seed 42 `
-  --candidates 6
-node src/cli.ts examples/atr-trend-breakout.json `
-  --style conservative `
-  --seed 42 `
-  --candidates 6
-```
+回到 `/showcase` 或 `/developer`，展示这些证据，不需要现场完整跑完：
+
+- `/showcase` 的 usage record 证据链。
+- `/developer` 的 `healthcheck`、`api:check` 和 `submission:usage-record` 命令。
+- `examples/submission/api-call-log.jsonl` 文件名。
+- `docs/SUBMISSION_EVIDENCE.md` 的 verification result。
 
 > MA、RSI+Bollinger、confirmed breakout 与 ATR trend breakout 共用诊断基础设施，但保留各自的交易决策、参数契约和处方逻辑。
+
+如果你想在视频里露一秒终端，只跑这两条最短命令：
+
+```powershell
+npm.cmd run healthcheck
+npm.cmd run api:check
+```
 
 ## 2:45-3:00 Track 2 总结
 
@@ -145,5 +149,15 @@ npm.cmd run preview:access
 - 总时长不超过 3 分钟。
 - 不显示 access code、session secret、API key 或 Anthropic key。
 - 页面中能够看到策略确认边界、五维结果、处方、held-out 对比和 request ID。
+- 至少出现一次 `/developer` 或 Developer handoff，证明这不是单纯前端 Demo。
 - 明确说出 `MockBacktester`、无账户数据、无订单。
 - 不把 Quick Tunnel 描述为永久部署。
+
+## 推荐镜头顺序
+
+1. `/showcase`：项目论点、四策略对比、submission evidence。
+2. `/developer`：API verification flow、环境变量边界、copy-ready commands。
+3. `/` 工作台：输入 access code，点击 ATR 模板。
+4. 参数确认页：展示策略不是直接执行，必须确认。
+5. 诊断页：展示 verdict、Before/After、图表、Developer handoff。
+6. 回到 `/showcase` 或 evidence 文档：说明 usage record 和提交包可复现。

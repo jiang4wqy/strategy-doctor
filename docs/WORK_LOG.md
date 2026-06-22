@@ -151,12 +151,20 @@ by default so CI and local submission checks stay offline and deterministic.
 
 ## Upload status
 
-GitHub push may still depend on local network access to `github.com:443`.
-When the network is available:
+GitHub authentication is configured for the `czb` server user. The final
+Track 2 commits have been pushed to `origin/main`, and stale local/remote
+feature branches have been removed. Current branch state should read:
 
 ```bash
 cd /data/wuzuo.jiang/strategy-doctor
-git push origin main
+git status --short --branch
 ```
 
-Then deploy the freshly built Web assets on the server.
+Expected:
+
+```text
+## main...origin/main
+```
+
+Next deployment work is public URL setup, demo video recording, and final
+submission form links.

@@ -15,19 +15,23 @@ If these files disagree, stop and surface the conflict before editing.
 
 ## Current Scope
 
-The active milestone is P1 developer platform:
+The active milestone is the Track 2 submission hardening pass on top of the
+completed P1 developer platform:
 
-- Preserve the verified two-strategy P0 CLI and MA golden output.
+- Preserve the verified CLI, MA golden output, and deterministic offline
+  defaults.
 - Expose capability metadata, a shared diagnosis service, and REST API v1.
 - Parse supported Chinese and English strategy descriptions into a draft.
 - Require explicit structured confirmation before diagnosis.
 - Add a React/Vite/ECharts reference client and local-only browser history.
-- Add a first-party TypeScript client, OpenAPI, and team preview workflow.
+- Add a first-party TypeScript client, OpenAPI, MCP adapter, public showcase,
+  developer guide, and team preview workflow.
 
-P1 remains single-symbol, offline Mock by default, and limited to `ma-cross`
-and `rsi-bollinger-mean-reversion`. Do not add arbitrary strategy code, a DSL,
-a third strategy, private account access, order placement, or permanent cloud
-hosting.
+The current public registry contains four reviewed archetypes:
+`ma-cross`, `rsi-bollinger-mean-reversion`, `breakout-confirmation`, and
+`atr-trend-breakout`. The product remains single-symbol and offline Mock by
+default. Do not add arbitrary strategy code, a DSL, private account access,
+order placement, or claims of permanent cloud hosting without explicit review.
 
 ## Workspace Isolation
 
@@ -55,7 +59,8 @@ The Foundation/integration owner has exclusive control of:
 
 Other ownership lanes are defined in `CONTRIBUTING.md`. A worker must not edit
 another lane's files without recording the cross-lane dependency in the PR.
-Wave 2 workers must treat the Foundation commit as immutable.
+Historical P1 foundation commits should be treated as immutable unless the
+current task explicitly updates governance documentation.
 
 ## Change Discipline
 

@@ -5,7 +5,7 @@
 **Name:** Strategy Doctor
 **Track:** Track 2 - Trading Infra
 **Repository:** https://github.com/jiang4wqy/strategy-doctor
-**Demo video:** 待录制并上传后填写
+**Demo video:** 待录制并上传后填写，建议使用 `docs/DEMO.md` 的三分钟脚本。
 
 ## One-line pitch
 
@@ -199,10 +199,9 @@ Bitget Playbook bridge.
 
 ## Deferred backlog
 
-Kept out of the current documentation/evidence pass until the local submission
-materials are stable:
+Kept out of the current documentation/evidence pass until the public submission
+links are ready:
 
-- Push the two local `main` commits after GitHub credentials are available.
 - Replace local `/showcase` with a public deployment URL.
 - Record and upload the three-minute demo video if the protected workspace is
 shown.
