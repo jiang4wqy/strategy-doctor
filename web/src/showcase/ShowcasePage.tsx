@@ -93,6 +93,7 @@ export function ShowcasePage() {
           <div className="showcase-actions" aria-label="Reviewer actions">
             <a href="#strategy-comparison">Compare strategies</a>
             <a href="#submission-evidence">Review evidence</a>
+            <a href="/developer">Developer API</a>
             <a href="/">Open workspace</a>
           </div>
         </div>
@@ -247,6 +248,7 @@ export function ShowcasePage() {
             {labels[item.id as keyof typeof labels]}
           </button>
         ))}
+        <a href="/developer">Open developer API guide</a>
         <a href="/">Open protected workspace</a>
       </section>
 

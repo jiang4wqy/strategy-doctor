@@ -19,7 +19,15 @@ $env:DOCTOR_API_KEYS='demo-private-agent-key'
 npm.cmd run web
 ```
 
-打开 `http://127.0.0.1:8080`。提前准备以下描述：
+打开：
+
+```text
+http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
+http://127.0.0.1:8080
+```
+
+提前准备以下描述：
 
 ```text
 BTCUSDT 4h ATR breakout, ATR period 14, breakout lookback 20, ATR stop 2.5, trend MA 50
@@ -34,6 +42,7 @@ http://127.0.0.1:8080/showcase
 Reviewer evidence index:
 
 - `docs/SUBMISSION_EVIDENCE.md`
+- `docs/DEPLOYMENT.md`
 - `docs/PLAYBOOK_EVIDENCE.md`
 
 ## 0:00-0:20 问题
@@ -42,7 +51,7 @@ Reviewer evidence index:
 
 ## 0:20-0:45 Agent 接入面
 
-展示首页与 README 的工作流。
+展示 `/developer` 与 README 的工作流。
 
 > 同一套能力可以从 Web、REST、TypeScript Client 或 CLI 使用。Agent 先读取 capabilities，再把自然语言解析为结构化草稿，经过用户或 Agent 显式确认后才运行诊断。
 
@@ -50,6 +59,7 @@ Reviewer evidence index:
 
 - `/api/v1/capabilities` 是参数契约的唯一来源。
 - `/api/v1/openapi.json` 和示例降低接入成本。
+- `npm run healthcheck` 与 `npm run submission:usage-record` 证明服务和记录可复现。
 - 自然语言解析不会绕过结构化校验与确认边界。
 
 ## 0:45-1:20 自然语言到可确认策略
@@ -123,6 +133,12 @@ cloudflared tunnel --url http://localhost:8080
 ```
 
 Quick Tunnel URL 会在重启后变化，只用于临时 demo。通过私密渠道单独分享 access code。
+
+服务器端口不方便直接打开时，先生成 SSH 隧道命令：
+
+```powershell
+npm.cmd run preview:access
+```
 
 ## 录屏检查
 

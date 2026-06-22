@@ -24,6 +24,16 @@ Base URL:
 http://127.0.0.1:8080
 ```
 
+Public helper pages:
+
+```text
+http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
+```
+
+`/developer` summarizes environment variables, copy-ready commands, and the
+minimum API verification path without exposing real keys.
+
 ## Authentication
 
 ### Agent and script
@@ -49,10 +59,12 @@ only a local CLI workflow:
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 npm.cmd run api:check
+npm.cmd run healthcheck
 ```
 
 The check calls public health, authenticated capabilities, and authenticated
-OpenAPI. It retries each request up to three times and never prints the key.
+OpenAPI. `healthcheck` also verifies the public showcase and developer pages.
+Both scripts retry each request up to three times and never print the key.
 
 ## Common envelope
 

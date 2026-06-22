@@ -36,6 +36,7 @@ console.log('================================');
 
 printBlock('Server-local URLs:', [
   `${localBase}/showcase`,
+  `${localBase}/developer`,
   `${localBase}/`,
   `${localBase}/api/v1/health`,
 ].join('\n'));
@@ -43,6 +44,7 @@ printBlock('Server-local URLs:', [
 printBlock('SSH tunnel command from your laptop:', [
   `ssh ${sshPortArg} -L ${localTunnelPort}:127.0.0.1:${servicePort} ${sshTarget}`,
   `Then open: ${tunnelBase}/showcase`,
+  `Developer guide: ${tunnelBase}/developer`,
 ].join('\n'));
 
 printBlock('Health checks:', [
@@ -58,6 +60,7 @@ printBlock('Temporary public share option:', [
 if (publicUrl) {
   printBlock('Configured public URL:', [
     `${publicUrl.replace(/\/$/, '')}/showcase`,
+    `${publicUrl.replace(/\/$/, '')}/developer`,
     `${publicUrl.replace(/\/$/, '')}/`,
   ].join('\n'));
 }

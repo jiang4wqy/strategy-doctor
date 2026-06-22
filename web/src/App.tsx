@@ -11,6 +11,7 @@ import {
   StrategyConfirmation,
 } from './components/StrategyConfirmation.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
+import { DeveloperPage } from './developer/DeveloperPage.tsx';
 import { saveDiagnosis } from './history/storage.ts';
 import { ShowcasePage } from './showcase/ShowcasePage.tsx';
 import {
@@ -33,6 +34,10 @@ export function App({ client = defaultClient }: AppProps) {
 
   if (window.location.pathname === '/showcase') {
     return <ShowcasePage />;
+  }
+
+  if (window.location.pathname === '/developer') {
+    return <DeveloperPage />;
   }
 
   if (state.status === 'signedOut') {

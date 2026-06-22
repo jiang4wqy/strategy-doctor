@@ -48,7 +48,15 @@ $env:DOCTOR_HOST='127.0.0.1'
 npm.cmd run web
 ```
 
-打开 `http://127.0.0.1:8080`。`npm.cmd run web` 会先构建 React 客户端，再由同一个 Fastify 进程提供页面和 `/api/v1/*`。
+打开：
+
+```text
+http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
+http://127.0.0.1:8080
+```
+
+`/showcase` 和 `/developer` 是无登录评审/开发者说明页。`/` 是受保护工作台。`npm.cmd run web` 会先构建 React 客户端，再由同一个 Fastify 进程提供页面和 `/api/v1/*`。
 
 变量说明：
 
@@ -65,6 +73,15 @@ npm.cmd run web
 
 不要把 access code、session secret 或 API key 提交到仓库。
 
+也可以复制 `.env.example` 后用生产启动脚本：
+
+```powershell
+Copy-Item .env.example .env
+npm.cmd run build:web
+npm.cmd run start:prod
+npm.cmd run healthcheck
+```
+
 ## REST 与 TypeScript
 
 服务运行后，另开一个 PowerShell：
@@ -74,6 +91,8 @@ $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 .\examples\agent-curl.ps1
 node examples/agent-client.ts
+npm.cmd run api:check
+npm.cmd run healthcheck
 ```
 
 OpenAPI 地址：
@@ -124,7 +143,7 @@ npm run preview:access
 ```
 
 在自己的电脑终端保持 SSH 隧道运行后，打开
-`http://127.0.0.1:18080/showcase`。更完整的远程预览、Nginx 反代和 usage
+`http://127.0.0.1:18080/showcase` 或 `http://127.0.0.1:18080/developer`。更完整的远程预览、Nginx 反代和 usage
 record 验证流程见 [Deployment And Preview Access](DEPLOYMENT.md)。
 
 ## 可选自然语言 AI fallback
@@ -167,6 +186,7 @@ npm.cmd run test:coverage
 npm.cmd run test:web
 npm.cmd run typecheck
 npm.cmd run build:web
+npm.cmd run healthcheck
 npm.cmd run test:e2e
 npm.cmd run demo
 git diff --check

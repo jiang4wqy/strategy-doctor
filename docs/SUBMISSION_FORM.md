@@ -34,6 +34,7 @@ Public demo:
 ```text
 TODO: replace with deployed /showcase URL
 Local preview: http://127.0.0.1:8080/showcase
+Developer preview: http://127.0.0.1:8080/developer
 ```
 
 Demo video:
@@ -83,7 +84,7 @@ that verdict.
 ## Why It Fits Track 2
 
 - It exposes a developer-facing REST API, OpenAPI document, TypeScript client,
-  CLI, and Web workspace.
+  CLI, no-login `/developer` API guide, and Web workspace.
 - It has capability discovery for registered strategy archetypes instead of an
   unsafe arbitrary-code strategy DSL.
 - It provides reproducible input-output artifacts and API-call logs.
@@ -135,6 +136,7 @@ Open:
 
 ```text
 http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
 ```
 
 Remote preview helper:
@@ -148,6 +150,7 @@ Usage record refresh:
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run healthcheck
 npm.cmd run submission:usage-record
 ```
 
@@ -155,6 +158,9 @@ npm.cmd run submission:usage-record
 
 - `docs/SUBMISSION_EVIDENCE.md`
 - `docs/PLAYBOOK_EVIDENCE.md`
+- `docs/DEPLOYMENT.md`
+- `.env.example`
+- `deploy/*`
 - `submission-package/index.md` after running `npm.cmd run submission:package`
 - `examples/submission/api-call-log.jsonl`
 - `examples/submission/*-diagnose-request.json`
@@ -165,9 +171,10 @@ npm.cmd run submission:usage-record
 ## Video Outline
 
 1. Open `/showcase` and show the four registered strategies.
-2. Explain that Strategy Doctor audits before Playbook publication.
-3. Show five-dimensional stress results and failure causes.
-4. Show targeted parameter prescription and held-out trade-off.
-5. Show the Playbook readiness panel.
-6. Show `npm run api:check` and `npm run submission:usage-record`.
-7. Show the validated Playbook package and evidence docs.
+2. Open `/developer` and show API verification, environment variables, and usage record commands.
+3. Explain that Strategy Doctor audits before Playbook publication.
+4. Show five-dimensional stress results and failure causes.
+5. Show targeted parameter prescription and held-out trade-off.
+6. Show the Playbook readiness panel.
+7. Show `npm run api:check`, `npm run healthcheck`, and `npm run submission:usage-record`.
+8. Show the validated Playbook package and evidence docs.

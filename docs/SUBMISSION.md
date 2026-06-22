@@ -80,6 +80,7 @@ $env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
 
 # API verification
 npm.cmd run api:check
+npm.cmd run healthcheck
 
 # TypeScript
 node examples/agent-client.ts
@@ -89,6 +90,7 @@ node examples/agent-client.ts
 
 - Protected React diagnosis workspace
 - Strategy template workbench for MA, RSI/Bollinger, confirmed breakout, and ATR trend breakout
+- No-login `/developer` page for API keys, OpenAPI, healthcheck, and usage record reproduction
 - Natural-language strategy draft with explicit confirmation boundary
 - Judge-ready verdict, Before/After repair comparison, five-dimension visual diagnosis, and local result history
 - Playbook readiness score with explicit deployment gates
@@ -115,6 +117,7 @@ Refresh the usage record with:
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run healthcheck
 npm.cmd run submission:usage-record
 ```
 
@@ -161,6 +164,7 @@ Open the no-login public showcase at:
 
 ```text
 http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
 ```
 
 See [DEMO.md](DEMO.md) for the three-minute Web-first script,
@@ -181,7 +185,9 @@ Bitget Playbook bridge.
 - [x] Temporary team-sharing instructions
 - [x] Three-minute demo script
 - [x] No-login public showcase route
+- [x] No-login developer/API route
 - [x] Reproducible sample input/output artifacts
+- [x] `.env.example`, healthcheck, and deployment templates
 - [x] Submission-grade API usage record with timestamps, request IDs, and latency
 - [x] Four-strategy submission artifacts including ATR trend breakout
 - [x] Validated GetAgent Playbook package

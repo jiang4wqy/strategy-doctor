@@ -6,9 +6,9 @@
 
 | Bitget requirement | Evidence in this repository |
 |---|---|
-| Public GitHub repository with README | `README.md`, `docs/API.md`, `docs/SETUP.md`, `docs/DEMO.md` |
+| Public GitHub repository with README | `README.md`, `docs/API.md`, `docs/SETUP.md`, `docs/DEMO.md`, `docs/DEPLOYMENT.md` |
 | Real runnable demo, not a concept-only deck | `npm.cmd run verify`, `npm.cmd run web`, `/showcase` no-login public route |
-| Track 2 developer-facing integration | REST API, OpenAPI, TypeScript Client, PowerShell sample, capability discovery |
+| Track 2 developer-facing integration | `/developer`, REST API, OpenAPI, TypeScript Client, PowerShell sample, capability discovery |
 | API logs / sample input-output / reproducible run records | `examples/submission/api-call-log.jsonl`, four `*-diagnose-request.json`, four `*-scorecard.json`, four `*-diagnosis-view.json`, `examples/agent-curl.ps1`, `examples/agent-client.ts` |
 | Demo video if public UI requires login | `/showcase` is no-login; protected workspace still has a video-ready script in `docs/DEMO.md` |
 | Crypto or AI connection | Bitget public market snapshots, Bitget public OHLCV path, AI strategy parsing, Strategy Doctor diagnosis |
@@ -26,6 +26,7 @@ Open:
 
 ```text
 http://127.0.0.1:8080/showcase
+http://127.0.0.1:8080/developer
 ```
 
 This route does not require a Web access code. It renders the same diagnosis
@@ -36,6 +37,9 @@ receiving private credentials.
 If the route works on the server but not in an external browser, run
 `npm.cmd run preview:access` and follow the SSH tunnel or temporary public
 preview steps in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+`/developer` is also public and shows the API verification path, required
+environment variables, and copy-ready commands without exposing real secrets.
 
 ## Canonical strategy examples
 
@@ -75,6 +79,7 @@ Command:
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 $env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
+npm.cmd run healthcheck
 npm.cmd run submission:usage-record
 ```
 
@@ -140,6 +145,18 @@ submission-package/artifacts/*
 
 The generated folder is intentionally ignored by Git. It is a local reviewer
 bundle for form filling, video prep, and external AI review.
+
+## Deployment evidence
+
+| Artifact | Purpose |
+|---|---|
+| `.env.example` | Safe placeholder environment template |
+| `scripts/start-production.mjs` | `.env` loader and production service launcher |
+| `scripts/doctor-healthcheck.mjs` | Three-retry Web/API healthcheck |
+| `scripts/print-preview-access.mjs` | SSH tunnel and temporary preview command generator |
+| `deploy/systemd/strategy-doctor.service.example` | Linux service template |
+| `deploy/nginx/strategy-doctor.conf.example` | Reverse proxy template |
+| `deploy/pm2/ecosystem.config.cjs` | PM2 process template |
 
 ## Playbook bridge
 

@@ -91,6 +91,31 @@ describe('App workflow', () => {
     window.history.pushState({}, '', '/');
   });
 
+  it('renders a public no-login developer route', () => {
+    window.history.pushState({}, '', '/developer');
+
+    render(<App />);
+
+    expect(screen.getByRole('heading', {
+      name: 'Agent-ready API, without exchange custody',
+    })).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'API verification flow',
+    })).toBeTruthy();
+    expect(screen.getByText('GET /api/v1/capabilities')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Environment variables',
+    })).toBeTruthy();
+    expect(screen.getByText('STRATEGY_DOCTOR_API_KEY')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Copy-ready API commands',
+    })).toBeTruthy();
+    expect(screen.getByText(/npm run submission:usage-record/)).toBeTruthy();
+    expect(screen.queryByLabelText('Access code')).toBeNull();
+
+    window.history.pushState({}, '', '/');
+  });
+
   it('moves from login to a fully named diagnosis workspace', async () => {
     const client: ApiClient = {
       login: vi.fn(async () => undefined),

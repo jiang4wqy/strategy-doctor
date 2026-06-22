@@ -28,6 +28,7 @@ export function ApiIntegrationPanel() {
       <pre>{`export STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 export STRATEGY_DOCTOR_API_KEY='<private-agent-key>'
 npm run api:check`}</pre>
+      <a href="/developer">Open developer API guide</a>
     </section>
   );
 }

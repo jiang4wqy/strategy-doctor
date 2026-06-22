@@ -14,6 +14,9 @@ describe('LoginScreen', () => {
     })).toBeTruthy();
     expect(screen.getAllByText(/npm run api:check/)).toHaveLength(2);
     expect(screen.getByText(/npm run preview:access/)).toBeTruthy();
+    expect(screen.getByRole('link', {
+      name: 'Open developer API guide',
+    })).toHaveProperty('href', expect.stringContaining('/developer'));
 
     await user.type(screen.getByLabelText('Access code'), 'team-code');
     await user.click(screen.getByRole('button', { name: 'Enter workspace' }));

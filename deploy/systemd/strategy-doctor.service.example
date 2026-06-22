@@ -1,0 +1,17 @@
+[Unit]
+Description=Strategy Doctor Web/API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/strategy-doctor
+EnvironmentFile=/opt/strategy-doctor/.env
+ExecStart=/usr/bin/npm run start:prod
+Restart=on-failure
+RestartSec=5
+User=strategy-doctor
+Group=strategy-doctor
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
