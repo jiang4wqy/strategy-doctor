@@ -41,12 +41,23 @@ describe('App workflow', () => {
     })).toBeTruthy();
     expect(screen.getByText('269 passed / 2 skipped')).toBeTruthy();
     expect(screen.getByRole('region', {
+      name: 'Reviewer thesis',
+    })).toBeTruthy();
+    expect(screen.getByRole('heading', {
+      name: 'Strategy Doctor is a risk gate, not another generator',
+    })).toBeTruthy();
+    expect(screen.getByRole('region', {
       name: 'Submission evidence chain',
     })).toBeTruthy();
     expect(screen.getByRole('heading', {
       name: 'From public demo to reproducible API calls',
     })).toBeTruthy();
     expect(screen.getByText('8 REST calls + 4 reproducible diagnoses')).toBeTruthy();
+    expect(screen.getByRole('region', {
+      name: 'Reviewer terminal reproduction',
+    })).toBeTruthy();
+    expect(screen.getByText('Remote preview through SSH')).toBeTruthy();
+    expect(screen.getByText(/npm run submission:usage-record/)).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Judge summary' })).toBeTruthy();
     expect(screen.getByText('Playbook pre-publication risk auditor')).toBeTruthy();
     expect(screen.getByRole('region', {

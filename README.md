@@ -32,6 +32,19 @@ npm.cmd run submission:usage-record
 
 提交证据位于 `examples/submission/`：真实 API call log、四个诊断请求、四个 scorecard、四个 Web/API diagnosis view。
 
+如果页面在服务器内能访问、但外部浏览器打不开，先打印预览访问命令：
+
+```bash
+STRATEGY_DOCTOR_SSH_HOST='<server-ip-or-domain>' \
+STRATEGY_DOCTOR_SSH_PORT='<ssh-port>' \
+STRATEGY_DOCTOR_SSH_USER='<ssh-user>' \
+npm run preview:access
+```
+
+常见原因是服务端口没有对外开放，此时用 SSH tunnel 打开
+`http://127.0.0.1:18080/showcase`。完整部署和分享流程见
+[Deployment And Preview Access](docs/DEPLOYMENT.md)。
+
 ## 为什么属于 Track 2
 
 - **帮助 Agent 跑得更好**：在策略进入 Playbook 或执行 Agent 前先发现隐藏风险。
@@ -176,6 +189,9 @@ cloudflared tunnel --url http://localhost:8080
 把生成的 `trycloudflare.com` URL 发给队友，并通过私密渠道单独发送 Web access code。Agent 调用者还需要私密 API key。
 
 Quick Tunnel 只适合 demo 和测试：终端与服务必须持续运行，重启后 URL 会变化，不应当作永久生产部署。详细步骤见 [环境与团队分享](docs/SETUP.md)。
+
+远程服务器预览、SSH 隧道、Nginx 反代和 API usage record 验证见
+[Deployment And Preview Access](docs/DEPLOYMENT.md)。
 
 ## API 入口
 

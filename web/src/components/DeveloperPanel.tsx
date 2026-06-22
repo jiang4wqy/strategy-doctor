@@ -18,6 +18,15 @@ export function DeveloperPanel({
   const apiCheck = `export STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 export STRATEGY_DOCTOR_API_KEY='<private-agent-key>'
 npm run api:check`;
+  const apiSequence = `curl -i "$STRATEGY_DOCTOR_URL/api/v1/health"
+curl -s "$STRATEGY_DOCTOR_URL/api/v1/capabilities" \\
+  -H "Authorization: Bearer $STRATEGY_DOCTOR_API_KEY"
+curl -s "$STRATEGY_DOCTOR_URL/api/v1/openapi.json" \\
+  -H "Authorization: Bearer $STRATEGY_DOCTOR_API_KEY"
+curl -s -X POST "$STRATEGY_DOCTOR_URL/api/v1/diagnoses" \\
+  -H "Authorization: Bearer $STRATEGY_DOCTOR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  --data '${JSON.stringify(request)}'`;
 
   return (
     <aside className="developer-panel" aria-labelledby="developer-title">
@@ -52,6 +61,10 @@ npm run api:check`;
       <details>
         <summary>Terminal API check</summary>
         <pre>{apiCheck}</pre>
+      </details>
+      <details>
+        <summary>Full API verification path</summary>
+        <pre>{apiSequence}</pre>
       </details>
       <a href="/api/v1/openapi.json" target="_blank" rel="noreferrer">
         OpenAPI schema

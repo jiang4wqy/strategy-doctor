@@ -165,8 +165,9 @@ http://127.0.0.1:8080/showcase
 
 See [DEMO.md](DEMO.md) for the three-minute Web-first script,
 [API.md](API.md) for developer integration, [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
-for reproducible artifacts, and [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md)
-for the Bitget Playbook bridge.
+for reproducible artifacts, [DEPLOYMENT.md](DEPLOYMENT.md) for preview access
+and server sharing, and [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md) for the
+Bitget Playbook bridge.
 
 ## Checklist
 

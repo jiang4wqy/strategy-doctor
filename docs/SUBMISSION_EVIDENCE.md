@@ -33,6 +33,10 @@ workspace with pre-generated MA, RSI/Bollinger, confirmed-breakout, and
 ATR trend-breakout evidence so reviewers can see the product surface without
 receiving private credentials.
 
+If the route works on the server but not in an external browser, run
+`npm.cmd run preview:access` and follow the SSH tunnel or temporary public
+preview steps in [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Canonical strategy examples
 
 The four executable strategy inputs used by CLI, Web/API samples, and release

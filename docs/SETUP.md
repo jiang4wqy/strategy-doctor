@@ -106,6 +106,27 @@ cloudflared tunnel --url http://localhost:8080
 
 若团队需要长期稳定地址，应改用有访问控制、TLS、日志和密钥轮换的正式部署。
 
+## 远程服务器和 SSH 隧道
+
+如果服务在服务器里返回 200，但你的浏览器打不开服务器 IP 或 `8080` 端口，通常是端口没有暴露到你所在网络。先在服务器里运行：
+
+```bash
+npm run preview:access
+```
+
+如果需要生成可复制的 SSH 隧道命令：
+
+```bash
+STRATEGY_DOCTOR_SSH_HOST='<server-ip-or-domain>' \
+STRATEGY_DOCTOR_SSH_PORT='<ssh-port>' \
+STRATEGY_DOCTOR_SSH_USER='<ssh-user>' \
+npm run preview:access
+```
+
+在自己的电脑终端保持 SSH 隧道运行后，打开
+`http://127.0.0.1:18080/showcase`。更完整的远程预览、Nginx 反代和 usage
+record 验证流程见 [Deployment And Preview Access](DEPLOYMENT.md)。
+
 ## 可选自然语言 AI fallback
 
 规则解析器默认离线工作。只有显式设置以下变量时，未被本地规则可靠识别的描述才会尝试 Anthropic：

@@ -20,6 +20,10 @@ export function ApiIntegrationPanel() {
           <dt>Review check</dt>
           <dd><code>npm run api:check</code> verifies health, capabilities, and OpenAPI.</dd>
         </div>
+        <div>
+          <dt>Preview access</dt>
+          <dd><code>npm run preview:access</code> prints SSH tunnel and health-check commands.</dd>
+        </div>
       </dl>
       <pre>{`export STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 export STRATEGY_DOCTOR_API_KEY='<private-agent-key>'

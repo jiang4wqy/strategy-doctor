@@ -32,6 +32,40 @@ const evidenceSteps = [
   ['4', 'Artifacts', 'Four request, scorecard, and diagnosis-view bundles'],
 ] as const;
 
+const thesisCards = [
+  [
+    'Claim',
+    'Generated trading ideas need a diagnostic gate before Playbook or Agent publication.',
+  ],
+  [
+    'Mechanism',
+    'Stress scenarios expose death causes, targeted patches change only relevant parameters, and held-out checks report the trade-off.',
+  ],
+  [
+    'Boundary',
+    'The public demo never asks for exchange credentials and never executes orders.',
+  ],
+] as const;
+
+const reviewerCommands = [
+  {
+    title: 'Remote preview through SSH',
+    command: `ssh -p <ssh-port> -L 18080:127.0.0.1:8080 <ssh-user>@<server-ip>
+open http://127.0.0.1:18080/showcase`,
+  },
+  {
+    title: 'API self-check',
+    command: `export STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
+export STRATEGY_DOCTOR_API_KEY='<private-agent-key>'
+npm run api:check`,
+  },
+  {
+    title: 'Usage record',
+    command: `npm run submission:usage-record
+head -n 4 examples/submission/api-call-log.jsonl`,
+  },
+] as const;
+
 function percent(value: number) {
   return `${value >= 0 ? '+' : ''}${(value * 100).toFixed(1)}%`;
 }
@@ -78,6 +112,21 @@ export function ShowcasePage() {
         </dl>
       </header>
 
+      <section className="reviewer-thesis" aria-label="Reviewer thesis">
+        <div className="comparison-heading">
+          <p className="eyebrow">Core thesis</p>
+          <h2>Strategy Doctor is a risk gate, not another generator</h2>
+        </div>
+        <div className="thesis-grid">
+          {thesisCards.map(([label, text]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section
         className="submission-evidence"
         id="submission-evidence"
@@ -101,6 +150,29 @@ export function ShowcasePage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section
+        className="reviewer-terminal"
+        aria-label="Reviewer terminal reproduction"
+      >
+        <div>
+          <p className="eyebrow">Terminal reproduction</p>
+          <h2>Verify the same product path without reading source code</h2>
+          <p>
+            The Web showcase is the inspection layer. The commands below prove
+            that the service is reachable, the API contract is discoverable, and
+            the submitted usage record can be regenerated.
+          </p>
+        </div>
+        <div className="terminal-grid">
+          {reviewerCommands.map(item => (
+            <article key={item.title}>
+              <strong>{item.title}</strong>
+              <pre>{item.command}</pre>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="judge-summary" aria-label="Judge summary">

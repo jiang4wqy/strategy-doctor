@@ -68,6 +68,8 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('curl request')).toBeTruthy();
     expect(screen.getByText('TypeScript client example')).toBeTruthy();
     expect(screen.getByText('Terminal API check')).toBeTruthy();
+    expect(screen.getByText('Full API verification path')).toBeTruthy();
+    expect(screen.getByText(/\$STRATEGY_DOCTOR_URL\/api\/v1\/capabilities/)).toBeTruthy();
     expect(screen.getByText('API mode')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'OpenAPI schema' })).toHaveProperty(
       'href',

@@ -137,6 +137,12 @@ Open:
 http://127.0.0.1:8080/showcase
 ```
 
+Remote preview helper:
+
+```powershell
+npm.cmd run preview:access
+```
+
 Usage record refresh:
 
 ```powershell
