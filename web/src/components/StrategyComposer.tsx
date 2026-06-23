@@ -3,16 +3,25 @@ import {
   useState,
   type FormEvent,
 } from 'react';
+import {
+  Dice5,
+  Sparkles,
+} from 'lucide-react';
 import type {
   ApiClient,
   StrategyDraft,
 } from '../api/types.ts';
+import {
+  randomStrategyDraft,
+  strategyExamples,
+} from '../strategy-playground.ts';
 
 export interface StrategyComposerProps {
   client: ApiClient;
   description: string;
   onDescriptionChange(description: string): void;
   onParsed(description: string, draft: StrategyDraft): void;
+  onOpenLearn?(): void;
 }
 
 export function StrategyComposer({
@@ -20,6 +29,7 @@ export function StrategyComposer({
   description,
   onDescriptionChange,
   onParsed,
+  onOpenLearn,
 }: StrategyComposerProps) {
   const [text, setText] = useState(description);
   const [loading, setLoading] = useState(false);
@@ -45,14 +55,33 @@ export function StrategyComposer({
     }
   }
 
+  function useRandomStrategy() {
+    const draft = randomStrategyDraft();
+    const generatedDescription =
+      `${draft.strategy.name}: generated ${draft.strategy.archetype} strategy for BTCUSDT ${draft.strategy.timeframe}`;
+    setText(generatedDescription);
+    onDescriptionChange(generatedDescription);
+    onParsed(generatedDescription, draft);
+  }
+
   return (
     <section className="composer-panel" aria-labelledby="composer-title">
-      <p className="eyebrow">01 / Strategy intake</p>
-      <h2 id="composer-title">Describe the strategy</h2>
-      <p>
-        Use one registered pattern. The parser creates a draft; it does not
-        run a diagnosis until you confirm every field.
-      </p>
+      <div className="panel-heading-row">
+        <div>
+          <p className="eyebrow">01 / Strategy intake</p>
+          <h2 id="composer-title">Describe the strategy</h2>
+          <p>
+            Use one registered pattern. The parser creates a draft; it does not
+            run a diagnosis until you confirm every field.
+          </p>
+        </div>
+        {onOpenLearn ? (
+          <button type="button" onClick={onOpenLearn}>
+            <Sparkles aria-hidden="true" />
+            Tutorial / QA
+          </button>
+        ) : null}
+      </div>
       <form onSubmit={submit}>
         <label htmlFor="strategy-description">Strategy description</label>
         <textarea
@@ -67,27 +96,21 @@ export function StrategyComposer({
           placeholder="BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30..."
         />
         <div className="composer-examples" aria-label="Supported examples">
-          <button
-            type="button"
-            onClick={() => {
-              const value =
-                'BTCUSDT 1h moving average crossover, fast MA 8, slow MA 30';
-              setText(value);
-              onDescriptionChange(value);
-            }}
-          >
-            Use MA example
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const value =
-                'BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30';
-              setText(value);
-              onDescriptionChange(value);
-            }}
-          >
-            Use RSI + Bollinger example
+          {strategyExamples.map(example => (
+            <button
+              key={example.label}
+              type="button"
+              onClick={() => {
+                setText(example.description);
+                onDescriptionChange(example.description);
+              }}
+            >
+              {example.label}
+            </button>
+          ))}
+          <button type="button" onClick={useRandomStrategy}>
+            <Dice5 aria-hidden="true" />
+            Random strategy
           </button>
         </div>
         <div className="form-footer">
@@ -96,7 +119,15 @@ export function StrategyComposer({
             {loading ? 'Parsing...' : 'Parse strategy'}
           </button>
         </div>
-        {error ? <p role="alert">{error}</p> : null}
+        {error ? (
+          <div className="parser-fallback">
+            <p role="alert">{error}</p>
+            <button type="button" onClick={useRandomStrategy}>
+              <Dice5 aria-hidden="true" />
+              Generate a playable strategy instead
+            </button>
+          </div>
+        ) : null}
       </form>
     </section>
   );

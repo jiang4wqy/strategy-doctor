@@ -1,6 +1,7 @@
 import {
   Activity,
   ArrowUpRight,
+  BookOpen,
   Bot,
   CheckCircle2,
   Cpu,
@@ -104,6 +105,10 @@ export function JudgeMode() {
             <a href="/api/v1/health">
               Check API health
               <Activity aria-hidden="true" />
+            </a>
+            <a href="/learn">
+              Tutorial / QA
+              <BookOpen aria-hidden="true" />
             </a>
           </div>
         </div>

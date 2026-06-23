@@ -2,6 +2,7 @@ import type {
   DiagnoseRequest,
   DiagnosisView,
 } from '../api/types.ts';
+import type { ComparisonBaseline } from '../state/app-state.ts';
 import { EquityComparisonChart } from '../charts/EquityComparisonChart.tsx';
 import { ParameterChangeChart } from '../charts/ParameterChangeChart.tsx';
 import { RiskRadarChart } from '../charts/RiskRadarChart.tsx';
@@ -14,6 +15,7 @@ import {
   renderRiskDashboardMarkdown,
 } from '../export/report.ts';
 import { DeveloperPanel } from './DeveloperPanel.tsx';
+import { ComparisonPanel } from './ComparisonPanel.tsx';
 import { ScenarioTable } from './ScenarioTable.tsx';
 import { SummaryCards } from './SummaryCards.tsx';
 
@@ -21,12 +23,16 @@ export interface DiagnosisWorkspaceProps {
   request: DiagnoseRequest;
   requestId: string;
   view: DiagnosisView;
+  baseline?: ComparisonBaseline;
+  onEditParameters?(): void;
 }
 
 export function DiagnosisWorkspace({
   request,
   requestId,
   view,
+  baseline,
+  onEditParameters,
 }: DiagnosisWorkspaceProps) {
   const filename = `strategy-doctor-${request.strategy.id}`;
   const hasDashboard = Boolean(view.riskDashboard);
@@ -42,6 +48,11 @@ export function DiagnosisWorkspace({
           </p>
         </div>
         <div className="export-actions">
+          {onEditParameters ? (
+            <button type="button" onClick={onEditParameters}>
+              Edit parameters
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => downloadText(
@@ -100,6 +111,13 @@ export function DiagnosisWorkspace({
       </header>
 
       <SummaryCards summary={view.summary} />
+      {baseline ? (
+        <ComparisonPanel
+          baseline={baseline}
+          request={request}
+          view={view}
+        />
+      ) : null}
       {view.riskDashboard ? (
         <section className="risk-dashboard-panel" aria-labelledby="risk-dashboard-title">
           <p className="eyebrow">Risk dashboard</p>

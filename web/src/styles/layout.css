@@ -97,12 +97,50 @@
   margin-top: var(--space-4);
 }
 
+.panel-heading-row,
+.workspace-nav {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.workspace-nav {
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding: var(--space-2);
+  border: 1px solid rgba(196, 245, 239, 0.14);
+  border-radius: var(--radius-md);
+  background: rgba(5, 10, 15, 0.5);
+}
+
 .composer-examples,
 .export-actions,
 .history-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.composer-examples button {
+  min-height: 38px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.parser-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid rgba(255, 127, 111, 0.24);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 127, 111, 0.08);
+}
+
+.parser-fallback p {
+  margin: 0;
 }
 
 .form-footer,
@@ -206,15 +244,31 @@
 }
 
 .risk-dashboard-panel,
+.comparison-panel,
 .summary-card {
   padding: var(--space-3);
   border-top: 2px solid var(--ice);
   background: var(--ink-850);
 }
 
-.risk-dashboard-panel {
+.risk-dashboard-panel,
+.comparison-panel {
   border-top: 0;
   background: rgba(9, 22, 37, 0.92);
+}
+
+.comparison-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+}
+
+.comparison-panel h2 {
+  margin-bottom: var(--space-2);
+}
+
+.comparison-panel strong {
+  color: var(--ice-soft);
 }
 
 .risk-dashboard-panel ul {
@@ -428,6 +482,111 @@ th {
   width: min(1440px, calc(100% - 2rem));
   margin: 0 auto;
   padding: clamp(1rem, 3vw, 2.2rem) 0 5rem;
+}
+
+.learn-shell {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2.2rem) 0 5rem;
+}
+
+.learn-hero,
+.qa-panel,
+.play-panel,
+.learn-steps article {
+  border: 1px solid rgba(196, 245, 239, 0.14);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    var(--surface);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+}
+
+.learn-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.learn-hero h1 {
+  max-width: 14ch;
+  margin-bottom: var(--space-3);
+  font-size: 4rem;
+}
+
+.learn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.learn-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.learn-steps article,
+.qa-panel,
+.play-panel {
+  padding: var(--space-4);
+}
+
+.learn-steps svg,
+.play-panel svg {
+  width: 26px;
+  height: 26px;
+  margin-bottom: var(--space-3);
+  color: var(--ice);
+}
+
+.qa-panel,
+.play-panel {
+  margin-top: var(--space-4);
+}
+
+.qa-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.qa-list details {
+  border: 1px solid rgba(196, 245, 239, 0.12);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  background: rgba(5, 10, 15, 0.36);
+}
+
+.qa-list summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  color: var(--ice-soft);
+  font-weight: 700;
+}
+
+.qa-list summary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.qa-list p {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+}
+
+.play-panel {
+  display: flex;
+  gap: var(--space-3);
 }
 
 .judge-hero {
@@ -741,8 +900,13 @@ th {
   }
 
   .judge-hero,
-  .judge-band {
+  .judge-band,
+  .learn-hero {
     grid-template-columns: 1fr;
+  }
+
+  .learn-hero {
+    display: grid;
   }
 
   .judge-hero h1 {
@@ -754,7 +918,8 @@ th {
   }
 
   .judge-scoreboard,
-  .judge-grid {
+  .judge-grid,
+  .learn-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -783,6 +948,8 @@ th {
   }
 
   .workspace-header,
+  .workspace-nav,
+  .panel-heading-row,
   .form-footer,
   .chart-heading,
   .history-panel li {
@@ -802,7 +969,8 @@ th {
 
   .judge-scoreboard,
   .judge-grid,
-  .terminal-grid {
+  .terminal-grid,
+  .learn-steps {
     grid-template-columns: 1fr;
   }
 
@@ -813,6 +981,16 @@ th {
 
   .judge-hero h1 {
     font-size: 2.85rem;
+  }
+
+  .learn-hero h1 {
+    font-size: 2.35rem;
+  }
+
+  .parser-fallback,
+  .play-panel {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .market-curve {

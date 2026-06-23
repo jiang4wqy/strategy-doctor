@@ -10,6 +10,7 @@ export interface StrategyConfirmationProps {
   draft: StrategyDraft;
   capabilities: readonly AnyStrategyDefinition[];
   externalError?: string;
+  onBack?(): void;
   onConfirm(request: DiagnoseRequest): Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export function StrategyConfirmation({
   draft,
   capabilities,
   externalError,
+  onBack,
   onConfirm,
 }: StrategyConfirmationProps) {
   const definition = capabilities.find(
@@ -103,9 +105,18 @@ export function StrategyConfirmation({
 
   return (
     <section className="confirmation-panel" aria-labelledby="confirm-title">
-      <p className="eyebrow">02 / Confirmation boundary</p>
-      <h2 id="confirm-title">{definition.displayName}</h2>
-      <p>{definition.description}</p>
+      <div className="panel-heading-row">
+        <div>
+          <p className="eyebrow">02 / Confirmation boundary</p>
+          <h2 id="confirm-title">{definition.displayName}</h2>
+          <p>{definition.description}</p>
+        </div>
+        {onBack ? (
+          <button type="button" onClick={onBack}>
+            Back to strategy
+          </button>
+        ) : null}
+      </div>
       <div className="draft-meta">
         <span>{draft.source}</span>
         <span>{Math.round(draft.confidence * 100)}% confidence</span>

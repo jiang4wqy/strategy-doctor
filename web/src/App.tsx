@@ -12,6 +12,7 @@ import {
 } from './components/StrategyConfirmation.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
 import { JudgeMode } from './components/JudgeMode.tsx';
+import { LearnMode } from './components/LearnMode.tsx';
 import { saveDiagnosis } from './history/storage.ts';
 import {
   appReducer,
@@ -33,6 +34,10 @@ export function App({ client = defaultClient }: AppProps) {
 
   if (window.location.pathname === '/judge') {
     return <JudgeMode />;
+  }
+
+  if (window.location.pathname === '/learn') {
+    return <LearnMode />;
   }
 
   if (state.status === 'signedOut') {
@@ -63,6 +68,7 @@ export function App({ client = defaultClient }: AppProps) {
             description,
             draft,
           })}
+          onOpenLearn={() => dispatch({ type: 'learnOpened' })}
         />
         <HistoryPanel onOpen={record => dispatch({
           type: 'restored',
@@ -79,6 +85,7 @@ export function App({ client = defaultClient }: AppProps) {
           draft={state.draft}
           capabilities={state.capabilities}
           externalError={state.error}
+          onBack={() => dispatch({ type: 'back' })}
           onConfirm={async request => {
             const draft = state.draft;
             dispatch({ type: 'diagnosisStarted', request });
@@ -124,13 +131,32 @@ export function App({ client = defaultClient }: AppProps) {
     );
   }
 
+  if (state.status === 'learning') {
+    return (
+      <LearnMode onBack={() => dispatch({ type: 'back' })} />
+    );
+  }
+
   return (
     <main className="app-shell">
+      <div className="workspace-nav" aria-label="Workspace navigation">
+        <button type="button" onClick={() => dispatch({ type: 'back' })}>
+          Back to strategy
+        </button>
+        <button type="button" onClick={() => dispatch({ type: 'newStrategy' })}>
+          New strategy
+        </button>
+        <button type="button" onClick={() => dispatch({ type: 'learnOpened' })}>
+          Tutorial / QA
+        </button>
+      </div>
       <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
           request={state.request}
           requestId={state.requestId}
           view={state.view}
+          baseline={state.baseline}
+          onEditParameters={() => dispatch({ type: 'editResult' })}
         />
       </Suspense>
       {state.error ? <p role="status">{state.error}</p> : null}

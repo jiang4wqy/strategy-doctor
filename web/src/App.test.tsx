@@ -79,4 +79,66 @@ describe('App workflow', () => {
     })).toBeTruthy();
     expect(screen.getAllByRole('img')).toHaveLength(4);
   });
+
+  it('can edit parameters after a result and compare with the original run', async () => {
+    const secondDiagnosis = {
+      ...diagnosisFixture,
+      summary: {
+        ...diagnosisFixture.summary,
+        riskScore: 55,
+        worstDrawdownPct: 0.3,
+      },
+    };
+    const client: ApiClient = {
+      login: vi.fn(async () => undefined),
+      logout: vi.fn(async () => undefined),
+      capabilities: vi.fn(async () => ({
+        apiVersion: 'v1' as const,
+        requestId: 'req-capabilities',
+        data: capabilityFixture,
+      })),
+      parse: vi.fn(async () => ({
+        apiVersion: 'v1' as const,
+        requestId: 'req-parse',
+        data: draftFixture,
+      })),
+      diagnose: vi.fn()
+        .mockResolvedValueOnce({
+          apiVersion: 'v1' as const,
+          requestId: 'req-diagnosis-1',
+          data: diagnosisFixture,
+        })
+        .mockResolvedValueOnce({
+          apiVersion: 'v1' as const,
+          requestId: 'req-diagnosis-2',
+          data: secondDiagnosis,
+        }),
+    };
+    const user = userEvent.setup();
+    render(<App client={client} />);
+
+    await user.type(screen.getByLabelText('Access code'), 'team-code');
+    await user.click(screen.getByRole('button', { name: 'Enter workspace' }));
+    await user.type(
+      await screen.findByLabelText('Strategy description'),
+      'BTC moving average crossover',
+    );
+    await user.click(screen.getByRole('button', { name: 'Parse strategy' }));
+    await user.click(await screen.findByRole('button', {
+      name: 'Confirm and diagnose',
+    }));
+    await user.click(await screen.findByRole('button', {
+      name: 'Edit parameters',
+    }));
+    await user.clear(await screen.findByLabelText('Leverage'));
+    await user.type(screen.getByLabelText('Leverage'), '4');
+    await user.click(screen.getByRole('button', {
+      name: 'Confirm and diagnose',
+    }));
+
+    expect(await screen.findByRole('heading', {
+      name: 'Compared with original diagnosis',
+    })).toBeTruthy();
+    expect(client.diagnose).toHaveBeenCalledTimes(2);
+  });
 });

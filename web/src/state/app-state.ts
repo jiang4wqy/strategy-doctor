@@ -10,8 +10,16 @@ interface StateError {
   error?: string;
 }
 
-export type AppState =
-  | ({ status: 'signedOut' } & StateError)
+export interface ComparisonBaseline {
+  label: string;
+  request: DiagnoseRequest;
+  requestId: string;
+  view: DiagnosisView;
+}
+
+type SignedOutState = { status: 'signedOut' } & StateError;
+
+type WorkspaceState =
   | ({
       status: 'describing';
       description: string;
@@ -22,12 +30,14 @@ export type AppState =
       description: string;
       capabilities: readonly AnyStrategyDefinition[];
       draft: StrategyDraft;
+      baseline?: ComparisonBaseline;
     } & StateError)
   | ({
       status: 'diagnosing';
       description: string;
       capabilities: readonly AnyStrategyDefinition[];
       request: DiagnoseRequest;
+      baseline?: ComparisonBaseline;
     } & StateError)
   | ({
       status: 'result';
@@ -36,7 +46,18 @@ export type AppState =
       request: DiagnoseRequest;
       requestId: string;
       view: DiagnosisView;
+      baseline?: ComparisonBaseline;
     } & StateError);
+
+type LearningState = {
+  status: 'learning';
+  previous: WorkspaceState;
+} & StateError;
+
+export type AppState =
+  | SignedOutState
+  | WorkspaceState
+  | LearningState;
 
 export type AppAction =
   | {
@@ -63,6 +84,10 @@ export type AppAction =
     }
   | { type: 'failed'; message: string }
   | { type: 'restored'; record: StoredDiagnosis }
+  | { type: 'learnOpened' }
+  | { type: 'back' }
+  | { type: 'newStrategy' }
+  | { type: 'editResult' }
   | { type: 'signedOut' };
 
 export const initialAppState: AppState = { status: 'signedOut' };
@@ -82,6 +107,65 @@ export function appReducer(
       return state.status === 'describing'
         ? { ...state, description: action.description, error: undefined }
         : state;
+    case 'learnOpened':
+      return state.status === 'signedOut'
+        ? state
+        : {
+            status: 'learning',
+            previous: state.status === 'learning'
+              ? state.previous
+              : state,
+          };
+    case 'back':
+      if (state.status === 'learning') {
+        return state.previous;
+      }
+      if (state.status === 'confirming') {
+        return {
+          status: 'describing',
+          description: state.description,
+          capabilities: state.capabilities,
+        };
+      }
+      if (state.status === 'result') {
+        return {
+          status: 'describing',
+          description: state.description,
+          capabilities: state.capabilities,
+        };
+      }
+      return state;
+    case 'editResult':
+      return state.status === 'result'
+        ? {
+            status: 'confirming',
+            description: state.description,
+            capabilities: state.capabilities,
+            draft: {
+              strategy: state.request.strategy,
+              source: 'rules',
+              confidence: 1,
+              assumptions: [],
+              warnings: [],
+            },
+            baseline: {
+              label: 'Original diagnosis',
+              request: state.request,
+              requestId: state.requestId,
+              view: state.view,
+            },
+          }
+        : state;
+    case 'newStrategy':
+      return state.status === 'signedOut'
+        ? state
+        : {
+            status: 'describing',
+            description: '',
+            capabilities: state.status === 'learning'
+              ? state.previous.capabilities
+              : state.capabilities,
+          };
     case 'parsed':
       return state.status === 'describing'
         ? {
@@ -98,6 +182,7 @@ export function appReducer(
             description: state.description,
             capabilities: state.capabilities,
             request: action.request,
+            baseline: state.baseline,
           }
         : state;
     case 'diagnosed':
@@ -109,6 +194,7 @@ export function appReducer(
             request: state.request,
             requestId: action.requestId,
             view: action.view,
+            baseline: state.baseline,
             error: action.message,
           }
         : state;
@@ -119,6 +205,7 @@ export function appReducer(
             description: state.description,
             capabilities: state.capabilities,
             draft: action.draft,
+            baseline: state.baseline,
             error: action.message,
           }
         : state;
@@ -130,7 +217,9 @@ export function appReducer(
         : {
             status: 'result',
             description: action.record.description,
-            capabilities: state.capabilities,
+            capabilities: state.status === 'learning'
+              ? state.previous.capabilities
+              : state.capabilities,
             request: action.record.request,
             requestId: action.record.requestId,
             view: action.record.view,
