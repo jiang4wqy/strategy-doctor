@@ -99,6 +99,14 @@ export function renderScorecard(
     );
   }
 
+  if (scorecard.prescription.patchedStrategy) {
+    lines.push(
+      '',
+      '## Strategy reviewer',
+      'The API/Web diagnosis view includes a strategy-review section. Configure `DOCTOR_REVIEW_ENABLED=1`, `DASHSCOPE_API_KEY`, and optionally `DOCTOR_REVIEW_MODEL` to call a Qwen-compatible reviewer; otherwise the local rule reviewer is used.',
+    );
+  }
+
   lines.push(
     '',
     '## Held-out validation',

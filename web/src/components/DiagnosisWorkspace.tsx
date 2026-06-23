@@ -189,6 +189,49 @@ export function DiagnosisWorkspace({
           ) : null}
         </section>
       ) : null}
+      {view.strategyReview ? (
+        <section className="risk-dashboard-panel" aria-labelledby="strategy-review-title">
+          <p className="eyebrow">Open-source model review</p>
+          <h2 id="strategy-review-title">Strategy reviewer</h2>
+          <div className="risk-dashboard-grid">
+            <div className="risk-dashboard-card">
+              <span>Reviewer</span>
+              <strong>{view.strategyReview.reviewer}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Mode</span>
+              <strong>{view.strategyReview.mode}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Review score</span>
+              <strong>{view.strategyReview.score}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Agreement</span>
+              <strong>
+                {(view.strategyReview.agreementRate * 100).toFixed(1)}%
+              </strong>
+            </div>
+          </div>
+          <p>{view.strategyReview.summary}</p>
+          <div className="model-consistency-grid">
+            <h3>Objections</h3>
+            <ul>
+              {view.strategyReview.objections.length > 0
+                ? view.strategyReview.objections.map(item => (
+                  <li key={item}>{item}</li>
+                ))
+                : <li>No blocking objections.</li>}
+            </ul>
+            <h3>Recommendations</h3>
+            <ul>
+              {view.strategyReview.recommendations.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       <section className="stress-strip" aria-label="Five-dimension stress trace">
         {view.charts.riskRadar.map(risk => (

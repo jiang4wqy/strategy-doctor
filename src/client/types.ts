@@ -4,6 +4,11 @@ export type {
   ApiErrorEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  FactorLibraryView,
+  MultiFactorFrameworkView,
+  NotebookCatalogView,
+  PaperSignalRequest,
+  PaperSignalView,
   PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';

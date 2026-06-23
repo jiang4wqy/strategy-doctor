@@ -4,6 +4,11 @@ import type {
   ApiErrorEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  FactorLibraryView,
+  MultiFactorFrameworkView,
+  NotebookCatalogView,
+  PaperSignalRequest,
+  PaperSignalView,
   PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';
@@ -44,6 +49,15 @@ export interface StrategyDoctorClient {
     },
     options?: RequestOptions,
   ): Promise<PlaybookDiagnosisView>;
+  factors(options?: RequestOptions): Promise<FactorLibraryView>;
+  notebooks(options?: RequestOptions): Promise<NotebookCatalogView>;
+  multiFactorFramework(
+    options?: RequestOptions,
+  ): Promise<MultiFactorFrameworkView>;
+  paperSignal(
+    input: PaperSignalRequest,
+    options?: RequestOptions,
+  ): Promise<PaperSignalView>;
 }
 
 function normalizeBaseUrl(value: string): string {
@@ -188,6 +202,41 @@ export function createStrategyDoctor(
     ) {
       return request<PlaybookDiagnosisView>(
         '/playbook/diagnoses',
+        'POST',
+        input,
+        requestOptions,
+      );
+    },
+    factors(requestOptions?: RequestOptions) {
+      return request<FactorLibraryView>(
+        '/factors',
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    notebooks(requestOptions?: RequestOptions) {
+      return request<NotebookCatalogView>(
+        '/notebooks',
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    multiFactorFramework(requestOptions?: RequestOptions) {
+      return request<MultiFactorFrameworkView>(
+        '/multi-factor-framework',
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    paperSignal(
+      input: PaperSignalRequest,
+      requestOptions?: RequestOptions,
+    ) {
+      return request<PaperSignalView>(
+        '/paper/signals',
         'POST',
         input,
         requestOptions,

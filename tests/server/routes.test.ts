@@ -12,7 +12,14 @@ import { toApiError } from '../../src/server/errors.ts';
 import { registerCapabilityRoutes } from '../../src/server/routes/capabilities.ts';
 import { registerDiagnosisRoutes } from '../../src/server/routes/diagnoses.ts';
 import { registerHealthRoutes } from '../../src/server/routes/health.ts';
+import { registerResearchRoutes } from '../../src/server/routes/research.ts';
 import { parseServerConfig } from '../../src/server/config.ts';
+import {
+  getFactorLibrary,
+  getMultiFactorFramework,
+  getNotebookCatalog,
+} from '../../src/research/factor-library.ts';
+import { trackPaperSignal } from '../../src/research/paper-signal.ts';
 
 const config = parseServerConfig({
   DOCTOR_API_KEYS: 'test-key',
@@ -56,6 +63,12 @@ async function buildFixture() {
     diagnose: diagnoseStrategy,
     limiter: new DiagnosisLimiter(2),
   });
+  await app.register(registerResearchRoutes, {
+    factors: getFactorLibrary,
+    notebooks: getNotebookCatalog,
+    multiFactorFramework: getMultiFactorFramework,
+    paperSignal: trackPaperSignal,
+  });
   await app.ready();
   return app;
 }
@@ -89,6 +102,50 @@ test('health is public while capabilities require authentication', async t => {
   });
   assert.equal(capabilities.statusCode, 200);
   assert.equal(capabilities.json().data.length, 2);
+});
+
+test('research routes expose factors, notebooks, framework, and paper signals', async t => {
+  const app = await buildFixture();
+  t.after(() => app.close());
+
+  const factors = await app.inject({
+    method: 'GET',
+    url: '/api/v1/factors',
+    headers: bearer,
+  });
+  assert.equal(factors.statusCode, 200);
+  assert.ok(factors.json().data.factors.length > 0);
+
+  const notebooks = await app.inject({
+    method: 'GET',
+    url: '/api/v1/notebooks',
+    headers: bearer,
+  });
+  assert.equal(notebooks.statusCode, 200);
+  assert.ok(notebooks.json().data.templates.length > 0);
+
+  const framework = await app.inject({
+    method: 'GET',
+    url: '/api/v1/multi-factor-framework',
+    headers: bearer,
+  });
+  assert.equal(framework.statusCode, 200);
+  assert.ok(framework.json().data.outputs.includes('strategy model review'));
+
+  const signal = await app.inject({
+    method: 'POST',
+    url: '/api/v1/paper/signals',
+    headers: {
+      ...bearer,
+      'content-type': 'application/json',
+    },
+    payload: {
+      strategy: validRequest.strategy,
+      prices: [100, 101, 102, 103, 104, 105, 106, 107],
+    },
+  });
+  assert.equal(signal.statusCode, 200);
+  assert.equal(signal.json().data.symbol, 'BTCUSDT');
 });
 
 test('diagnosis route returns the shared DiagnosisView envelope', async t => {

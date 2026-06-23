@@ -16,6 +16,10 @@ import type { StrategyDoctorClient } from '../../src/client/index.ts';
 import type {
   AnyStrategyDefinition,
   DiagnosisView,
+  FactorLibraryView,
+  MultiFactorFrameworkView,
+  NotebookCatalogView,
+  PaperSignalView,
   PlaybookDiagnosisView,
   StrategyDraft,
 } from '../../src/platform/contracts.ts';
@@ -91,6 +95,42 @@ function createFakeClient(): StrategyDoctorClient {
           },
         },
       } satisfies PlaybookDiagnosisView;
+    },
+    async factors() {
+      return {
+        factors: [],
+        frameworkVersion: 'factor-library-v1',
+      } satisfies FactorLibraryView;
+    },
+    async notebooks() {
+      return {
+        templates: [],
+      } satisfies NotebookCatalogView;
+    },
+    async multiFactorFramework() {
+      return {
+        version: 'multi-factor-framework-v1',
+        stages: [],
+        factorGroups: [],
+        outputs: [],
+        safeguards: [],
+      } satisfies MultiFactorFrameworkView;
+    },
+    async paperSignal() {
+      return {
+        strategyId: 'parsed-001',
+        symbol: 'BTCUSDT',
+        timeframe: '1h',
+        latestSignal: 'hold',
+        simulatedPosition: 'flat',
+        paperEquity: 1,
+        totalTrades: 0,
+        turnoverPct: 0,
+        feeCostPct: 0,
+        slippageCostPct: 0,
+        lastUpdatedAt: '2026-06-23T00:00:00.000Z',
+        notes: [],
+      } satisfies PaperSignalView;
     },
   });
 }

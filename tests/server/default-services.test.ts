@@ -15,6 +15,9 @@ test('default services expose registered capabilities and local parsing', async 
     draft.strategy.archetype,
     'rsi-bollinger-mean-reversion',
   );
+  assert.ok(services.factors().factors.length > 0);
+  assert.ok(services.notebooks().templates.length > 0);
+  assert.ok(services.multiFactorFramework().outputs.length > 0);
 });
 
 test('default diagnosis service returns the shared diagnosis result', async () => {

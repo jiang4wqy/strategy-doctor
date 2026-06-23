@@ -83,6 +83,16 @@ export interface DiagnosisModelConsistency {
   };
 }
 
+export interface StrategyModelReview {
+  reviewer: string;
+  mode: 'rules' | 'open-source-model';
+  score: number;
+  agreementRate: number;
+  objections: string[];
+  recommendations: string[];
+  summary: string;
+}
+
 export interface StrategyDraft {
   strategy: Strategy;
   source: 'rules' | 'anthropic';
@@ -186,6 +196,7 @@ export interface DiagnosisView {
   };
   riskDashboard?: RiskDashboard;
   modelConsistency?: DiagnosisModelConsistency;
+  strategyReview?: StrategyModelReview;
   charts: {
     treatmentEquity: DimensionEquity[];
     treatmentDrawdown: DimensionDrawdown[];
@@ -226,3 +237,59 @@ export interface StoredDiagnosis {
 }
 
 export type CapabilityList = readonly AnyStrategyDefinition[];
+
+export interface FactorDefinition {
+  id: string;
+  group: 'trend' | 'mean-reversion' | 'volatility' | 'liquidity' | 'sentiment' | 'macro' | 'news';
+  name: string;
+  description: string;
+  scenarioUse: Dimension | 'cross-dimension';
+  defaultWeight: number;
+}
+
+export interface FactorLibraryView {
+  factors: FactorDefinition[];
+  frameworkVersion: string;
+}
+
+export interface PaperSignalRequest {
+  strategy: Strategy;
+  prices?: number[];
+}
+
+export interface PaperSignalView {
+  strategyId: string;
+  symbol: string;
+  timeframe: string;
+  latestSignal: 'long' | 'short' | 'flat' | 'hold';
+  simulatedPosition: 'long' | 'short' | 'flat';
+  paperEquity: number;
+  totalTrades: number;
+  turnoverPct: number;
+  feeCostPct: number;
+  slippageCostPct: number;
+  lastUpdatedAt: string;
+  notes: string[];
+}
+
+export interface NotebookTemplate {
+  id: string;
+  title: string;
+  cells: Array<{
+    kind: 'markdown' | 'query' | 'diagnosis' | 'export';
+    title: string;
+    body: string;
+  }>;
+}
+
+export interface NotebookCatalogView {
+  templates: NotebookTemplate[];
+}
+
+export interface MultiFactorFrameworkView {
+  version: string;
+  stages: string[];
+  factorGroups: FactorDefinition['group'][];
+  outputs: string[];
+  safeguards: string[];
+}

@@ -11,9 +11,14 @@ import { runDoctorDetailed } from '../pipeline/doctor.ts';
 import type {
   DiagnoseRequest,
   DiagnosisResult,
+  StrategyModelReview,
 } from '../platform/contracts.ts';
 import type { Narrator } from '../redteam/narrate.ts';
 import { buildAdversarialScenarioSet } from '../redteam/search.ts';
+import {
+  reviewWithOpenSourceModel,
+  type StrategyReviewOptions,
+} from '../review/model-review.ts';
 import { parseStrategy } from '../strategy/parse.ts';
 import { buildDiagnosisView } from './view.ts';
 
@@ -27,6 +32,13 @@ export interface DiagnoseDependencies {
   backtest?: BacktestAdapter;
   snapshots?: SnapshotBundle;
   narrator?: Narrator;
+  reviewer?: (
+    input: {
+      request: DiagnoseRequest;
+      view: DiagnosisResult['view'];
+    },
+  ) => Promise<StrategyModelReview>;
+  reviewOptions?: StrategyReviewOptions;
   onTrace?: (entry: string) => void;
 }
 
@@ -96,8 +108,17 @@ export async function diagnoseStrategy(
     `diagnose end: deaths=${doctor.scorecard.deaths.length}, patchedChanges=${Object.keys(doctor.scorecard.prescription.changes).length}`,
   );
 
+  const view = buildDiagnosisView(normalizedRequest, doctor, heldOut);
+  const review = dependencies.reviewer
+    ? await dependencies.reviewer({ request: normalizedRequest, view })
+    : await reviewWithOpenSourceModel(
+      { request: normalizedRequest, view },
+      dependencies.reviewOptions,
+    );
+  view.strategyReview = review;
+
   return {
     scorecard: doctor.scorecard,
-    view: buildDiagnosisView(normalizedRequest, doctor, heldOut),
+    view,
   };
 }

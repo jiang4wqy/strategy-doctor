@@ -69,6 +69,34 @@ test('client sends typed operations with Bearer authentication', async () => {
         charts: {},
       },
     }),
+    success({
+      factors: [],
+      frameworkVersion: 'factor-library-v1',
+    }),
+    success({
+      templates: [],
+    }),
+    success({
+      version: 'multi-factor-framework-v1',
+      stages: [],
+      factorGroups: [],
+      outputs: [],
+      safeguards: [],
+    }),
+    success({
+      strategyId: 'client-ma',
+      symbol: 'BTCUSDT',
+      timeframe: '1h',
+      latestSignal: 'hold',
+      simulatedPosition: 'flat',
+      paperEquity: 1,
+      totalTrades: 0,
+      turnoverPct: 0,
+      feeCostPct: 0,
+      slippageCostPct: 0,
+      lastUpdatedAt: '2026-06-23T00:00:00.000Z',
+      notes: [],
+    }),
   ];
   const doctor = createStrategyDoctor({
     baseUrl: 'https://doctor.example/',
@@ -89,6 +117,10 @@ test('client sends typed operations with Bearer authentication', async () => {
     },
     style: 'trend',
   });
+  await doctor.factors();
+  await doctor.notebooks();
+  await doctor.multiFactorFramework();
+  await doctor.paperSignal({ strategy: requestFixture.strategy });
 
   assert.deepEqual(calls.map(call => [
     call.init?.method ?? 'GET',
@@ -98,6 +130,10 @@ test('client sends typed operations with Bearer authentication', async () => {
     ['POST', 'https://doctor.example/api/v1/strategies/parse'],
     ['POST', 'https://doctor.example/api/v1/diagnoses'],
     ['POST', 'https://doctor.example/api/v1/playbook/diagnoses'],
+    ['GET', 'https://doctor.example/api/v1/factors'],
+    ['GET', 'https://doctor.example/api/v1/notebooks'],
+    ['GET', 'https://doctor.example/api/v1/multi-factor-framework'],
+    ['POST', 'https://doctor.example/api/v1/paper/signals'],
   ]);
   for (const call of calls) {
     assert.equal(
@@ -118,6 +154,9 @@ test('client sends typed operations with Bearer authentication', async () => {
       prompt: 'BTC moving average crossover',
     },
     style: 'trend',
+  });
+  assert.deepEqual(JSON.parse(String(calls[7].init?.body)), {
+    strategy: requestFixture.strategy,
   });
 });
 

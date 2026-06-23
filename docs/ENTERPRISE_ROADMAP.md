@@ -102,6 +102,16 @@ Security boundary:
 Goal: use a second model as an independent reviewer of the generated strategy
 and the prescription.
 
+Current implementation:
+
+- `strategyReview` is attached to every diagnosis.
+- Default mode uses deterministic local rules.
+- Network mode supports OpenAI-compatible APIs.
+- Tongyi Qianwen/Qwen can be called through DashScope by setting:
+  - `DOCTOR_REVIEW_ENABLED=1`
+  - `DASHSCOPE_API_KEY`
+  - optional `DOCTOR_REVIEW_MODEL=qwen-plus`
+
 Recommended flow:
 
 1. Primary parser creates a typed strategy.

@@ -62,6 +62,9 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('Export Risk Dashboard JSON')).toBeTruthy();
     expect(screen.getByText('Export Risk Dashboard Markdown')).toBeTruthy();
     expect(screen.getByText('Export Decision Snapshot')).toBeTruthy();
+    expect(screen.getByText('Strategy reviewer')).toBeTruthy();
+    expect(screen.getByText('local-rule-reviewer')).toBeTruthy();
+    expect(screen.getByText('64')).toBeTruthy();
     expect(screen.getAllByRole('img')).toHaveLength(6);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
     expect(screen.getByText(

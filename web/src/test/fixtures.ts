@@ -221,6 +221,20 @@ export const diagnosisFixture = {
       },
     ],
   },
+  strategyReview: {
+    reviewer: 'local-rule-reviewer',
+    mode: 'rules',
+    score: 64,
+    agreementRate: 1,
+    objections: [
+      'Worst drawdown is above 50%, so capital survival is weak.',
+    ],
+    recommendations: [
+      'Reduce exposure or add a regime filter before deployment.',
+    ],
+    summary:
+      'The strategy is diagnosable but still needs risk review before deployment.',
+  },
   charts: {
     treatmentEquity: [
       { dimension: 'sentiment', equity: [1, 0.9, 1.1] },

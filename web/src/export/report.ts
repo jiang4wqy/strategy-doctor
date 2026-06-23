@@ -43,6 +43,22 @@ ${evaluations}
 
 ${view.scorecard.prescription.rationale}
 
+## Strategy reviewer
+
+${view.strategyReview
+    ? `Reviewer: ${view.strategyReview.reviewer}
+Mode: ${view.strategyReview.mode}
+Score: ${view.strategyReview.score}
+Agreement: ${(view.strategyReview.agreementRate * 100).toFixed(1)}%
+Summary: ${view.strategyReview.summary}
+
+Objections:
+${view.strategyReview.objections.map(item => `- ${item}`).join('\n') || '- None'}
+
+Recommendations:
+${view.strategyReview.recommendations.map(item => `- ${item}`).join('\n')}`
+    : 'No strategy-review metadata was captured.'}
+
 ## Held-out trade-off
 
 Robustness changed by ${view.scorecard.tradeoff.robustnessGain}; average return
@@ -157,6 +173,7 @@ export function exportRiskDashboardJson(
   return JSON.stringify({
     request,
     modelConsistency: view.modelConsistency,
+    strategyReview: view.strategyReview,
     riskDashboard: view.riskDashboard,
     prescription: view.scorecard.prescription,
     tradeoff: view.scorecard.tradeoff,

@@ -177,6 +177,56 @@ $env:DOCTOR_NL_MODEL='<available-model-id>'
 
 CI and the default service do not enable the fallback.
 
+## Open-source model strategy review
+
+Every diagnosis includes `strategyReview`. By default it uses the deterministic
+local rule reviewer. To call Tongyi Qianwen/Qwen through DashScope's
+OpenAI-compatible API:
+
+```powershell
+$env:DOCTOR_REVIEW_ENABLED='1'
+$env:DASHSCOPE_API_KEY='<your-dashscope-key>'
+$env:DOCTOR_REVIEW_MODEL='qwen-plus'
+```
+
+Default compatible endpoint:
+
+```text
+https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+```
+
+For local open-source deployments such as vLLM, Ollama OpenAI-compatible mode,
+or LM Studio, override:
+
+```powershell
+$env:DOCTOR_REVIEW_BASE_URL='http://127.0.0.1:8000/v1'
+$env:DOCTOR_REVIEW_MODEL='Qwen3-8B'
+$env:DOCTOR_REVIEW_API_KEY='local-dev-key'
+```
+
+The reviewer is advisory. It never places orders and falls back to local rules
+when the remote model is unavailable.
+
+Notes:
+
+- DashScope/Qwen is a direct hosted API call.
+- `DOCTOR_REVIEW_BASE_URL` is optional for DashScope because Strategy Doctor
+  defaults to the official compatible endpoint above.
+- Use `DOCTOR_REVIEW_BASE_URL` only when switching to a local or third-party
+  OpenAI-compatible model server.
+
+## Research platform endpoints
+
+```http
+GET /api/v1/factors
+GET /api/v1/notebooks
+GET /api/v1/multi-factor-framework
+POST /api/v1/paper/signals
+```
+
+These endpoints expose the AI factor library, Notebook templates, multi-factor
+research framework, and read-only paper signal tracking lane.
+
 ## Run a diagnosis
 
 ```http

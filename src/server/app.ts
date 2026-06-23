@@ -26,6 +26,7 @@ import { registerDiagnosisRoutes } from './routes/diagnoses.ts';
 import { registerHealthRoutes } from './routes/health.ts';
 import { registerParseRoutes } from './routes/parse.ts';
 import { registerPlaybookRoutes } from './routes/playbook.ts';
+import { registerResearchRoutes } from './routes/research.ts';
 
 export interface BuildServerOptions {
   env?: Record<string, string | undefined>;
@@ -88,6 +89,11 @@ export async function buildServer(
     diagnose: options.diagnose
       ?? options.services?.diagnose
       ?? defaults.diagnose,
+    factors: options.services?.factors ?? defaults.factors,
+    notebooks: options.services?.notebooks ?? defaults.notebooks,
+    multiFactorFramework: options.services?.multiFactorFramework
+      ?? defaults.multiFactorFramework,
+    paperSignal: options.services?.paperSignal ?? defaults.paperSignal,
   };
   const app = Fastify({
     bodyLimit: config.bodyLimit,
@@ -147,6 +153,12 @@ export async function buildServer(
     parse: services.parse,
     diagnose: services.diagnose,
     limiter: new DiagnosisLimiter(2),
+  });
+  await app.register(registerResearchRoutes, {
+    factors: services.factors,
+    notebooks: services.notebooks,
+    multiFactorFramework: services.multiFactorFramework,
+    paperSignal: services.paperSignal,
   });
 
   app.get('/api/v1/openapi.json', {
