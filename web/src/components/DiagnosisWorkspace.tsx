@@ -4,6 +4,8 @@ import type {
 } from '../api/types.ts';
 import type { ComparisonBaseline } from '../state/app-state.ts';
 import { EquityComparisonChart } from '../charts/EquityComparisonChart.tsx';
+import { DrawdownCurveChart } from '../charts/DrawdownCurveChart.tsx';
+import { ExecutionQualityChart } from '../charts/ExecutionQualityChart.tsx';
 import { ParameterChangeChart } from '../charts/ParameterChangeChart.tsx';
 import { RiskRadarChart } from '../charts/RiskRadarChart.tsx';
 import { ScenarioTimelineChart } from '../charts/ScenarioTimelineChart.tsx';
@@ -199,6 +201,8 @@ export function DiagnosisWorkspace({
 
       <section className="chart-grid" aria-label="Diagnosis charts">
         <EquityComparisonChart charts={view.charts} />
+        <DrawdownCurveChart charts={view.charts} />
+        <ExecutionQualityChart items={view.charts.executionQuality} />
         <RiskRadarChart risks={view.charts.riskRadar} />
         <ScenarioTimelineChart items={view.charts.scenarioTimeline} />
         <ParameterChangeChart changes={view.charts.parameterChanges} />

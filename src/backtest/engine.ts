@@ -24,8 +24,11 @@ export function runStrategyOnPrices(
   }
 
   const { leverage, stopLossPct, positionPct } = strategy.params;
+  const feeRatePct = strategy.execution?.feeRatePct ?? 0;
+  const slippagePct = strategy.execution?.slippagePct ?? 0;
   let equity = 1;
   const equityCurve = [equity];
+  const drawdownCurve = [0];
   let direction: PositionDirection = 0;
   let entryPrice = 0;
   let blockedDirection: PositionDirection = 0;
@@ -33,7 +36,22 @@ export function runStrategyOnPrices(
   let numTrades = 0;
   let peakEquity = equity;
   let maxDrawdownPct = 0;
+  let turnoverPct = 0;
+  let feeCostPct = 0;
+  let slippageCostPct = 0;
   const liquidationLine = 0.9 / leverage;
+
+  function applyExecutionCost(turnoverMultiplier: number): void {
+    if (turnoverMultiplier <= 0) {
+      return;
+    }
+    const turnover = positionPct * leverage * turnoverMultiplier;
+    turnoverPct += turnover;
+    feeCostPct += turnover * feeRatePct;
+    slippageCostPct += turnover * slippagePct;
+    const cost = turnover * (feeRatePct + slippagePct);
+    equity = Math.max(0.001, equity * (1 - cost));
+  }
 
   for (let index = 1; index < prices.length; index++) {
     if (direction !== 0 && !liquidated) {
@@ -72,6 +90,9 @@ export function runStrategyOnPrices(
 
     if (!liquidated) {
       if (decision === 'flat') {
+        if (direction !== 0) {
+          applyExecutionCost(1);
+        }
         direction = 0;
         entryPrice = 0;
         blockedDirection = 0;
@@ -82,6 +103,7 @@ export function runStrategyOnPrices(
           nextDirection !== direction
           && nextDirection !== blockedDirection
         ) {
+          applyExecutionCost(direction === 0 ? 1 : 2);
           direction = nextDirection;
           entryPrice = prices[index];
           numTrades++;
@@ -96,13 +118,23 @@ export function runStrategyOnPrices(
       (peakEquity - equity) / peakEquity,
     );
     equityCurve.push(equity);
+    drawdownCurve.push((peakEquity - equity) / peakEquity);
   }
 
-  return {
+  const metrics: Metrics = {
     pnlPct: equity - 1,
     maxDrawdownPct,
     liquidated,
     numTrades,
     equityCurve,
   };
+  return strategy.execution
+    ? {
+      ...metrics,
+      drawdownCurve,
+      turnoverPct,
+      feeCostPct,
+      slippageCostPct,
+    }
+    : metrics;
 }

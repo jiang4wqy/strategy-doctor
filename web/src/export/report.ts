@@ -29,6 +29,9 @@ export function renderDiagnosisMarkdown(
 - Risk score: ${view.summary.riskScore}
 - Worst drawdown: ${(view.summary.worstDrawdownPct * 100).toFixed(1)}%
 - Total trades: ${view.summary.totalTrades}
+- Total turnover: ${(view.summary.totalTurnoverPct * 100).toFixed(1)}%
+- Fee drag: ${(view.summary.feeCostPct * 100).toFixed(2)}%
+- Slippage drag: ${(view.summary.slippageCostPct * 100).toFixed(2)}%
 - Robustness gain: ${view.summary.robustnessGain}
 - Return delta: ${(view.summary.returnDelta * 100).toFixed(2)}%
 
@@ -108,6 +111,7 @@ function fiveDimensionRows(view: DiagnosisView): string {
     .map(evaluation => (
       `- ${evaluation.dimension}: pnl ${(evaluation.metrics.pnlPct * 100).toFixed(2)}%, ` +
       `maxDD ${(evaluation.metrics.maxDrawdownPct * 100).toFixed(2)}%, ` +
+      `turnover ${((evaluation.metrics.turnoverPct ?? 0) * 100).toFixed(2)}%, ` +
       `damageScore ${evaluation.damageScore.toFixed(4)}, ` +
       `cause ${evaluation.cause}`
     ))
@@ -163,6 +167,9 @@ export function exportRiskDashboardJson(
       scenarioName: evaluation.scenarioName,
       pnlPct: evaluation.metrics.pnlPct,
       maxDrawdownPct: evaluation.metrics.maxDrawdownPct,
+      turnoverPct: evaluation.metrics.turnoverPct ?? 0,
+      feeCostPct: evaluation.metrics.feeCostPct ?? 0,
+      slippageCostPct: evaluation.metrics.slippageCostPct ?? 0,
       damageScore: evaluation.damageScore,
       cause: evaluation.cause,
       survived: evaluation.cause === 'survived',

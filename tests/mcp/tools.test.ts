@@ -48,14 +48,16 @@ function createFakeClient(): StrategyDoctorClient {
     async diagnose() {
       return {
         scorecard: {} as DiagnosisView['scorecard'],
-        summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, robustnessGain: 5, returnDelta: 0.1 },
+        summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, totalTurnoverPct: 2.4, feeCostPct: 0.002, slippageCostPct: 0.001, robustnessGain: 5, returnDelta: 0.1 },
         charts: {
           treatmentEquity: [],
+          treatmentDrawdown: [],
           heldOutComparison: [],
           defaultHeldOutDimension: 'technical',
           riskRadar: [],
           parameterChanges: [],
           scenarioTimeline: [],
+          executionQuality: [],
         },
       } satisfies DiagnosisView;
     },
@@ -76,14 +78,16 @@ function createFakeClient(): StrategyDoctorClient {
         },
         view: {
           scorecard: {} as DiagnosisView['scorecard'],
-          summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, robustnessGain: 5, returnDelta: 0.1 },
+          summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, totalTurnoverPct: 2.4, feeCostPct: 0.002, slippageCostPct: 0.001, robustnessGain: 5, returnDelta: 0.1 },
           charts: {
             treatmentEquity: [],
+            treatmentDrawdown: [],
             heldOutComparison: [],
             defaultHeldOutDimension: 'technical',
             riskRadar: [],
             parameterChanges: [],
             scenarioTimeline: [],
+            executionQuality: [],
           },
         },
       } satisfies PlaybookDiagnosisView;

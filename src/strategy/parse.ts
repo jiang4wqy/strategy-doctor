@@ -1,5 +1,6 @@
 import type {
   BacktestSelection,
+  ExecutionSettings,
   Strategy,
   StrategyArchetype,
   StrategyBase,
@@ -99,6 +100,36 @@ function parseBacktest(value: unknown): BacktestSelection | undefined {
   };
 }
 
+function parseBoundedRate(
+  value: unknown,
+  field: string,
+): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 0.02) {
+    fail(
+      `${field} must be a decimal rate from 0 to 0.02`,
+      'INVALID_REQUEST',
+      field,
+    );
+  }
+  return parsed;
+}
+
+function parseExecution(value: unknown): ExecutionSettings | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const execution = object(value, 'strategy.execution');
+  return {
+    feeRatePct: execution.feeRatePct === undefined
+      ? 0
+      : parseBoundedRate(execution.feeRatePct, 'strategy.execution.feeRatePct'),
+    slippagePct: execution.slippagePct === undefined
+      ? 0
+      : parseBoundedRate(execution.slippagePct, 'strategy.execution.slippagePct'),
+  };
+}
+
 function parseArchetype(value: unknown): StrategyArchetype {
   if (
     value !== 'ma-cross'
@@ -164,6 +195,7 @@ export function parseStrategy(value: unknown): Strategy {
     universe: [symbol],
     timeframe,
     backtest: parseBacktest(strategy.backtest),
+    execution: parseExecution(strategy.execution),
   };
 
   try {

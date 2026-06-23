@@ -130,6 +130,11 @@ export interface DimensionEquity {
   equity: number[];
 }
 
+export interface DimensionDrawdown {
+  dimension: Dimension;
+  drawdown: number[];
+}
+
 export interface DimensionEquityComparison {
   dimension: Dimension;
   original: number[];
@@ -155,6 +160,16 @@ export interface ScenarioTimelineItem {
   cause: DeathCause;
   pnlPct: number;
   maxDrawdownPct: number;
+  turnoverPct: number;
+}
+
+export interface ExecutionQualityItem {
+  dimension: Dimension;
+  scenarioName: string;
+  turnoverPct: number;
+  feeCostPct: number;
+  slippageCostPct: number;
+  numTrades: number;
 }
 
 export interface DiagnosisView {
@@ -163,6 +178,9 @@ export interface DiagnosisView {
     riskScore: number;
     worstDrawdownPct: number;
     totalTrades: number;
+    totalTurnoverPct: number;
+    feeCostPct: number;
+    slippageCostPct: number;
     robustnessGain: number;
     returnDelta: number;
   };
@@ -170,11 +188,13 @@ export interface DiagnosisView {
   modelConsistency?: DiagnosisModelConsistency;
   charts: {
     treatmentEquity: DimensionEquity[];
+    treatmentDrawdown: DimensionDrawdown[];
     heldOutComparison: DimensionEquityComparison[];
     defaultHeldOutDimension: Dimension;
     riskRadar: DimensionRisk[];
     parameterChanges: ParameterChange[];
     scenarioTimeline: ScenarioTimelineItem[];
+    executionQuality: ExecutionQualityItem[];
   };
 }
 

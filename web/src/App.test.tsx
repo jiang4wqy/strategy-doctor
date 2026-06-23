@@ -14,6 +14,16 @@ vi.mock('./charts/EquityComparisonChart.tsx', () => ({
     <div role="img" aria-label="Held-out equity comparison" />
   ),
 }));
+vi.mock('./charts/DrawdownCurveChart.tsx', () => ({
+  DrawdownCurveChart: () => (
+    <div role="img" aria-label="Treatment drawdown curve" />
+  ),
+}));
+vi.mock('./charts/ExecutionQualityChart.tsx', () => ({
+  ExecutionQualityChart: () => (
+    <div role="img" aria-label="Execution cost and turnover" />
+  ),
+}));
 vi.mock('./charts/RiskRadarChart.tsx', () => ({
   RiskRadarChart: () => (
     <div role="img" aria-label="Five-dimension risk radar" />
@@ -77,7 +87,7 @@ describe('App workflow', () => {
     expect(screen.getByRole('heading', {
       name: 'Reproduce this diagnosis',
     })).toBeTruthy();
-    expect(screen.getAllByRole('img')).toHaveLength(4);
+    expect(screen.getAllByRole('img')).toHaveLength(6);
   });
 
   it('sends selected market, timeframe, data source, and candle window', async () => {
@@ -117,6 +127,10 @@ describe('App workflow', () => {
     await user.type(screen.getByLabelText('Candles'), '360');
     await user.type(screen.getByLabelText('Start date'), '2026-01-01');
     await user.type(screen.getByLabelText('End date'), '2026-06-01');
+    await user.clear(screen.getByLabelText('Fee rate'));
+    await user.type(screen.getByLabelText('Fee rate'), '0.001');
+    await user.clear(screen.getByLabelText('Slippage'));
+    await user.type(screen.getByLabelText('Slippage'), '0.0007');
     await user.click(screen.getByRole('button', {
       name: 'Confirm and diagnose',
     }));
@@ -130,6 +144,10 @@ describe('App workflow', () => {
           candleLimit: 360,
           startDate: '2026-01-01',
           endDate: '2026-06-01',
+        },
+        execution: {
+          feeRatePct: 0.001,
+          slippagePct: 0.0007,
         },
       }),
     }));

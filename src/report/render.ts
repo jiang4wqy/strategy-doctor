@@ -75,6 +75,19 @@ export function renderScorecard(
 
   lines.push(
     '',
+    '## Execution quality',
+    '| Dimension | Trades | Turnover | Fee drag | Slippage drag |',
+    '|---|---:|---:|---:|---:|',
+  );
+
+  for (const evaluation of scorecard.evaluations) {
+    lines.push(
+      `| ${evaluation.dimension} | ${evaluation.metrics.numTrades} | ${percent(evaluation.metrics.turnoverPct ?? 0)} | ${percent(evaluation.metrics.feeCostPct ?? 0)} | ${percent(evaluation.metrics.slippageCostPct ?? 0)} |`,
+    );
+  }
+
+  lines.push(
+    '',
     '## Prescription',
     `- Parameter changes: \`${JSON.stringify(scorecard.prescription.changes)}\``,
     `- Rationale: ${scorecard.prescription.rationale}`,

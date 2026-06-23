@@ -60,7 +60,24 @@ test('buildDiagnosisView derives deterministic chart data without changing the s
       0,
     ),
   );
+  assert.equal(
+    view.summary.totalTurnoverPct,
+    doctor.scorecard.evaluations.reduce(
+      (sum, evaluation) => sum + (evaluation.metrics.turnoverPct ?? 0),
+      0,
+    ),
+  );
+  assert.equal(
+    view.summary.feeCostPct,
+    doctor.scorecard.evaluations.reduce(
+      (sum, evaluation) => sum + (evaluation.metrics.feeCostPct ?? 0),
+      0,
+    ),
+  );
   assert.equal(view.charts.treatmentEquity.length, treatment.length);
+  assert.equal(view.charts.treatmentDrawdown.length, treatment.length);
+  assert.equal(view.charts.executionQuality.length, treatment.length);
+  assert.ok(view.charts.treatmentDrawdown.every(item => item.drawdown.length > 0));
   assert.equal(view.charts.heldOutComparison.length, heldOut.length);
   assert.deepEqual(
     view.charts.heldOutComparison.map(item => item.dimension),

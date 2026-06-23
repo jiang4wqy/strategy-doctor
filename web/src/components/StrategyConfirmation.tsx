@@ -59,6 +59,12 @@ export function StrategyConfirmation({
   const [endDate, setEndDate] = useState(
     draft.strategy.backtest?.endDate ?? '',
   );
+  const [feeRatePct, setFeeRatePct] = useState(
+    String(draft.strategy.execution?.feeRatePct ?? 0.0006),
+  );
+  const [slippagePct, setSlippagePct] = useState(
+    String(draft.strategy.execution?.slippagePct ?? 0.0005),
+  );
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
 
@@ -112,6 +118,19 @@ export function StrategyConfirmation({
       setError('Start date must be on or before end date.');
       return;
     }
+    const parsedFeeRatePct = Number(feeRatePct);
+    const parsedSlippagePct = Number(slippagePct);
+    if (
+      !Number.isFinite(parsedFeeRatePct)
+      || parsedFeeRatePct < 0
+      || parsedFeeRatePct > 0.02
+      || !Number.isFinite(parsedSlippagePct)
+      || parsedSlippagePct < 0
+      || parsedSlippagePct > 0.02
+    ) {
+      setError('Fee rate and slippage must be decimal rates from 0 to 0.02.');
+      return;
+    }
 
     setError(undefined);
     setLoading(true);
@@ -127,6 +146,10 @@ export function StrategyConfirmation({
             candleLimit: parsedCandleLimit,
             ...(startDate ? { startDate } : {}),
             ...(endDate ? { endDate } : {}),
+          },
+          execution: {
+            feeRatePct: parsedFeeRatePct,
+            slippagePct: parsedSlippagePct,
           },
         } as unknown as DiagnoseRequest['strategy'],
         style,
@@ -259,6 +282,26 @@ export function StrategyConfirmation({
             type="date"
             value={endDate}
             onChange={event => setEndDate(event.target.value)}
+          />
+          <label htmlFor="fee-rate">Fee rate</label>
+          <input
+            id="fee-rate"
+            type="number"
+            min="0"
+            max="0.02"
+            step="0.0001"
+            value={feeRatePct}
+            onChange={event => setFeeRatePct(event.target.value)}
+          />
+          <label htmlFor="slippage-rate">Slippage</label>
+          <input
+            id="slippage-rate"
+            type="number"
+            min="0"
+            max="0.02"
+            step="0.0001"
+            value={slippagePct}
+            onChange={event => setSlippagePct(event.target.value)}
           />
         </fieldset>
         {error || externalError ? (

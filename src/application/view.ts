@@ -188,21 +188,45 @@ function buildModelConsistency(
   };
 }
 
+function drawdownCurve(equityCurve: readonly number[]): number[] {
+  let peak = equityCurve[0] ?? 1;
+  return equityCurve.map(value => {
+    peak = Math.max(peak, value);
+    return peak <= 0 ? 0 : (peak - value) / peak;
+  });
+}
+
 export function buildDiagnosisView(
   request: DiagnoseRequest,
   doctor: DoctorResult,
   heldOut: readonly Scenario[],
 ): DiagnosisView {
   const selectedStyle = doctor.scorecard.perStyle[request.style];
+  const totalTrades = doctor.scorecard.evaluations.reduce(
+    (sum, evaluation) => sum + evaluation.metrics.numTrades,
+    0,
+  );
+  const totalTurnoverPct = doctor.scorecard.evaluations.reduce(
+    (sum, evaluation) => sum + (evaluation.metrics.turnoverPct ?? 0),
+    0,
+  );
+  const feeCostPct = doctor.scorecard.evaluations.reduce(
+    (sum, evaluation) => sum + (evaluation.metrics.feeCostPct ?? 0),
+    0,
+  );
+  const slippageCostPct = doctor.scorecard.evaluations.reduce(
+    (sum, evaluation) => sum + (evaluation.metrics.slippageCostPct ?? 0),
+    0,
+  );
   return {
     scorecard: doctor.scorecard,
     summary: {
       riskScore: selectedStyle.riskScore,
       worstDrawdownPct: selectedStyle.worstDrawdownPct,
-      totalTrades: doctor.scorecard.evaluations.reduce(
-        (sum, evaluation) => sum + evaluation.metrics.numTrades,
-        0,
-      ),
+      totalTrades,
+      totalTurnoverPct,
+      feeCostPct,
+      slippageCostPct,
       robustnessGain: doctor.scorecard.tradeoff.robustnessGain,
       returnDelta: doctor.scorecard.tradeoff.returnCost,
     },
@@ -212,6 +236,13 @@ export function buildDiagnosisView(
       treatmentEquity: doctor.scorecard.evaluations.map(evaluation => ({
         dimension: evaluation.dimension,
         equity: [...evaluation.metrics.equityCurve],
+      })),
+      treatmentDrawdown: doctor.scorecard.evaluations.map(evaluation => ({
+        dimension: evaluation.dimension,
+        drawdown: [
+          ...(evaluation.metrics.drawdownCurve
+            ?? drawdownCurve(evaluation.metrics.equityCurve)),
+        ],
       })),
       heldOutComparison: heldOut.map((scenario, index) => ({
         dimension: scenario.dimension,
@@ -241,8 +272,17 @@ export function buildDiagnosisView(
           cause: evaluation.cause,
           pnlPct: evaluation.metrics.pnlPct,
           maxDrawdownPct: evaluation.metrics.maxDrawdownPct,
+          turnoverPct: evaluation.metrics.turnoverPct ?? 0,
         }))
         .sort((left, right) => right.damageScore - left.damageScore),
+      executionQuality: doctor.scorecard.evaluations.map(evaluation => ({
+        dimension: evaluation.dimension,
+        scenarioName: evaluation.scenarioName,
+        turnoverPct: evaluation.metrics.turnoverPct ?? 0,
+        feeCostPct: evaluation.metrics.feeCostPct ?? 0,
+        slippageCostPct: evaluation.metrics.slippageCostPct ?? 0,
+        numTrades: evaluation.metrics.numTrades,
+      })),
     },
   };
 }

@@ -116,6 +116,37 @@ test('flat closes an open position without counting a new trade', () => {
   assert.equal(metrics.pnlPct, 0);
 });
 
+test('execution costs reduce equity and report turnover drag', () => {
+  const adapter = adapterWithDecisions((index) => {
+    if (index === 1) return 'long';
+    if (index === 3) return 'flat';
+    return 'hold';
+  });
+  const zeroCost = runStrategyOnPrices(
+    strategy,
+    [100, 100, 105, 105],
+    adapter,
+  );
+  const withCosts = runStrategyOnPrices(
+    {
+      ...strategy,
+      execution: {
+        feeRatePct: 0.001,
+        slippagePct: 0.002,
+      },
+    },
+    [100, 100, 105, 105],
+    adapter,
+  );
+
+  assert.equal(withCosts.numTrades, 1);
+  assert.equal(withCosts.turnoverPct, 4);
+  assert.ok(Math.abs((withCosts.feeCostPct ?? 0) - 0.004) < 1e-12);
+  assert.ok(Math.abs((withCosts.slippageCostPct ?? 0) - 0.008) < 1e-12);
+  assert.ok(withCosts.pnlPct < zeroCost.pnlPct);
+  assert.equal(withCosts.drawdownCurve?.length, withCosts.equityCurve.length);
+});
+
 test('a stopped direction remains blocked through hold', () => {
   const adapter = adapterWithDecisions((index) => (
     index === 2 ? 'hold' : 'long'

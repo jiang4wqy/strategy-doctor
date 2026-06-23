@@ -72,6 +72,7 @@ export function createStrategyRegistry(
         universe: base.universe,
         timeframe: base.timeframe,
         ...(base.backtest ? { backtest: base.backtest } : {}),
+        ...(base.execution ? { execution: base.execution } : {}),
       } as unknown as StrategyByArchetype<A>;
     },
   };

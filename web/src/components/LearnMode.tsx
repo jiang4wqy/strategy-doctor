@@ -4,7 +4,10 @@ import {
   BrainCircuit,
   CircleHelp,
   Dice5,
+  LineChart,
+  NotebookTabs,
   ShieldAlert,
+  Waves,
 } from 'lucide-react';
 
 const steps = [
@@ -25,6 +28,33 @@ const steps = [
     text:
       'Strategy Doctor attacks the strategy across five deterministic stress dimensions, then proposes bounded targeted repairs.',
     Icon: BookOpen,
+  },
+  {
+    title: 'Inspect execution quality',
+    text:
+      'Review equity, drawdown, turnover, fee drag, slippage drag, and held-out repair trade-offs before sharing the report.',
+    Icon: LineChart,
+  },
+];
+
+const researchModules = [
+  {
+    title: 'AI factor library',
+    text:
+      'A curated factor map for trend, mean reversion, liquidity, volatility, sentiment, macro, and news stress features.',
+    Icon: BrainCircuit,
+  },
+  {
+    title: 'Paper signal monitor',
+    text:
+      'A read-only simulation lane for tracking live strategy decisions before any deployment handoff.',
+    Icon: Waves,
+  },
+  {
+    title: 'Notebook research lane',
+    text:
+      'A planned online notebook surface for multi-factor experiments, dataset fingerprints, and reproducible reports.',
+    Icon: NotebookTabs,
   },
 ];
 
@@ -106,6 +136,16 @@ export function LearnMode({ onBack }: LearnModeProps) {
             </details>
           ))}
         </div>
+      </section>
+
+      <section className="learn-steps" aria-label="Research extensions">
+        {researchModules.map(({ Icon, title, text }) => (
+          <article key={title}>
+            <Icon aria-hidden="true" />
+            <h2>{title}</h2>
+            <p>{text}</p>
+          </article>
+        ))}
       </section>
 
       <section className="play-panel" aria-labelledby="play-title">

@@ -9,6 +9,11 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
     ['Risk score', String(summary.riskScore)],
     ['Worst drawdown', `${(summary.worstDrawdownPct * 100).toFixed(1)}%`],
     ['Total trades', String(summary.totalTrades)],
+    ['Turnover', `${(summary.totalTurnoverPct * 100).toFixed(1)}%`],
+    [
+      'Cost drag',
+      `${((summary.feeCostPct + summary.slippageCostPct) * 100).toFixed(2)}%`,
+    ],
     [
       'Robustness gain',
       `${summary.robustnessGain >= 0 ? '+' : ''}${summary.robustnessGain}`,

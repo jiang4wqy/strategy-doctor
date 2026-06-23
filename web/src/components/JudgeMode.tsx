@@ -34,13 +34,13 @@ const scorecards = [
   },
   {
     label: 'Evidence',
-    value: '267 tests',
+    value: '269 tests',
     caption: 'core, web, API, accessibility, e2e',
     Icon: FileArchive,
   },
   {
     label: 'Coverage',
-    value: '94.58% lines',
+    value: '94.51% lines',
     caption: 'guarded by the verification script',
     Icon: ShieldCheck,
   },
@@ -49,7 +49,7 @@ const scorecards = [
 const signals = [
   ['Parse consensus', 'multi-model ready'],
   ['Prescription', 'adapter-owned'],
-  ['Backtest', 'Bitget public data'],
+  ['Backtest', 'cost-aware Bitget data'],
   ['Deployment', 'Playbook bridge'],
 ];
 
@@ -97,6 +97,11 @@ export function JudgeMode() {
             strategies, stress-tests them against deterministic failure modes,
             and produces auditable risk repairs before Playbook deployment.
           </p>
+          <p className="judge-lede">
+            Execution assumptions are explicit: fee rate, slippage, turnover,
+            drawdown path, and held-out equity are exported as reviewer-ready
+            evidence instead of hidden chart calculations.
+          </p>
           <div className="judge-actions" aria-label="Demo actions">
             <a href="/showcase">
               Open private workspace
@@ -136,8 +141,8 @@ export function JudgeMode() {
               <strong>+27.2</strong>
             </div>
             <div>
-              <span>Held-out delta</span>
-              <strong>-0.031</strong>
+              <span>Cost drag</span>
+              <strong>-0.42%</strong>
             </div>
           </div>
           <div className="signal-stack">

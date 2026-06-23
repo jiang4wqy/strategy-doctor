@@ -49,6 +49,7 @@ Strategy Doctor provides a deterministic diagnosis pipeline:
 - Protected React diagnosis workspace.
 - Natural-language strategy composer with confirmation boundary.
 - Market, timeframe, dataset, candle-count, and date-window controls.
+- Explicit fee and slippage assumptions with turnover and cost-drag reporting.
 - Five-dimension charts and scenario timeline.
 - Risk dashboard with trend score, defense score, cost efficiency, and alerts.
 - Model-consistency metrics for parse/narration/prescription paths.
@@ -134,6 +135,8 @@ Included:
 - offline deterministic diagnosis
 - optional public Bitget candle diagnosis
 - user-selectable candle limit and date window
+- explicit fee/slippage execution assumptions
+- equity, drawdown, turnover, and cost-drag chart data
 
 Not included:
 
@@ -158,6 +161,7 @@ Not included:
 - [x] Submission evidence pack.
 - [x] One-command local showcase script.
 - [x] Market, timeframe, dataset, and date-window controls.
+- [x] Fee/slippage, turnover, drawdown-curve, and cost-drag evidence.
 - [ ] Record and upload demo video.
 - [ ] Add the demo video URL to the submission form.
 - [ ] Submit before the official deadline.

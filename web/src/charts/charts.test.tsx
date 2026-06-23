@@ -2,7 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { diagnosisFixture } from '../test/fixtures.ts';
+import { DrawdownCurveChart } from './DrawdownCurveChart.tsx';
 import { EquityComparisonChart } from './EquityComparisonChart.tsx';
+import { ExecutionQualityChart } from './ExecutionQualityChart.tsx';
 import { ParameterChangeChart } from './ParameterChangeChart.tsx';
 import { RiskRadarChart } from './RiskRadarChart.tsx';
 import { ScenarioTimelineChart } from './ScenarioTimelineChart.tsx';
@@ -76,6 +78,10 @@ describe('diagnosis charts', () => {
     render(
       <>
         <RiskRadarChart risks={diagnosisFixture.charts.riskRadar} />
+        <DrawdownCurveChart charts={diagnosisFixture.charts} />
+        <ExecutionQualityChart
+          items={diagnosisFixture.charts.executionQuality}
+        />
         <ScenarioTimelineChart
           items={diagnosisFixture.charts.scenarioTimeline}
         />
@@ -89,6 +95,12 @@ describe('diagnosis charts', () => {
       name: 'Five-dimension risk radar',
     })).toBeTruthy();
     expect(screen.getByRole('img', {
+      name: 'Treatment drawdown curve',
+    })).toBeTruthy();
+    expect(screen.getByRole('img', {
+      name: 'Execution cost and turnover',
+    })).toBeTruthy();
+    expect(screen.getByRole('img', {
       name: 'Scenario damage timeline',
     })).toBeTruthy();
     expect(screen.getByRole('img', {
@@ -100,6 +112,22 @@ describe('diagnosis charts', () => {
           indicator: expect.arrayContaining([
             expect.objectContaining({ name: 'sentiment' }),
           ]),
+        }),
+      }),
+      { notMerge: true },
+    );
+    expect(mocks.setOption).toHaveBeenCalledWith(
+      expect.objectContaining({
+        series: expect.arrayContaining([
+          expect.objectContaining({ name: 'Drawdown' }),
+        ]),
+      }),
+      { notMerge: true },
+    );
+    expect(mocks.setOption).toHaveBeenCalledWith(
+      expect.objectContaining({
+        legend: expect.objectContaining({
+          data: ['Fee drag', 'Slippage drag', 'Turnover'],
         }),
       }),
       { notMerge: true },

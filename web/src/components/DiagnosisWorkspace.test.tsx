@@ -11,6 +11,16 @@ vi.mock('../charts/EquityComparisonChart.tsx', () => ({
     <div role="img" aria-label="Held-out equity comparison" />
   ),
 }));
+vi.mock('../charts/DrawdownCurveChart.tsx', () => ({
+  DrawdownCurveChart: () => (
+    <div role="img" aria-label="Treatment drawdown curve" />
+  ),
+}));
+vi.mock('../charts/ExecutionQualityChart.tsx', () => ({
+  ExecutionQualityChart: () => (
+    <div role="img" aria-label="Execution cost and turnover" />
+  ),
+}));
 vi.mock('../charts/RiskRadarChart.tsx', () => ({
   RiskRadarChart: () => (
     <div role="img" aria-label="Five-dimension risk radar" />
@@ -40,6 +50,8 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('42')).toBeTruthy();
     expect(screen.getByText('42.0%')).toBeTruthy();
     expect(screen.getByText('27')).toBeTruthy();
+    expect(screen.getByText('800.0%')).toBeTruthy();
+    expect(screen.getByText('1.30%')).toBeTruthy();
     expect(screen.getByText('+12')).toBeTruthy();
     expect(screen.getByText('-2.0%')).toBeTruthy();
     expect(screen.getByText('Risk-control signals')).toBeTruthy();
@@ -50,7 +62,7 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('Export Risk Dashboard JSON')).toBeTruthy();
     expect(screen.getByText('Export Risk Dashboard Markdown')).toBeTruthy();
     expect(screen.getByText('Export Decision Snapshot')).toBeTruthy();
-    expect(screen.getAllByRole('img')).toHaveLength(4);
+    expect(screen.getAllByRole('img')).toHaveLength(6);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
     expect(screen.getByText(
       'Lower leverage and tighten the stop loss.',

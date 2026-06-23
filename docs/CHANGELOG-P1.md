@@ -41,6 +41,17 @@
 - Fixed random strategy generation so it only emits parser-supported
   timeframes.
 
+### Execution quality controls
+
+- Added explicit strategy execution assumptions:
+  - fee rate
+  - slippage
+- Added engine-level turnover accounting.
+- Added fee drag and slippage drag metrics.
+- Added drawdown curves alongside equity curves.
+- Added Web summary cards for turnover and cost drag.
+- Added execution-quality and drawdown chart data for professional reports.
+
 ### Bitget public data path
 
 - Extended `BitgetBacktester` to pass candle limit and optional time-window

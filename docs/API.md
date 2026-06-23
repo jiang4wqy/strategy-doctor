@@ -26,6 +26,18 @@ an integer from 50 to 1000. Dates are optional `YYYY-MM-DD` values. Selecting
 `bitget-public` uses public market data before applying the same stress tests
 and risk engine.
 
+Optional `strategy.execution` controls explicit trading-cost assumptions:
+
+```json
+{
+  "feeRatePct": 0.0006,
+  "slippagePct": 0.0005
+}
+```
+
+Both values are decimal rates from 0 to 0.02. When omitted, the engine uses
+zero-cost execution for backward-compatible deterministic baselines.
+
 ## Start the service
 
 ```powershell
@@ -191,6 +203,10 @@ Content-Type: application/json
     "backtest": {
       "source": "offline-synthetic",
       "candleLimit": 240
+    },
+    "execution": {
+      "feeRatePct": 0.0006,
+      "slippagePct": 0.0005
     }
   },
   "style": "conservative",
@@ -284,7 +300,8 @@ Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL chan
 - Two registered archetypes only
 - Offline `MockBacktester` by default, with optional public Bitget candles
 - No database; browser history stays local
-- No fees, slippage, funding, latency, or order-book fill model
+- Explicit fee and slippage rates are supported
+- No funding, latency, or order-book fill model
 - Diagnosis and prescription are not a return guarantee
 
 ## Extension path

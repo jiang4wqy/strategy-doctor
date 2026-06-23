@@ -30,6 +30,7 @@ export interface StrategyBase {
   universe: string[];
   timeframe: string;
   backtest?: BacktestSelection;
+  execution?: ExecutionSettings;
 }
 
 export interface BacktestSelection {
@@ -37,6 +38,11 @@ export interface BacktestSelection {
   candleLimit: number;
   startDate?: string;
   endDate?: string;
+}
+
+export interface ExecutionSettings {
+  feeRatePct: number;
+  slippagePct: number;
 }
 
 export interface MaCrossStrategy extends StrategyBase {
@@ -160,6 +166,10 @@ export interface Metrics {
   liquidated: boolean;
   numTrades: number;
   equityCurve: number[];
+  drawdownCurve?: number[];
+  turnoverPct?: number;
+  feeCostPct?: number;
+  slippageCostPct?: number;
 }
 
 export interface BacktestAdapter {

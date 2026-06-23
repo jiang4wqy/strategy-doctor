@@ -62,6 +62,10 @@ test('parseStrategy preserves optional backtest data selection', () => {
       startDate: '2026-01-01',
       endDate: '2026-06-01',
     },
+    execution: {
+      feeRatePct: 0.001,
+      slippagePct: 0.0007,
+    },
   });
 
   assert.deepEqual(parsed.backtest, {
@@ -72,6 +76,10 @@ test('parseStrategy preserves optional backtest data selection', () => {
   });
   assert.deepEqual(parsed.universe, ['ETHUSDT']);
   assert.equal(parsed.timeframe, '4h');
+  assert.deepEqual(parsed.execution, {
+    feeRatePct: 0.001,
+    slippagePct: 0.0007,
+  });
 });
 
 test('parseStrategy normalizes a single USDT symbol to uppercase', () => {
@@ -104,6 +112,8 @@ test('parseStrategy rejects malformed identity and market fields', () => {
     { ...validStrategy, archetype: 'grid' },
     { ...validStrategy, universe: [] },
     { ...validStrategy, universe: ['BTCUSDT', ' '] },
+    { ...validStrategy, execution: { feeRatePct: 0.03 } },
+    { ...validStrategy, execution: { slippagePct: -0.01 } },
   ]) {
     assert.throws(() => parseStrategy(invalid), /strategy/i);
   }
