@@ -31,7 +31,7 @@ export function HistoryPanel({
 
   return (
     <aside className="history-panel" aria-label="Local diagnosis history">
-      <p className="eyebrow">Local history · newest first</p>
+      <p className="eyebrow">Local history / newest first</p>
       <ul>
         {records.map(record => (
           <li key={record.id}>

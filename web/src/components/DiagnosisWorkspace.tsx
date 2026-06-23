@@ -34,7 +34,7 @@ export function DiagnosisWorkspace({
     <div className="diagnosis-workspace">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">03 · Adversarial diagnosis</p>
+          <p className="eyebrow">03 / Adversarial diagnosis</p>
           <h1>{request.strategy.name}</h1>
           <p>
             Treatment failures, targeted repair, and independent held-out

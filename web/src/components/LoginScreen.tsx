@@ -1,4 +1,9 @@
 import { useState, type FormEvent } from 'react';
+import {
+  ArrowRight,
+  LockKeyhole,
+  ShieldCheck,
+} from 'lucide-react';
 
 export interface LoginScreenProps {
   onLogin(accessCode: string): Promise<void>;
@@ -27,6 +32,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <main className="login-shell">
       <section className="login-card" aria-labelledby="login-title">
+        <div className="login-icon" aria-hidden="true">
+          <ShieldCheck />
+        </div>
         <p className="eyebrow">Adversarial strategy lab</p>
         <h1 id="login-title">Strategy Doctor</h1>
         <p>
@@ -34,7 +42,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           diagnoses and targeted repairs.
         </p>
         <form onSubmit={submit}>
-          <label htmlFor="access-code">Access code</label>
+          <label htmlFor="access-code">
+            <LockKeyhole aria-hidden="true" />
+            Access code
+          </label>
           <input
             id="access-code"
             type="password"
@@ -46,6 +57,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           {error ? <p role="alert">{error}</p> : null}
           <button type="submit" disabled={loading || accessCode.length === 0}>
             {loading ? 'Checking access...' : 'Enter workspace'}
+            <ArrowRight aria-hidden="true" />
           </button>
         </form>
       </section>

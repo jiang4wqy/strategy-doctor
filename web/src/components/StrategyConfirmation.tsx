@@ -103,7 +103,7 @@ export function StrategyConfirmation({
 
   return (
     <section className="confirmation-panel" aria-labelledby="confirm-title">
-      <p className="eyebrow">02 · Confirmation boundary</p>
+      <p className="eyebrow">02 / Confirmation boundary</p>
       <h2 id="confirm-title">{definition.displayName}</h2>
       <p>{definition.description}</p>
       <div className="draft-meta">
@@ -159,7 +159,7 @@ export function StrategyConfirmation({
           <p role="alert">{error ?? externalError}</p>
         ) : null}
         <button type="submit" disabled={loading}>
-          {loading ? 'Running diagnosis…' : 'Confirm and diagnose'}
+          {loading ? 'Running diagnosis...' : 'Confirm and diagnose'}
         </button>
       </form>
     </section>

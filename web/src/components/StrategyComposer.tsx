@@ -47,7 +47,7 @@ export function StrategyComposer({
 
   return (
     <section className="composer-panel" aria-labelledby="composer-title">
-      <p className="eyebrow">01 · Strategy intake</p>
+      <p className="eyebrow">01 / Strategy intake</p>
       <h2 id="composer-title">Describe the strategy</h2>
       <p>
         Use one registered pattern. The parser creates a draft; it does not
@@ -93,7 +93,7 @@ export function StrategyComposer({
         <div className="form-footer">
           <span>{text.length} / 2000</span>
           <button type="submit" disabled={loading || text.trim().length === 0}>
-            {loading ? 'Parsing…' : 'Parse strategy'}
+            {loading ? 'Parsing...' : 'Parse strategy'}
           </button>
         </div>
         {error ? <p role="alert">{error}</p> : null}
