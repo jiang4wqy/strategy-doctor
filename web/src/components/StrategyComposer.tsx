@@ -58,7 +58,7 @@ export function StrategyComposer({
   function useRandomStrategy() {
     const draft = randomStrategyDraft();
     const generatedDescription =
-      `${draft.strategy.name}: generated ${draft.strategy.archetype} strategy for BTCUSDT ${draft.strategy.timeframe}`;
+      `${draft.strategy.name}: generated ${draft.strategy.archetype} strategy for ${draft.strategy.universe[0]} ${draft.strategy.timeframe}`;
     setText(generatedDescription);
     onDescriptionChange(generatedDescription);
     onParsed(generatedDescription, draft);

@@ -26,6 +26,8 @@ export interface CandleRequest {
   symbol: string;
   timeframe: string;
   limit: number;
+  startTime?: number;
+  endTime?: number;
 }
 
 export interface CandleSource {
@@ -107,6 +109,8 @@ export class McpBitgetCandleSource implements CandleSource {
       symbol: marketSymbol(request.symbol),
       timeframe: request.timeframe,
       limit: request.limit,
+      ...(request.startTime ? { startTime: request.startTime } : {}),
+      ...(request.endTime ? { endTime: request.endTime } : {}),
     });
     return parseCandles(result);
   }
@@ -153,7 +157,13 @@ export class BitgetBacktester implements BacktestAdapter {
     const request = {
       symbol,
       timeframe: strategy.timeframe,
-      limit: 240,
+      limit: strategy.backtest?.candleLimit ?? 240,
+      ...(strategy.backtest?.startDate
+        ? { startTime: Date.parse(`${strategy.backtest.startDate}T00:00:00.000Z`) }
+        : {}),
+      ...(strategy.backtest?.endDate
+        ? { endTime: Date.parse(`${strategy.backtest.endDate}T23:59:59.999Z`) }
+        : {}),
     };
     const cacheKey = JSON.stringify(request);
     let pending = this.candleCache.get(cacheKey);

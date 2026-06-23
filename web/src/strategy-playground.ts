@@ -21,14 +21,27 @@ export const strategyExamples: readonly StrategyExample[] = [
   {
     label: 'Defensive swing',
     description:
-      'BTCUSDT 2h moving average crossover with fast MA 12, slow MA 48, leverage 3, stop loss 0.18, position size 0.45',
+      'ETHUSDT 4h moving average crossover with fast MA 12, slow MA 48, leverage 3, stop loss 0.18, position size 0.45',
   },
   {
     label: 'Aggressive mean reversion',
     description:
       'BTCUSDT 1h RSI mean reversion using RSI period 8, Bollinger period 20, oversold 25, overbought 75, leverage 5, position size 0.6',
   },
+  {
+    label: 'SOL breakout guard',
+    description:
+      'SOLUSDT 1h moving average crossover with fast MA 10, slow MA 36, leverage 6, stop loss 0.22, position size 0.65',
+  },
+  {
+    label: 'XRP range filter',
+    description:
+      'XRPUSDT 1d RSI Bollinger mean reversion using RSI period 12, Bollinger period 24, oversold 28, overbought 72, trend filter period 55, leverage 2',
+  },
 ];
+
+const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];
+const timeframes = ['1h', '4h', '1d'];
 
 const names = [
   'Random Trend Sentinel',
@@ -54,6 +67,8 @@ function randomFloat(
 export function randomStrategyDraft(): StrategyDraft {
   const id = `random-${Date.now().toString(36)}-${randomInteger(100, 999)}`;
   const name = names[randomInteger(0, names.length - 1)];
+  const symbol = symbols[randomInteger(0, symbols.length - 1)];
+  const timeframe = timeframes[randomInteger(0, timeframes.length - 1)];
   const useMeanReversion = Math.random() > 0.5;
   if (useMeanReversion) {
     const bollingerPeriod = randomInteger(12, 24);
@@ -74,14 +89,14 @@ export function randomStrategyDraft(): StrategyDraft {
           stopLossPct: randomFloat(0.05, 0.28, 3),
           positionPct: randomFloat(0.35, 0.85, 2),
         },
-        universe: ['BTCUSDT'],
-        timeframe: Math.random() > 0.5 ? '1h' : '4h',
+        universe: [symbol],
+        timeframe,
       },
       source: 'rules',
       confidence: 0.72,
       assumptions: [{
         field: 'strategy.universe',
-        value: 'BTCUSDT',
+        value: symbol,
         reason: 'market-default',
       }],
       warnings: [{
@@ -105,14 +120,14 @@ export function randomStrategyDraft(): StrategyDraft {
         stopLossPct: randomFloat(0.08, 0.4, 3),
         positionPct: randomFloat(0.3, 0.95, 2),
       },
-      universe: ['BTCUSDT'],
-      timeframe: Math.random() > 0.5 ? '1h' : '2h',
+      universe: [symbol],
+      timeframe,
     },
     source: 'rules',
     confidence: 0.72,
     assumptions: [{
       field: 'strategy.universe',
-      value: 'BTCUSDT',
+      value: symbol,
       reason: 'market-default',
     }],
     warnings: [{

@@ -71,6 +71,7 @@ export function createStrategyRegistry(
         params: adapter.parseParams(value),
         universe: base.universe,
         timeframe: base.timeframe,
+        ...(base.backtest ? { backtest: base.backtest } : {}),
       } as unknown as StrategyByArchetype<A>;
     },
   };

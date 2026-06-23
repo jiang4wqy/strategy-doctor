@@ -45,6 +45,20 @@ export function StrategyConfirmation({
   const [style, setStyle] = useState<DiagnoseRequest['style']>(
     'conservative',
   );
+  const [symbol, setSymbol] = useState(draft.strategy.universe[0] ?? 'BTCUSDT');
+  const [timeframe, setTimeframe] = useState(draft.strategy.timeframe);
+  const [dataSource, setDataSource] = useState(
+    draft.strategy.backtest?.source ?? 'offline-synthetic',
+  );
+  const [candleLimit, setCandleLimit] = useState(
+    String(draft.strategy.backtest?.candleLimit ?? 240),
+  );
+  const [startDate, setStartDate] = useState(
+    draft.strategy.backtest?.startDate ?? '',
+  );
+  const [endDate, setEndDate] = useState(
+    draft.strategy.backtest?.endDate ?? '',
+  );
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
 
@@ -85,6 +99,19 @@ export function StrategyConfirmation({
       }
       parsed[parameter.key] = value;
     }
+    const parsedCandleLimit = Number(candleLimit);
+    if (
+      !Number.isInteger(parsedCandleLimit)
+      || parsedCandleLimit < 50
+      || parsedCandleLimit > 1000
+    ) {
+      setError('Candle limit must be an integer from 50 to 1000.');
+      return;
+    }
+    if (startDate && endDate && startDate > endDate) {
+      setError('Start date must be on or before end date.');
+      return;
+    }
 
     setError(undefined);
     setLoading(true);
@@ -93,6 +120,14 @@ export function StrategyConfirmation({
         strategy: {
           ...draft.strategy,
           params: parsed,
+          universe: [symbol],
+          timeframe,
+          backtest: {
+            source: dataSource,
+            candleLimit: parsedCandleLimit,
+            ...(startDate ? { startDate } : {}),
+            ...(endDate ? { endDate } : {}),
+          },
         } as unknown as DiagnoseRequest['strategy'],
         style,
         seed: 42,
@@ -166,6 +201,66 @@ export function StrategyConfirmation({
           <option value="aggressive">Aggressive</option>
           <option value="trend">Trend</option>
         </select>
+        <fieldset className="market-controls">
+          <legend>Market and dataset</legend>
+          <label htmlFor="market-symbol">Symbol</label>
+          <select
+            id="market-symbol"
+            value={symbol}
+            onChange={event => setSymbol(event.target.value)}
+          >
+            <option value="BTCUSDT">BTCUSDT</option>
+            <option value="ETHUSDT">ETHUSDT</option>
+            <option value="SOLUSDT">SOLUSDT</option>
+            <option value="XRPUSDT">XRPUSDT</option>
+            <option value="DOGEUSDT">DOGEUSDT</option>
+          </select>
+          <label htmlFor="market-timeframe">Timeframe</label>
+          <select
+            id="market-timeframe"
+            value={timeframe}
+            onChange={event => setTimeframe(event.target.value)}
+          >
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="1d">1d</option>
+          </select>
+          <label htmlFor="market-source">Data source</label>
+          <select
+            id="market-source"
+            value={dataSource}
+            onChange={event => setDataSource(
+              event.target.value as 'offline-synthetic' | 'bitget-public',
+            )}
+          >
+            <option value="offline-synthetic">Offline deterministic</option>
+            <option value="bitget-public">Bitget public candles</option>
+          </select>
+          <label htmlFor="candle-limit">Candles</label>
+          <input
+            id="candle-limit"
+            type="number"
+            min="50"
+            max="1000"
+            step="1"
+            value={candleLimit}
+            onChange={event => setCandleLimit(event.target.value)}
+          />
+          <label htmlFor="start-date">Start date</label>
+          <input
+            id="start-date"
+            type="date"
+            value={startDate}
+            onChange={event => setStartDate(event.target.value)}
+          />
+          <label htmlFor="end-date">End date</label>
+          <input
+            id="end-date"
+            type="date"
+            value={endDate}
+            onChange={event => setEndDate(event.target.value)}
+          />
+        </fieldset>
         {error || externalError ? (
           <p role="alert">{error ?? externalError}</p>
         ) : null}

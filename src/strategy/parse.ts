@@ -1,4 +1,5 @@
 import type {
+  BacktestSelection,
   Strategy,
   StrategyArchetype,
   StrategyBase,
@@ -29,6 +30,73 @@ function nonEmptyString(value: unknown, field: string): string {
     fail(`${field} must be a non-empty string`);
   }
   return value;
+}
+
+function optionalDate(value: unknown, field: string): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (
+    typeof value !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    || Number.isNaN(Date.parse(`${value}T00:00:00.000Z`))
+  ) {
+    fail(`${field} must be a YYYY-MM-DD date`, 'INVALID_REQUEST', field);
+  }
+  return value;
+}
+
+function parseBacktest(value: unknown): BacktestSelection | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const backtest = object(value, 'strategy.backtest');
+  const source = backtest.source === undefined
+    ? 'offline-synthetic'
+    : nonEmptyString(backtest.source, 'strategy.backtest.source');
+  if (source !== 'offline-synthetic' && source !== 'bitget-public') {
+    fail(
+      'backtest source must be offline-synthetic or bitget-public',
+      'INVALID_REQUEST',
+      'strategy.backtest.source',
+    );
+  }
+  const candleLimit = backtest.candleLimit === undefined
+    ? 240
+    : Number(backtest.candleLimit);
+  if (!Number.isInteger(candleLimit) || candleLimit < 50 || candleLimit > 1000) {
+    fail(
+      'backtest candleLimit must be an integer from 50 to 1000',
+      'INVALID_REQUEST',
+      'strategy.backtest.candleLimit',
+    );
+  }
+  const startDate = optionalDate(
+    backtest.startDate,
+    'strategy.backtest.startDate',
+  );
+  const endDate = optionalDate(
+    backtest.endDate,
+    'strategy.backtest.endDate',
+  );
+  if (
+    startDate
+    && endDate
+    && Date.parse(`${startDate}T00:00:00.000Z`)
+      > Date.parse(`${endDate}T00:00:00.000Z`)
+  ) {
+    fail(
+      'backtest startDate must be on or before endDate',
+      'INVALID_REQUEST',
+      'strategy.backtest.startDate',
+    );
+  }
+  return {
+    source,
+    candleLimit,
+    ...(startDate ? { startDate } : {}),
+    ...(endDate ? { endDate } : {}),
+  };
 }
 
 function parseArchetype(value: unknown): StrategyArchetype {
@@ -95,6 +163,7 @@ export function parseStrategy(value: unknown): Strategy {
     name: nonEmptyString(strategy.name, 'name'),
     universe: [symbol],
     timeframe,
+    backtest: parseBacktest(strategy.backtest),
   };
 
   try {

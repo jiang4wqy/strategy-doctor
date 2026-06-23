@@ -200,6 +200,26 @@
   gap: var(--space-3);
 }
 
+.market-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  border: 1px solid rgba(196, 245, 239, 0.14);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  background: rgba(5, 10, 15, 0.34);
+}
+
+.market-controls legend {
+  padding: 0 var(--space-2);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .parameter-field small {
   display: block;
   margin-top: var(--space-1);
@@ -959,7 +979,8 @@ th {
 
   .summary-grid,
   .stress-strip,
-  .parameter-grid {
+  .parameter-grid,
+  .market-controls {
     grid-template-columns: 1fr;
   }
 

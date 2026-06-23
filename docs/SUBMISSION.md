@@ -48,6 +48,7 @@ Strategy Doctor provides a deterministic diagnosis pipeline:
 
 - Protected React diagnosis workspace.
 - Natural-language strategy composer with confirmation boundary.
+- Market, timeframe, dataset, candle-count, and date-window controls.
 - Five-dimension charts and scenario timeline.
 - Risk dashboard with trend score, defense score, cost efficiency, and alerts.
 - Model-consistency metrics for parse/narration/prescription paths.
@@ -57,6 +58,8 @@ Strategy Doctor provides a deterministic diagnosis pipeline:
 ## Bitget Integration
 
 - Public Bitget OHLCV access is available through `BitgetBacktester`.
+- The Web workflow can route an explicit diagnosis to Bitget public candles for
+  `USDT` markets while preserving the same stress scenarios and repair engine.
 - Frozen public snapshots keep the default demo deterministic.
 - The system does not use account, balance, position, order, or private trading endpoints.
 - Private Bitget credentials are not required for the default Web/API/CLI demo.
@@ -129,7 +132,8 @@ Included:
 - one symbol per diagnosis
 - `1h`, `4h`, and `1d` timeframes
 - offline deterministic diagnosis
-- optional public Bitget data refresh
+- optional public Bitget candle diagnosis
+- user-selectable candle limit and date window
 
 Not included:
 
@@ -153,6 +157,7 @@ Not included:
 - [x] Model-consistency metrics.
 - [x] Submission evidence pack.
 - [x] One-command local showcase script.
+- [x] Market, timeframe, dataset, and date-window controls.
 - [ ] Record and upload demo video.
 - [ ] Add the demo video URL to the submission form.
 - [ ] Submit before the official deadline.

@@ -5,7 +5,26 @@ Strategy Doctor exposes deterministic five-dimension diagnosis for two registere
 - `ma-cross`
 - `rsi-bollinger-mean-reversion`
 
-The public Web/API uses offline `MockBacktester`. It does not read account data or private Bitget credentials and cannot submit orders.
+The public Web/API uses offline `MockBacktester` by default. It can also route
+an explicit diagnosis to public Bitget candles. It does not read account data or
+private Bitget credentials and cannot submit orders.
+
+Diagnoses are one-symbol runs. Supported timeframes are `1h`, `4h`, and `1d`.
+Optional `strategy.backtest` controls the dataset:
+
+```json
+{
+  "source": "offline-synthetic",
+  "candleLimit": 240,
+  "startDate": "2026-01-01",
+  "endDate": "2026-06-01"
+}
+```
+
+`source` can be `offline-synthetic` or `bitget-public`. `candleLimit` must be
+an integer from 50 to 1000. Dates are optional `YYYY-MM-DD` values. Selecting
+`bitget-public` uses public market data before applying the same stress tests
+and risk engine.
 
 ## Start the service
 
@@ -168,7 +187,11 @@ Content-Type: application/json
       "positionPct": 0.6
     },
     "universe": ["BTCUSDT"],
-    "timeframe": "1h"
+    "timeframe": "1h",
+    "backtest": {
+      "source": "offline-synthetic",
+      "candleLimit": 240
+    }
   },
   "style": "conservative",
   "seed": 42,
@@ -259,7 +282,7 @@ Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL chan
 - One `*USDT` symbol per diagnosis
 - Timeframes: `1h`, `4h`, `1d`
 - Two registered archetypes only
-- Offline `MockBacktester` for public Web/API
+- Offline `MockBacktester` by default, with optional public Bitget candles
 - No database; browser history stays local
 - No fees, slippage, funding, latency, or order-book fill model
 - Diagnosis and prescription are not a return guarantee

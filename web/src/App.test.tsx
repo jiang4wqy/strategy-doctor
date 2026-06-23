@@ -80,6 +80,61 @@ describe('App workflow', () => {
     expect(screen.getAllByRole('img')).toHaveLength(4);
   });
 
+  it('sends selected market, timeframe, data source, and candle window', async () => {
+    const client: ApiClient = {
+      login: vi.fn(async () => undefined),
+      logout: vi.fn(async () => undefined),
+      capabilities: vi.fn(async () => ({
+        apiVersion: 'v1' as const,
+        requestId: 'req-capabilities',
+        data: capabilityFixture,
+      })),
+      parse: vi.fn(async () => ({
+        apiVersion: 'v1' as const,
+        requestId: 'req-parse',
+        data: draftFixture,
+      })),
+      diagnose: vi.fn(async () => ({
+        apiVersion: 'v1' as const,
+        requestId: 'req-diagnosis',
+        data: diagnosisFixture,
+      })),
+    };
+    const user = userEvent.setup();
+    render(<App client={client} />);
+
+    await user.type(screen.getByLabelText('Access code'), 'team-code');
+    await user.click(screen.getByRole('button', { name: 'Enter workspace' }));
+    await user.type(
+      await screen.findByLabelText('Strategy description'),
+      'BTC moving average crossover',
+    );
+    await user.click(screen.getByRole('button', { name: 'Parse strategy' }));
+    await user.selectOptions(await screen.findByLabelText('Symbol'), 'ETHUSDT');
+    await user.selectOptions(screen.getByLabelText('Timeframe'), '4h');
+    await user.selectOptions(screen.getByLabelText('Data source'), 'bitget-public');
+    await user.clear(screen.getByLabelText('Candles'));
+    await user.type(screen.getByLabelText('Candles'), '360');
+    await user.type(screen.getByLabelText('Start date'), '2026-01-01');
+    await user.type(screen.getByLabelText('End date'), '2026-06-01');
+    await user.click(screen.getByRole('button', {
+      name: 'Confirm and diagnose',
+    }));
+
+    expect(client.diagnose).toHaveBeenCalledWith(expect.objectContaining({
+      strategy: expect.objectContaining({
+        universe: ['ETHUSDT'],
+        timeframe: '4h',
+        backtest: {
+          source: 'bitget-public',
+          candleLimit: 360,
+          startDate: '2026-01-01',
+          endDate: '2026-06-01',
+        },
+      }),
+    }));
+  });
+
   it('can edit parameters after a result and compare with the original run', async () => {
     const secondDiagnosis = {
       ...diagnosisFixture,
@@ -124,6 +179,13 @@ describe('App workflow', () => {
       'BTC moving average crossover',
     );
     await user.click(screen.getByRole('button', { name: 'Parse strategy' }));
+    await user.selectOptions(await screen.findByLabelText('Symbol'), 'ETHUSDT');
+    await user.selectOptions(screen.getByLabelText('Timeframe'), '4h');
+    await user.selectOptions(screen.getByLabelText('Data source'), 'bitget-public');
+    await user.clear(screen.getByLabelText('Candles'));
+    await user.type(screen.getByLabelText('Candles'), '360');
+    await user.type(screen.getByLabelText('Start date'), '2026-01-01');
+    await user.type(screen.getByLabelText('End date'), '2026-06-01');
     await user.click(await screen.findByRole('button', {
       name: 'Confirm and diagnose',
     }));

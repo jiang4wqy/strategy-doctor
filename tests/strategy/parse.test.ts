@@ -42,6 +42,38 @@ test('parseStrategy accepts a valid moving-average strategy', () => {
   assert.deepEqual(parseStrategy(validStrategy), validStrategy);
 });
 
+test('parseStrategy preserves optional backtest data selection', () => {
+  const parsed = parseStrategy({
+    id: 'ma-window',
+    name: 'MA with market window',
+    archetype: 'ma-cross',
+    params: {
+      fastMA: 8,
+      slowMA: 30,
+      leverage: 3,
+      stopLossPct: 0.1,
+      positionPct: 0.5,
+    },
+    universe: ['ethusdt'],
+    timeframe: '4H',
+    backtest: {
+      source: 'bitget-public',
+      candleLimit: 360,
+      startDate: '2026-01-01',
+      endDate: '2026-06-01',
+    },
+  });
+
+  assert.deepEqual(parsed.backtest, {
+    source: 'bitget-public',
+    candleLimit: 360,
+    startDate: '2026-01-01',
+    endDate: '2026-06-01',
+  });
+  assert.deepEqual(parsed.universe, ['ETHUSDT']);
+  assert.equal(parsed.timeframe, '4h');
+});
+
 test('parseStrategy normalizes a single USDT symbol to uppercase', () => {
   const parsed = parseStrategy({
     ...validStrategy,

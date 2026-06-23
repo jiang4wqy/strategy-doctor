@@ -1,4 +1,5 @@
 import { diagnoseStrategy } from '../application/diagnose.ts';
+import { BitgetBacktester } from '../backtest/bitget.ts';
 import type { AnyStrategyDefinition } from '../contracts.ts';
 import {
   parseStrategyDescription,
@@ -20,6 +21,8 @@ export function createDefaultServices(): ServerServices {
   return {
     capabilities: () => strategyRegistry.listDefinitions(),
     parse: description => parseStrategyDescription(description),
-    diagnose: request => diagnoseStrategy(request),
+    diagnose: request => request.strategy.backtest?.source === 'bitget-public'
+      ? diagnoseStrategy(request, { backtest: new BitgetBacktester() })
+      : diagnoseStrategy(request),
   };
 }

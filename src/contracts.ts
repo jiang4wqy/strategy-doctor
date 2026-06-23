@@ -29,6 +29,14 @@ export interface StrategyBase {
   name: string;
   universe: string[];
   timeframe: string;
+  backtest?: BacktestSelection;
+}
+
+export interface BacktestSelection {
+  source: 'offline-synthetic' | 'bitget-public';
+  candleLimit: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface MaCrossStrategy extends StrategyBase {

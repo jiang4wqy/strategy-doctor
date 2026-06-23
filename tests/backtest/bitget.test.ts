@@ -103,6 +103,37 @@ test('BitgetBacktester caches 240 public candles and returns deterministic metri
   assert.ok(Number.isFinite(first.maxDrawdownPct));
 });
 
+test('BitgetBacktester passes optional candle window controls to the source', async () => {
+  const calls: unknown[] = [];
+  const source = {
+    async load(request: unknown) {
+      calls.push(request);
+      return candles;
+    },
+  };
+  const backtester = new BitgetBacktester(source);
+
+  await backtester.run({
+    ...strategy,
+    universe: ['ETHUSDT'],
+    timeframe: '1h',
+    backtest: {
+      source: 'bitget-public',
+      candleLimit: 360,
+      startDate: '2026-01-01',
+      endDate: '2026-06-01',
+    },
+  }, scenario);
+
+  assert.deepEqual(calls[0], {
+    symbol: 'ETHUSDT',
+    timeframe: '1h',
+    limit: 360,
+    startTime: Date.parse('2026-01-01T00:00:00.000Z'),
+    endTime: Date.parse('2026-06-01T23:59:59.999Z'),
+  });
+});
+
 test('McpBitgetCandleSource maps symbols and requests public Bitget klines', async () => {
   let toolName = '';
   let toolArgs: Record<string, unknown> = {};
@@ -118,6 +149,8 @@ test('McpBitgetCandleSource maps symbols and requests public Bitget klines', asy
     symbol: 'BTCUSDT',
     timeframe: '4h',
     limit: 240,
+    startTime: 1_767_225_600_000,
+    endTime: 1_780_291_199_999,
   });
 
   assert.equal(result.length, 240);
@@ -128,6 +161,8 @@ test('McpBitgetCandleSource maps symbols and requests public Bitget klines', asy
     symbol: 'BTC/USDT',
     timeframe: '4h',
     limit: 240,
+    startTime: 1_767_225_600_000,
+    endTime: 1_780_291_199_999,
   });
 });
 
