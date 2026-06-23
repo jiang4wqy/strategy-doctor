@@ -10,11 +10,13 @@ import {
   listCapabilitiesTool,
   parseStrategyTool,
   diagnoseStrategyTool,
+  diagnosePlaybookTool,
 } from '../../src/mcp/tools.ts';
 import type { StrategyDoctorClient } from '../../src/client/index.ts';
 import type {
   AnyStrategyDefinition,
   DiagnosisView,
+  PlaybookDiagnosisView,
   StrategyDraft,
 } from '../../src/platform/contracts.ts';
 
@@ -56,6 +58,35 @@ function createFakeClient(): StrategyDoctorClient {
           scenarioTimeline: [],
         },
       } satisfies DiagnosisView;
+    },
+    async diagnosePlaybook() {
+      return {
+        import: {
+          source: 'description',
+          playbookId: 'agent-101',
+          description: 'BTC trend strategy',
+          strategy: {
+            id: 'parsed-001',
+            name: 'BTC trend strategy',
+            archetype: 'ma-cross',
+            params: { fastMA: 8, slowMA: 30, leverage: 10, stopLossPct: 0.5, positionPct: 1 },
+            universe: ['BTCUSDT'],
+            timeframe: '1h',
+          },
+        },
+        view: {
+          scorecard: {} as DiagnosisView['scorecard'],
+          summary: { riskScore: 50, worstDrawdownPct: 0.3, totalTrades: 10, robustnessGain: 5, returnDelta: 0.1 },
+          charts: {
+            treatmentEquity: [],
+            heldOutComparison: [],
+            defaultHeldOutDimension: 'technical',
+            riskRadar: [],
+            parameterChanges: [],
+            scenarioTimeline: [],
+          },
+        },
+      } satisfies PlaybookDiagnosisView;
     },
   });
 }
@@ -190,4 +221,30 @@ test('diagnoseStrategyTool applies defaults for seed and candidates', () => {
     assert.equal(result.data.seed, 42);
     assert.equal(result.data.candidates, 6);
   }
+});
+
+test('diagnosePlaybookTool calls client.diagnosePlaybook for prompts', async () => {
+  const client = createFakeClient();
+  const result = await diagnosePlaybookTool.handler(client, {
+    playbook: 'BTC trend strategy with defensive stops',
+    style: 'trend',
+    seed: 42,
+    candidates: 6,
+  });
+
+  assert.equal(result.import.source, 'description');
+  assert.equal(result.import.strategy.archetype, 'ma-cross');
+});
+
+test('diagnosePlaybookTool rejects malformed JSON exports', async () => {
+  const client = createFakeClient();
+  await assert.rejects(
+    () => diagnosePlaybookTool.handler(client, {
+      playbook: '{bad-json',
+      style: 'conservative',
+      seed: 42,
+      candidates: 6,
+    }),
+    /invalid Playbook JSON/,
+  );
 });

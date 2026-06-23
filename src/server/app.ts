@@ -25,6 +25,7 @@ import { registerCapabilityRoutes } from './routes/capabilities.ts';
 import { registerDiagnosisRoutes } from './routes/diagnoses.ts';
 import { registerHealthRoutes } from './routes/health.ts';
 import { registerParseRoutes } from './routes/parse.ts';
+import { registerPlaybookRoutes } from './routes/playbook.ts';
 
 export interface BuildServerOptions {
   env?: Record<string, string | undefined>;
@@ -139,6 +140,11 @@ export async function buildServer(
     parse: services.parse,
   });
   await app.register(registerDiagnosisRoutes, {
+    diagnose: services.diagnose,
+    limiter: new DiagnosisLimiter(2),
+  });
+  await app.register(registerPlaybookRoutes, {
+    parse: services.parse,
     diagnose: services.diagnose,
     limiter: new DiagnosisLimiter(2),
   });

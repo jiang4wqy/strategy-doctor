@@ -74,6 +74,31 @@ export const diagnosisRouteSchema: FastifySchema = {
   },
 };
 
+export const playbookDiagnosisRouteSchema: FastifySchema = {
+  tags: ['playbook'],
+  summary: 'Import a Bitget Playbook export and diagnose it',
+  security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+  body: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['playbook'],
+    properties: {
+      playbook: {
+        oneOf: [
+          { type: 'object', additionalProperties: true },
+          { type: 'string', minLength: 1, maxLength: 12000 },
+        ],
+      },
+      style: {
+        type: 'string',
+        enum: ['conservative', 'aggressive', 'trend'],
+      },
+      seed: { type: 'integer' },
+      candidates: { type: 'integer' },
+    },
+  },
+};
+
 export const parseRouteSchema: FastifySchema = {
   tags: ['strategies'],
   summary: 'Parse a supported strategy description',

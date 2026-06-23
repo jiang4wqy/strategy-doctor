@@ -29,6 +29,7 @@ test('buildServer exposes protected OpenAPI for registered routes', async t => {
   assert.ok(openapi.paths['/api/v1/health']);
   assert.ok(openapi.paths['/api/v1/capabilities']);
   assert.ok(openapi.paths['/api/v1/diagnoses']);
+  assert.ok(openapi.paths['/api/v1/playbook/diagnoses']);
 });
 
 test('buildServer returns common envelopes for oversized and unknown requests', async t => {

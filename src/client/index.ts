@@ -4,8 +4,10 @@ import type {
   ApiErrorEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';
+import type { StyleName } from '../contracts.ts';
 import { StrategyDoctorApiError } from './error.ts';
 
 export { StrategyDoctorApiError } from './error.ts';
@@ -33,6 +35,15 @@ export interface StrategyDoctorClient {
     input: DiagnoseRequest,
     options?: RequestOptions,
   ): Promise<DiagnosisView>;
+  diagnosePlaybook(
+    input: {
+      playbook: unknown;
+      style?: StyleName;
+      seed?: number;
+      candidates?: number;
+    },
+    options?: RequestOptions,
+  ): Promise<PlaybookDiagnosisView>;
 }
 
 function normalizeBaseUrl(value: string): string {
@@ -161,6 +172,22 @@ export function createStrategyDoctor(
     ) {
       return request<DiagnosisView>(
         '/diagnoses',
+        'POST',
+        input,
+        requestOptions,
+      );
+    },
+    diagnosePlaybook(
+      input: {
+        playbook: unknown;
+        style?: StyleName;
+        seed?: number;
+        candidates?: number;
+      },
+      requestOptions?: RequestOptions,
+    ) {
+      return request<PlaybookDiagnosisView>(
+        '/playbook/diagnoses',
         'POST',
         input,
         requestOptions,

@@ -4,5 +4,6 @@ export type {
   ApiErrorEnvelope,
   DiagnoseRequest,
   DiagnosisView,
+  PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';

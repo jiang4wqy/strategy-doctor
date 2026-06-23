@@ -5,6 +5,7 @@ import type {
 import type {
   AnyStrategyDefinition,
   DiagnosisView,
+  PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';
 
@@ -18,6 +19,13 @@ const styleSchema = z.enum(['conservative', 'aggressive', 'trend']);
 const diagnoseInputSchema = z.object({
   strategy: z.string().min(1, 'strategy must be a non-empty JSON string'),
   style: styleSchema,
+  seed: z.number().int().positive().optional().default(42),
+  candidates: z.number().int().min(1).max(50).optional().default(6),
+});
+
+const playbookInputSchema = z.object({
+  playbook: z.string().min(1, 'playbook must be a prompt or JSON string'),
+  style: styleSchema.optional().default('conservative'),
   seed: z.number().int().positive().optional().default(42),
   candidates: z.number().int().min(1).max(50).optional().default(6),
 });
@@ -118,8 +126,46 @@ export const diagnoseStrategyTool: McpTool<
   },
 });
 
+export const diagnosePlaybookTool: McpTool<
+  {
+    playbook: string;
+    style: 'conservative' | 'aggressive' | 'trend';
+    seed: number;
+    candidates: number;
+  },
+  PlaybookDiagnosisView
+> = defineMcpTool({
+  name: 'diagnose_playbook_strategy',
+  description:
+    'Import a Bitget Playbook export or strategy prompt, then run the same five-dimension diagnosis and targeted repair workflow.',
+  inputSchema: playbookInputSchema,
+  async handler(client, input) {
+    let playbook: unknown = {
+      prompt: input.playbook,
+    };
+    const trimmed = input.playbook.trim();
+    if (trimmed.startsWith('{')) {
+      try {
+        playbook = JSON.parse(trimmed) as unknown;
+      } catch {
+        throw new Error(
+          'invalid Playbook JSON: provide valid JSON or a plain strategy prompt',
+        );
+      }
+    }
+
+    return client.diagnosePlaybook({
+      playbook,
+      style: input.style ?? 'conservative',
+      seed: input.seed ?? 42,
+      candidates: input.candidates ?? 6,
+    });
+  },
+});
+
 export const ALL_TOOLS: readonly RegisteredMcpTool[] = [
   listCapabilitiesTool,
   parseStrategyTool,
   diagnoseStrategyTool,
+  diagnosePlaybookTool,
 ];

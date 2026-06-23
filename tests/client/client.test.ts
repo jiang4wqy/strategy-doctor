@@ -37,7 +37,7 @@ function success(data: unknown, requestId = 'req-client'): Response {
   });
 }
 
-test('client sends the three typed operations with Bearer authentication', async () => {
+test('client sends typed operations with Bearer authentication', async () => {
   const calls: Array<{
     url: string;
     init?: RequestInit;
@@ -56,6 +56,19 @@ test('client sends the three typed operations with Bearer authentication', async
       summary: {},
       charts: {},
     }),
+    success({
+      import: {
+        source: 'description',
+        playbookId: 'agent-101',
+        description: 'BTC moving average crossover',
+        strategy: requestFixture.strategy,
+      },
+      view: {
+        scorecard: {},
+        summary: {},
+        charts: {},
+      },
+    }),
   ];
   const doctor = createStrategyDoctor({
     baseUrl: 'https://doctor.example/',
@@ -69,6 +82,13 @@ test('client sends the three typed operations with Bearer authentication', async
   await doctor.capabilities();
   await doctor.parseStrategy({ description: 'BTC 4h RSI Bollinger' });
   await doctor.diagnose(requestFixture);
+  await doctor.diagnosePlaybook({
+    playbook: {
+      playbookId: 'agent-101',
+      prompt: 'BTC moving average crossover',
+    },
+    style: 'trend',
+  });
 
   assert.deepEqual(calls.map(call => [
     call.init?.method ?? 'GET',
@@ -77,6 +97,7 @@ test('client sends the three typed operations with Bearer authentication', async
     ['GET', 'https://doctor.example/api/v1/capabilities'],
     ['POST', 'https://doctor.example/api/v1/strategies/parse'],
     ['POST', 'https://doctor.example/api/v1/diagnoses'],
+    ['POST', 'https://doctor.example/api/v1/playbook/diagnoses'],
   ]);
   for (const call of calls) {
     assert.equal(
@@ -90,6 +111,13 @@ test('client sends the three typed operations with Bearer authentication', async
   );
   assert.deepEqual(JSON.parse(String(calls[1].init?.body)), {
     description: 'BTC 4h RSI Bollinger',
+  });
+  assert.deepEqual(JSON.parse(String(calls[3].init?.body)), {
+    playbook: {
+      playbookId: 'agent-101',
+      prompt: 'BTC moving average crossover',
+    },
+    style: 'trend',
   });
 });
 

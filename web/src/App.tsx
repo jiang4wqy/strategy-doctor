@@ -11,6 +11,7 @@ import {
   StrategyConfirmation,
 } from './components/StrategyConfirmation.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
+import { JudgeMode } from './components/JudgeMode.tsx';
 import { saveDiagnosis } from './history/storage.ts';
 import {
   appReducer,
@@ -29,6 +30,10 @@ export interface AppProps {
 
 export function App({ client = defaultClient }: AppProps) {
   const [state, dispatch] = useReducer(appReducer, initialAppState);
+
+  if (window.location.pathname === '/judge') {
+    return <JudgeMode />;
+  }
 
   if (state.status === 'signedOut') {
     return (
@@ -121,7 +126,7 @@ export function App({ client = defaultClient }: AppProps) {
 
   return (
     <main className="app-shell">
-      <Suspense fallback={<p aria-live="polite">Loading visual analysis…</p>}>
+      <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
           request={state.request}
           requestId={state.requestId}

@@ -183,6 +183,19 @@ export interface DiagnosisResult {
   view: DiagnosisView;
 }
 
+export interface PlaybookImportView {
+  source: 'strategy-json' | 'description';
+  playbookId?: string;
+  playbookName?: string;
+  description?: string;
+  strategy: Strategy;
+}
+
+export interface PlaybookDiagnosisView {
+  import: PlaybookImportView;
+  view: DiagnosisView;
+}
+
 export interface StoredDiagnosis {
   id: string;
   createdAt: string;
