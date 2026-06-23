@@ -12,7 +12,7 @@ const scenario: Scenario = {
   dimension: 'news',
   sourceSkill: 'news-briefing',
   sourceObservedAt: '2026-06-12T15:17:31Z',
-  narrative: '冻结新闻显示突发跳空风险。',
+  narrative: 'Market narrative from mocked ingestion stream.',
   severity: 4,
   shock: {
     kind: 'gap',
@@ -37,6 +37,12 @@ const input = {
   cause: 'drawdown-breach' as const,
 };
 
+function extractText(
+  value: string | { text: string; consensus?: unknown },
+): string {
+  return typeof value === 'string' ? value : value.text;
+}
+
 test('narrator stays offline and deterministic when enhancement is disabled', async () => {
   let called = false;
   const narrator = createAnthropicNarrator({
@@ -47,7 +53,8 @@ test('narrator stays offline and deterministic when enhancement is disabled', as
     },
   });
 
-  assert.equal(await narrator(input), fallbackNarrative(input));
+  const text = extractText(await narrator(input));
+  assert.equal(text, fallbackNarrative(input));
   assert.equal(called, false);
 });
 
@@ -62,7 +69,10 @@ test('narrator returns the first Anthropic text block', async () => {
     fetch: async (_url, init) => {
       request = init;
       return new Response(JSON.stringify({
-        content: [{ type: 'text', text: 'LLM 生成的中文风险叙事。' }],
+        content: [{
+          type: 'text',
+          text: 'LLM generated narrative from primary model.',
+        }],
       }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
@@ -70,7 +80,8 @@ test('narrator returns the first Anthropic text block', async () => {
     },
   });
 
-  assert.equal(await narrator(input), 'LLM 生成的中文风险叙事。');
+  const text = extractText(await narrator(input));
+  assert.equal(text, 'LLM generated narrative from primary model.');
   assert.equal(request?.method, 'POST');
   assert.equal(
     (request?.headers as Record<string, string>)['anthropic-version'],
@@ -96,7 +107,8 @@ test('narrator falls back on HTTP and malformed response failures', async () => 
       env,
       fetch: async () => response,
     });
-    assert.equal(await narrator(input), fallbackNarrative(input));
+    const text = extractText(await narrator(input));
+    assert.equal(text, fallbackNarrative(input));
   }
 });
 
@@ -115,5 +127,83 @@ test('narrator aborts at the configured timeout and falls back', async () => {
     }),
   });
 
-  assert.equal(await narrator(input), fallbackNarrative(input));
+  const text = extractText(await narrator(input));
+  assert.equal(text, fallbackNarrative(input));
+});
+
+test('narrator uses secondary model and emits consensus trace when configured', async () => {
+  const calls: string[] = [];
+  const traces: string[] = [];
+  const narrator = createAnthropicNarrator({
+    env: {
+      DOCTOR_LLM_NARRATE: '1',
+      ANTHROPIC_API_KEY: 'test-key',
+      DOCTOR_LLM_MODEL: 'primary-llm',
+      DOCTOR_LLM_SECONDARY_MODELS: 'secondary-llm',
+    },
+    fetch: async (_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { model: string };
+      calls.push(body.model);
+      return new Response(JSON.stringify({
+        content: [{
+          type: 'text',
+          text: body.model === 'primary-llm'
+            ? 'Primary explanation from first model.'
+            : 'Primary explanation from first model.',
+        }],
+      }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    },
+    onTrace: entry => traces.push(entry),
+  });
+
+  const result = await narrator(input);
+  const text = extractText(result);
+
+  assert.equal(text, 'Primary explanation from first model.');
+  assert.deepEqual(calls, ['primary-llm', 'secondary-llm']);
+  assert.ok(traces.some(item => item.includes('narration consensus')));
+  if (typeof result !== 'string') {
+    assert.equal(result.consensus?.agreementRate, 1);
+  }
+});
+
+test('narrator supports cascade mode with disagreement penalty trace', async () => {
+  const traces: string[] = [];
+  const narrator = createAnthropicNarrator({
+    env: {
+      DOCTOR_LLM_NARRATE: '1',
+      ANTHROPIC_API_KEY: 'test-key',
+      DOCTOR_LLM_MODEL: 'primary-llm',
+      DOCTOR_LLM_SECONDARY_MODELS: 'secondary-llm',
+      DOCTOR_LLM_ENSEMBLE_MODE: 'cascade',
+    },
+    fetch: async (_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { model: string };
+      return new Response(JSON.stringify({
+        content: [{
+          type: 'text',
+          text: body.model === 'primary-llm'
+            ? 'Narrative about first path.'
+            : 'Different narrative with mismatched wording.',
+        }],
+      }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    },
+    onTrace: entry => traces.push(entry),
+  });
+
+  const result = await narrator(input);
+  const text = extractText(result);
+
+  assert.equal(text, 'Narrative about first path.');
+  assert.ok(traces.some(item => item.includes('narration consensus warning')));
+  if (typeof result !== 'string') {
+    assert.ok(result.consensus);
+    assert.ok(result.consensus?.agreementRate < 1);
+  }
 });

@@ -9,11 +9,11 @@ import type {
 import { freezeStrategyDefinition } from '../definition.ts';
 
 const PARAM_LABELS: Record<keyof MaCrossParams, string> = {
-  fastMA: '快均线',
-  slowMA: '慢均线',
-  leverage: '杠杆',
-  stopLossPct: '止损比例',
-  positionPct: '仓位比例',
+  fastMA: 'fastMA',
+  slowMA: 'slowMA',
+  leverage: 'leverage',
+  stopLossPct: 'stopLossPct',
+  positionPct: 'positionPct',
 };
 
 function fail(message: string): never {
@@ -121,18 +121,18 @@ function targetedPatch(
       params.stopLossPct,
       Number((0.8 / leverage / 2).toFixed(3)),
     );
-    rationale.push('清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内');
+    rationale.push('Reduce leverage and tighten stop-loss to within half of the liquidation line.');
   }
 
   if (uniqueCauses.has('drawdown-breach')) {
     patch.positionPct = Number((params.positionPct * 0.7).toFixed(2));
-    rationale.push('回撤击穿 → 降低仓位暴露');
+    rationale.push('Lower position exposure to reduce drawdown pressure.');
   }
 
   if (uniqueCauses.has('stop-loss-bleed')) {
     patch.fastMA = Math.round(params.fastMA * 1.5);
     patch.slowMA = Math.round(params.slowMA * 1.5);
-    rationale.push('震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音');
+    rationale.push('Slow moving averages by 1.5x to reduce whipsaw entries and stop-loss bleed.');
   }
 
   return { patch, rationale };
@@ -243,7 +243,7 @@ const definition = freezeStrategyDefinition({
   ],
   example: {
     id: 'tf-001',
-    name: '高杠杆趋势跟随',
+    name: 'High-Leverage Trend Follower',
     archetype: 'ma-cross',
     params: {
       fastMA: 8,

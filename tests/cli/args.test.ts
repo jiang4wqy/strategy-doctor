@@ -11,6 +11,7 @@ test('parseCliArgs applies offline submission defaults', () => {
     backtest: 'mock',
     format: 'markdown',
     help: false,
+    trace: false,
   });
 });
 
@@ -23,6 +24,7 @@ test('parseCliArgs accepts every supported option', () => {
     '--backtest', 'bitget',
     '--format', 'json',
     '--output', 'report.json',
+    '--trace',
   ]), {
     strategyPath: 'strategy.json',
     style: 'trend',
@@ -32,6 +34,7 @@ test('parseCliArgs accepts every supported option', () => {
     format: 'json',
     outputPath: 'report.json',
     help: false,
+    trace: true,
   });
 });
 
@@ -51,7 +54,7 @@ test('parseCliArgs rejects unknown flags, missing values, and invalid ranges', (
     ['strategy.json', '--format', 'html'],
     ['one.json', 'two.json'],
   ]) {
-    assert.throws(() => parseCliArgs(args), /argument|style|seed|candidate|backtest|format/i);
+  assert.throws(() => parseCliArgs(args), /argument|style|seed|candidate|backtest|format/i);
   }
 });
 

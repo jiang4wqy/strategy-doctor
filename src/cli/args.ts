@@ -12,6 +12,7 @@ export interface CliOptions {
   format: OutputFormat;
   outputPath?: string;
   help: boolean;
+  trace: boolean;
 }
 
 const STYLE_NAMES = new Set<StyleName>([
@@ -38,6 +39,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     backtest: 'mock',
     format: 'markdown',
     help: false,
+    trace: false,
   };
   if (args.includes('--help')) {
     options.help = true;
@@ -51,6 +53,11 @@ export function parseCliArgs(args: string[]): CliOptions {
         throw new Error(`unexpected strategy argument: ${argument}`);
       }
       options.strategyPath = argument;
+      continue;
+    }
+
+    if (argument === '--trace') {
+      options.trace = true;
       continue;
     }
 

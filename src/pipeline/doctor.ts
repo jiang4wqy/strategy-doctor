@@ -2,6 +2,7 @@ import type {
   BacktestAdapter,
   Death,
   Metrics,
+  NarrationConsensus,
   Scenario,
   ScenarioEvaluation,
   Scorecard,
@@ -24,11 +25,28 @@ export interface DoctorOptions {
   treatment: Scenario[];
   heldOut: Scenario[];
   narrator?: Narrator;
+  onTrace?: (entry: string) => void;
 }
 
 export interface DoctorResult {
   scorecard: Scorecard;
   heldOut: HeldOutValidation;
+  modelConsistency?: {
+    prescriptionAgreement?: {
+      agreementRate: number;
+      requestedStyles: StyleName[];
+      agreeingStyles: StyleName[];
+      mismatches: string[];
+    };
+    narrationAgreement?: {
+      agreementRate: number;
+      requestedModels: string[];
+      agreeingModels: string[];
+      mismatches: string[];
+      avgSimilarity: number;
+      sampleCount: number;
+    };
+  };
 }
 
 async function runAll(
@@ -73,6 +91,26 @@ const SHOCK_KINDS = {
   news: new Set(['gap']),
   technical: new Set(['whipsaw']),
 } as const;
+
+const VALIDATION_PROFILE_ENV = 'DOCTOR_PRESCRIPTION_VALIDATION_STYLES';
+
+function getValidationProfiles(): StyleName[] {
+  const raw = process.env[VALIDATION_PROFILE_ENV];
+  if (!raw) {
+    return [];
+  }
+  const requested = new Set<StyleName>();
+  for (const item of raw.split(',').map(value => value.trim())) {
+    if (
+      item === 'conservative'
+      || item === 'aggressive'
+      || item === 'trend'
+    ) {
+      requested.add(item);
+    }
+  }
+  return [...requested];
+}
 
 function validateScenarioSet(label: string, scenarios: Scenario[]): void {
   const ids = new Set<string>();
@@ -182,6 +220,34 @@ function validateScenarioSets(
   }
 }
 
+function summarizeScenarioSet(label: string, scenarios: Scenario[]): string {
+  const shockKinds = new Set(scenarios.map(scenario => scenario.shock.kind)).size;
+  const severity = scenarios.map(scenario => scenario.severity);
+  const minSeverity = Math.min(...severity);
+  const maxSeverity = Math.max(...severity);
+  const causes = Object.entries(
+    scenarios.reduce((counts, scenario) => {
+      counts[scenario.dimension] = (counts[scenario.dimension] ?? 0) + 1;
+      return counts;
+    }, {} as Record<string, number>),
+  )
+    .map(([dimension, count]) => `${dimension}=${count}`)
+    .join(', ');
+
+  return `${label}: n=${scenarios.length}, seed=${scenarios[0].shock.seed}, shockKinds=${shockKinds}, severity=[${minSeverity}, ${maxSeverity}], dims=[${causes}]`;
+}
+
+function summarizeStyleScores(perStyle: Record<StyleName, StyleScore>): string {
+  return Object.values(perStyle)
+    .map(
+      score =>
+        `${score.style}:{riskScore=${score.riskScore.toFixed(2)}, survived=${score.survived}, worstDD=${score.worstDrawdownPct.toFixed(4)}, meanPnL=${(
+          score.meanPnlPct * 100
+        ).toFixed(2)}%}`,
+    )
+    .join(' | ');
+}
+
 async function evaluate(
   scenarios: Scenario[],
   metrics: Metrics[],
@@ -190,9 +256,15 @@ async function evaluate(
   return Promise.all(scenarios.map(async (scenario, index) => {
     const result = metrics[index];
     const cause = classifyDeath(result);
-    const narrative = narrator
+    const narrated = narrator
       ? await narrator({ scenario, metrics: result, cause })
       : scenario.narrative;
+    const narrative = typeof narrated === 'string'
+      ? narrated
+      : narrated.text;
+    const narrationConsensus = typeof narrated === 'object' && narrated !== null
+      ? narrated.consensus
+      : undefined;
     return {
       scenarioId: scenario.id,
       scenarioName: scenario.name,
@@ -208,8 +280,61 @@ async function evaluate(
         + result.maxDrawdownPct * 100
         - result.pnlPct * 100,
       narrative,
+      narrationConsensus: narrationConsensus as
+        | ScenarioEvaluation['narrationConsensus']
+        | undefined,
     };
   }));
+}
+
+function aggregateNarrationAgreement(
+  evaluations: ScenarioEvaluation[],
+): {
+  agreementRate: number;
+  requestedModels: string[];
+  agreeingModels: string[];
+  mismatches: string[];
+  avgSimilarity: number;
+  sampleCount: number;
+} | undefined {
+  const rates: NarrationConsensus[] = evaluations
+    .map(evaluation => evaluation.narrationConsensus)
+    .filter((consensus): consensus is NarrationConsensus => (
+      consensus !== undefined
+      && consensus !== null
+      && typeof consensus.agreementRate === 'number'
+    ));
+
+  if (rates.length === 0) {
+    return undefined;
+  }
+
+  const requestedModels = new Set<string>();
+  const agreeingModels = new Set<string>();
+  const mismatches = new Set<string>();
+  let avgSimilarity = 0;
+  for (const consensus of rates) {
+    for (const model of consensus.requestedModels) {
+      requestedModels.add(model);
+    }
+    for (const model of consensus.agreeingModels) {
+      agreeingModels.add(model);
+    }
+    for (const model of consensus.mismatches) {
+      mismatches.add(model);
+    }
+    avgSimilarity += consensus.avgSimilarity;
+  }
+
+  return {
+    agreementRate: rates.reduce((sum, item) => sum + item.agreementRate, 0)
+      / rates.length,
+    requestedModels: [...requestedModels],
+    agreeingModels: [...agreeingModels],
+    mismatches: [...mismatches],
+    avgSimilarity: Number((avgSimilarity / rates.length).toFixed(4)),
+    sampleCount: rates.length,
+  };
 }
 
 export async function runDoctorDetailed(
@@ -218,6 +343,11 @@ export async function runDoctorDetailed(
   options: DoctorOptions,
 ): Promise<DoctorResult> {
   validateScenarioSets(options.treatment, options.heldOut);
+  const trace = options.onTrace;
+  trace?.('doctor-start');
+  trace?.(
+    `doctor start strategy=${strategy.id} style=${options.style} ${summarizeScenarioSet('treatment', options.treatment)} ${summarizeScenarioSet('heldOut', options.heldOut)}`,
+  );
 
   const treatmentMetrics = await runAll(
     strategy,
@@ -236,14 +366,28 @@ export async function runDoctorDetailed(
       scoreStyle(treatmentMetrics, profile),
     ]),
   ) as Record<StyleName, StyleScore>;
+  trace?.(`scorecard-style-summaries ${summarizeStyleScores(perStyle)}`);
 
   const profile = getProfile(options.style);
+  const validationProfiles = getValidationProfiles();
   const prescription = await prescribe(
     strategy,
     deaths,
     options.treatment,
     backtest,
     profile,
+    options.onTrace
+      ? {
+          onTrace: options.onTrace,
+          validationProfiles: validationProfiles.length > 0
+            ? validationProfiles
+            : [options.style],
+      }
+      : {
+          validationProfiles: validationProfiles.length > 0
+            ? validationProfiles
+            : [options.style],
+      },
   );
   const heldOut = await validateOnHeldOutDetailed(
     strategy,
@@ -252,6 +396,26 @@ export async function runDoctorDetailed(
     options.heldOut,
     backtest,
     profile,
+  );
+
+  const heldOutGain = `${heldOut.tradeoff.robustnessGain >= 0 ? '+' : ''}${heldOut.tradeoff.robustnessGain.toFixed(4)}`;
+  const heldOutCost = `${heldOut.tradeoff.returnCost >= 0 ? '+' : ''}${(
+    heldOut.tradeoff.returnCost * 100
+  ).toFixed(2)}%`;
+  const modelConsistency = {
+    prescriptionAgreement: prescription.consensus
+      ? {
+        agreementRate: prescription.consensus.agreementRate,
+        requestedStyles: prescription.consensus.requestedStyles,
+        agreeingStyles: prescription.consensus.agreeingStyles,
+        mismatches: prescription.consensus.mismatches,
+      }
+      : undefined,
+    narrationAgreement: aggregateNarrationAgreement(evaluations),
+  };
+
+  trace?.(
+    `doctor end: prescriptions=${Object.keys(prescription.changes).length} changes, heldOutMetrics=${heldOut.patchedMetrics.length}/${heldOut.originalMetrics.length}, robustness=${heldOutGain}, returnCost=${heldOutCost}`,
   );
 
   return {
@@ -265,6 +429,7 @@ export async function runDoctorDetailed(
       prescription,
       tradeoff: heldOut.tradeoff,
     },
+    modelConsistency,
     heldOut,
   };
 }

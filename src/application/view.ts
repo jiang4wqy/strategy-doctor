@@ -2,11 +2,15 @@ import type {
   Dimension,
   Scenario,
   StrategyParamKey,
+  StyleName,
 } from '../contracts.ts';
 import type { DoctorResult } from '../pipeline/doctor.ts';
 import type {
   DiagnoseRequest,
   DiagnosisView,
+  DashboardAlert,
+  DiagnosisModelConsistency,
+  RiskDashboard,
   ParameterChange,
 } from '../platform/contracts.ts';
 import {
@@ -66,6 +70,124 @@ function defaultHeldOutDimension(
   return heldOut[worstIndex].dimension;
 }
 
+const TREND_SCORE_THRESHOLD = 35;
+const DEFENSE_SCORE_THRESHOLD = 42;
+const COST_EFFICIENCY_THRESHOLD = 1;
+const COST_RATIO_CRITICAL_THRESHOLD = 0.25;
+const MAX_RETURN_COST_FOR_INF = 0.0005;
+
+function addAlert(
+  alerts: DashboardAlert[],
+  code: string,
+  severity: DashboardAlert['severity'],
+  message: string,
+  value: number,
+  threshold: number,
+): void {
+  alerts.push({
+    code,
+    severity,
+    message,
+    value,
+    threshold,
+  });
+}
+
+function buildRiskDashboard(doctor: DoctorResult, selectedStyle: StyleName): RiskDashboard {
+  const trendScore = doctor.scorecard.perStyle.trend.riskScore;
+  const defenseScore = doctor.scorecard.perStyle.conservative.riskScore;
+  const robustness = doctor.scorecard.tradeoff.robustnessGain;
+  const returnCost = doctor.scorecard.tradeoff.returnCost * 100;
+  const costEfficiency = Math.abs(returnCost) <= MAX_RETURN_COST_FOR_INF
+    ? (robustness >= 0 ? 999 : 0)
+    : Number((robustness / Math.abs(returnCost)).toFixed(4));
+  const gap = trendScore - defenseScore;
+  const alerts: DashboardAlert[] = [];
+
+  if (selectedStyle === 'trend' && trendScore < TREND_SCORE_THRESHOLD) {
+    addAlert(
+      alerts,
+      'trend-threshold',
+      'warning',
+      'trend score is below the threshold',
+      trendScore,
+      TREND_SCORE_THRESHOLD,
+    );
+  }
+  if (defenseScore < DEFENSE_SCORE_THRESHOLD) {
+    addAlert(
+      alerts,
+      'defense-threshold',
+      'warning',
+      'defense score is below the threshold',
+      defenseScore,
+      DEFENSE_SCORE_THRESHOLD,
+    );
+  }
+  if (robustness < 0) {
+    addAlert(
+      alerts,
+      'robustness-negative',
+      'critical',
+      'held-out robustness is negative',
+      robustness,
+      0,
+    );
+  }
+  if (costEfficiency < COST_EFFICIENCY_THRESHOLD) {
+    addAlert(
+      alerts,
+      'cost-efficiency-threshold',
+      costEfficiency <= COST_RATIO_CRITICAL_THRESHOLD ? 'critical' : 'warning',
+      'cost-efficiency is below the threshold',
+      costEfficiency,
+      COST_EFFICIENCY_THRESHOLD,
+    );
+  }
+
+  return {
+    trendScore,
+    defenseScore,
+    costEfficiency,
+    trendDefenseGap: gap,
+    costEfficiencyThreshold: COST_EFFICIENCY_THRESHOLD,
+    trendThreshold: TREND_SCORE_THRESHOLD,
+    defenseThreshold: DEFENSE_SCORE_THRESHOLD,
+    alerts,
+  };
+}
+
+function buildModelConsistency(
+  doctor: DoctorResult,
+): DiagnosisModelConsistency | undefined {
+  const prescription = doctor.modelConsistency?.prescriptionAgreement;
+  const narration = doctor.modelConsistency?.narrationAgreement;
+  if (!prescription && !narration) {
+    return undefined;
+  }
+
+  return {
+    prescription: prescription
+      ? {
+        agreementRate: prescription.agreementRate,
+        requestedStyles: prescription.requestedStyles,
+        agreeingStyles: prescription.agreeingStyles,
+        mismatches: prescription.mismatches,
+      }
+      : undefined,
+    narration: narration
+      ? {
+        agreementRate: narration.agreementRate,
+        requestedModels: narration.requestedModels,
+        agreeingModels: narration.agreeingModels,
+        mismatches: narration.mismatches,
+        avgSimilarity: narration.avgSimilarity,
+        sampleCount: narration.sampleCount,
+      }
+      : undefined,
+  };
+}
+
 export function buildDiagnosisView(
   request: DiagnoseRequest,
   doctor: DoctorResult,
@@ -84,6 +206,8 @@ export function buildDiagnosisView(
       robustnessGain: doctor.scorecard.tradeoff.robustnessGain,
       returnDelta: doctor.scorecard.tradeoff.returnCost,
     },
+    modelConsistency: buildModelConsistency(doctor),
+    riskDashboard: buildRiskDashboard(doctor, selectedStyle.style),
     charts: {
       treatmentEquity: doctor.scorecard.evaluations.map(evaluation => ({
         dimension: evaluation.dimension,

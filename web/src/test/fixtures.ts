@@ -189,6 +189,31 @@ export const diagnosisFixture = {
     robustnessGain: 12,
     returnDelta: -0.02,
   },
+  riskDashboard: {
+    trendScore: 50,
+    defenseScore: 38,
+    costEfficiency: 0.5,
+    trendDefenseGap: 12,
+    costEfficiencyThreshold: 1,
+    trendThreshold: 35,
+    defenseThreshold: 42,
+    alerts: [
+      {
+        code: 'defense-threshold',
+        severity: 'warning',
+        message: 'defense score is below the threshold',
+        value: 38,
+        threshold: 42,
+      },
+      {
+        code: 'cost-efficiency-threshold',
+        severity: 'warning',
+        message: 'cost-efficiency is below the threshold',
+        value: 0.5,
+        threshold: 1,
+      },
+    ],
+  },
   charts: {
     treatmentEquity: [
       { dimension: 'sentiment', equity: [1, 0.9, 1.1] },

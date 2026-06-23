@@ -27,6 +27,7 @@ export interface DiagnoseDependencies {
   backtest?: BacktestAdapter;
   snapshots?: SnapshotBundle;
   narrator?: Narrator;
+  onTrace?: (entry: string) => void;
 }
 
 function validateRequest(request: DiagnoseRequest): void {
@@ -54,6 +55,10 @@ export async function diagnoseStrategy(
 ): Promise<DiagnosisResult> {
   validateRequest(request);
   const strategy = parseStrategy(request.strategy);
+  const trace = dependencies.onTrace;
+  trace?.(
+    `diagnose start: archetype=${strategy.archetype} style=${request.style} seed=${request.seed} candidates=${request.candidates}`,
+  );
   const normalizedRequest: DiagnoseRequest = {
     ...request,
     strategy,
@@ -77,12 +82,19 @@ export async function diagnoseStrategy(
       backtest,
     ),
   ]);
+  trace?.(
+    `diagnose scenarios ready: treatment=${treatment.length}, heldOut=${heldOut.length}`,
+  );
   const doctor = await runDoctorDetailed(strategy, backtest, {
     style: request.style,
     treatment,
     heldOut,
     narrator: dependencies.narrator,
+    onTrace: dependencies.onTrace,
   });
+  trace?.(
+    `diagnose end: deaths=${doctor.scorecard.deaths.length}, patchedChanges=${Object.keys(doctor.scorecard.prescription.changes).length}`,
+  );
 
   return {
     scorecard: doctor.scorecard,

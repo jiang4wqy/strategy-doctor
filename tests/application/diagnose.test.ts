@@ -49,3 +49,27 @@ test('diagnoseStrategy rejects invalid seed and candidate boundaries', async () 
     /candidate/i,
   );
 });
+
+test('diagnoseStrategy can emit stage traces', async () => {
+  const traces: string[] = [];
+  await diagnoseStrategy(
+    {
+      strategy,
+      style: 'conservative',
+      seed: 42,
+      candidates: 6,
+    },
+    {
+      onTrace: entry => traces.push(entry),
+    },
+  );
+
+  assert.ok(traces.length > 0);
+  assert.ok(traces.some(entry => entry.startsWith('diagnose start:')));
+  assert.ok(
+    traces.some(
+      entry => entry.startsWith('diagnose scenarios ready:'),
+    ),
+  );
+  assert.ok(traces.some(entry => entry.startsWith('diagnose end:')));
+});

@@ -2639,10 +2639,21 @@
       "stopLossPct": 0.072,
       "positionPct": 0.6
     },
-    "rationale": "清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内；回撤击穿 → 降低仓位暴露；最终处方：杠杆 10→5，止损比例 0.5→0.072，仓位比例 1→0.6",
+    "rationale": "Reduce leverage and tighten stop-loss to within half of the liquidation line.; Lower position exposure to reduce drawdown pressure.; final prescription: leverage 10 -> 5; stopLossPct 0.5 -> 0.072; positionPct 1 -> 0.6",
+    "consensus": {
+      "primaryStyle": "conservative",
+      "requestedStyles": [
+        "conservative"
+      ],
+      "agreeingStyles": [
+        "conservative"
+      ],
+      "agreementRate": 1,
+      "mismatches": []
+    },
     "patchedStrategy": {
       "id": "tf-001-rx",
-      "name": "高杠杆趋势跟随（处方修补版）",
+      "name": "高杠杆趋势跟随 (prescription-adjusted)",
       "archetype": "ma-cross",
       "params": {
         "fastMA": 8,

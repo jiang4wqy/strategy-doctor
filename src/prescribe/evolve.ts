@@ -1,8 +1,9 @@
-import type {
+﻿import type {
   BacktestAdapter,
   Death,
   DeathCause,
   Metrics,
+  StyleName,
   ParameterChanges,
   Prescription,
   Scenario,
@@ -13,7 +14,7 @@ import type {
 } from '../contracts.ts';
 import { mulberry32 } from '../backtest/path.ts';
 import { scoreStyle } from '../scoring/scorecard.ts';
-import type { StyleProfile } from '../scoring/styles.ts';
+import { getProfile, type StyleProfile } from '../scoring/styles.ts';
 import {
   getStrategyAdapter,
   type AnyStrategyAdapter,
@@ -21,8 +22,10 @@ import {
 import { diffParams } from './mutations.ts';
 
 export interface PrescribeOptions {
-  candidates: number;
-  seed: number;
+  candidates?: number;
+  seed?: number;
+  validationProfiles?: readonly StyleName[];
+  onTrace?: (entry: string) => void;
 }
 
 interface CandidateEvaluation {
@@ -34,15 +37,87 @@ interface CandidateEvaluation {
   meanPnl: number;
 }
 
-const DEFAULT_OPTIONS: PrescribeOptions = {
+interface ProfileCandidateEvaluation extends CandidateEvaluation {
+  style: StyleName;
+  params: StrategyParams;
+  index: number;
+}
+
+interface ProfileConsensus {
+  primaryStyle: StyleName;
+  requestedStyles: StyleName[];
+  agreeingStyles: StyleName[];
+  agreementRate: number;
+  mismatches: StyleName[];
+}
+
+type PrescribeResolvedOptions = Required<Pick<PrescribeOptions, 'candidates' | 'seed'>> & {
+  validationProfiles: StyleName[];
+  onTrace?: PrescribeOptions['onTrace'];
+};
+
+const DEFAULT_OPTIONS: PrescribeResolvedOptions = {
   candidates: 8,
   seed: 7,
+  validationProfiles: [],
 };
+
+function normalizeValidationProfiles(
+  validationProfiles: readonly StyleName[],
+  primaryStyle: StyleName,
+): StyleName[] {
+  const profiles = new Set<StyleName>([primaryStyle]);
+  for (const candidate of validationProfiles) {
+    profiles.add(candidate);
+  }
+  return [...profiles];
+}
+
+function computeConsensus(
+  orderedProfiles: ProfileCandidateEvaluation[],
+  primaryProfile: StyleName,
+): ProfileConsensus {
+  const requested = orderedProfiles.map(item => item.style);
+  const primary = orderedProfiles
+    .find(item => item.style === primaryProfile);
+  const primaryKey = primary ? JSON.stringify(primary.params) : JSON.stringify({});
+  const agreeing = orderedProfiles
+    .filter(item => JSON.stringify(item.params) === primaryKey)
+    .map(item => item.style);
+  const mismatches = orderedProfiles
+    .map(item => item.style)
+    .filter(style => !agreeing.includes(style));
+
+  return {
+    primaryStyle: primaryProfile,
+    requestedStyles: requested,
+    agreeingStyles: agreeing,
+    agreementRate: requested.length > 0 ? agreeing.length / requested.length : 1,
+    mismatches,
+  };
+}
+
+function formatConsensus(consensus: ProfileConsensus): string {
+  const mismatch = consensus.mismatches.length > 0
+    ? `${consensus.mismatches.join(',')} mismatch`
+    : 'all profiles agree';
+  return `prescription consensus: primary=${consensus.primaryStyle}, agreement=${(
+    consensus.agreementRate * 100
+  ).toFixed(2)}%, requested=${consensus.requestedStyles.join(',')}, ${mismatch}`;
+}
 
 function parameterRecord(
   params: StrategyParams | ParameterChanges,
 ): Record<string, number | undefined> {
   return params as unknown as Record<string, number | undefined>;
+}
+
+function labelWithoutLocale(
+  key: StrategyParamKey,
+  adapter: AnyStrategyAdapter,
+): string {
+  const label = adapter.paramLabel(key as never);
+  return /[\u4e00-\u9fff]/.test(label) ? key : label;
 }
 
 function summarizeChanges(
@@ -54,9 +129,9 @@ function summarizeChanges(
   const updated = parameterRecord(changes);
   return (Object.keys(changes) as StrategyParamKey[])
     .map(key => (
-      `${adapter.paramLabel(key as never)} ${previous[key]}→${updated[key]}`
+      `${labelWithoutLocale(key, adapter)} ${previous[key]} -> ${updated[key]}`
     ))
-    .join('，');
+    .join('; ');
 }
 
 function preservesTargetedIntent(
@@ -158,6 +233,49 @@ async function evaluateCandidate(
   };
 }
 
+async function evaluateCandidateForProfile(
+  strategy: Strategy,
+  candidates: StrategyParams[],
+  treatment: Scenario[],
+  backtest: BacktestAdapter,
+  profile: StyleProfile,
+  trace?: PrescribeOptions['onTrace'],
+): Promise<ProfileCandidateEvaluation> {
+  let best: CandidateEvaluation | undefined;
+  let bestIndex = 0;
+  for (let index = 0; index < candidates.length; index++) {
+    const candidate = candidates[index];
+    const evaluation = await evaluateCandidate(
+      strategy,
+      candidate,
+      treatment,
+      backtest,
+      profile,
+    );
+    trace?.(
+      `[${profile.style}] candidate #${index + 1}/${candidates.length}: ` +
+      `risk=${evaluation.score} survived=${evaluation.survived} ` +
+      `liquidations=${evaluation.liquidations} ` +
+      `worstDrawdown=${evaluation.worstDrawdown.toFixed(4)} ` +
+      `meanPnL=${(evaluation.meanPnl * 100).toFixed(2)}%`,
+    );
+    if (isBetter(evaluation, best)) {
+      best = evaluation;
+      bestIndex = index;
+    }
+  }
+
+  if (!best) {
+    throw new Error(`no candidate passed validation for profile ${profile.style}`);
+  }
+
+  return {
+    ...best,
+    style: profile.style,
+    index: bestIndex,
+  };
+}
+
 export async function prescribe(
   strategy: Strategy,
   deaths: Death[],
@@ -166,28 +284,53 @@ export async function prescribe(
   profile: StyleProfile,
   options: PrescribeOptions = DEFAULT_OPTIONS,
 ): Promise<Prescription> {
+  const resolvedOptions: PrescribeResolvedOptions = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+    validationProfiles: [...(options.validationProfiles ?? [])],
+  };
   const causes = new Set(
     deaths
       .map(death => death.cause)
       .filter(cause => cause !== 'survived'),
   );
   if (causes.size === 0) {
+    const consensus = resolvedOptions.validationProfiles.length > 0
+      ? {
+        primaryStyle: profile.style,
+        requestedStyles: normalizeValidationProfiles(
+          resolvedOptions.validationProfiles,
+          profile.style,
+        ),
+        agreeingStyles: [profile.style],
+        agreementRate: 1,
+        mismatches: [],
+      }
+      : undefined;
     return {
       changes: {},
       rationale: '',
       patchedStrategy: strategy,
+      consensus,
     };
   }
   if (treatment.length === 0) {
     throw new Error('treatment scenarios must not be empty');
   }
-  if (!Number.isInteger(options.candidates) || options.candidates < 1) {
+  if (!Number.isInteger(resolvedOptions.candidates) || resolvedOptions.candidates < 1) {
     throw new Error('candidates must be a positive integer');
   }
 
   const adapter = getStrategyAdapter(
     strategy.archetype,
   ) as AnyStrategyAdapter;
+  const trace = resolvedOptions.onTrace;
+  trace?.(
+    `prescribe start: ${strategy.id} | archetype=${strategy.archetype} | causes=${[
+      ...causes,
+    ].sort().join(',')}`,
+  );
+
   const { patch, rationale } = adapter.targetedPatch(
     strategy.params as never,
     [...causes],
@@ -196,12 +339,13 @@ export async function prescribe(
     ...strategy.params,
     ...patch,
   } as StrategyParams;
-  const random = mulberry32(options.seed);
+  const random = mulberry32(resolvedOptions.seed);
   const fields = adapter.targetedFields(
     causes,
   ) as readonly StrategyParamKey[];
   const candidates: StrategyParams[] = [base];
-  for (let index = 1; index < options.candidates; index++) {
+  const candidateKeys = new Set<string>([JSON.stringify(base)]);
+  for (let index = 1; index < resolvedOptions.candidates; index++) {
     const candidate = adapter.jitterParams(
       base as never,
       random,
@@ -216,37 +360,61 @@ export async function prescribe(
         causes,
       )
     ) {
-      candidates.push(candidate);
+      const key = JSON.stringify(candidate);
+      if (!candidateKeys.has(key)) {
+        candidateKeys.add(key);
+        candidates.push(candidate);
+      }
     }
   }
 
-  let best: CandidateEvaluation | undefined;
-  for (const candidate of candidates) {
-    const evaluation = await evaluateCandidate(
+  const profiles = normalizeValidationProfiles(
+    resolvedOptions.validationProfiles,
+    profile.style,
+  ).map(requested => getProfile(requested));
+
+  const profileEvaluations = await Promise.all(profiles.map(
+    searchProfile => evaluateCandidateForProfile(
       strategy,
-      candidate,
+      candidates,
       treatment,
       backtest,
-      profile,
+      searchProfile,
+      trace,
+    ),
+  ));
+  const best = profileEvaluations[0];
+  if (!best) {
+    throw new Error('prescription profile search failed');
+  }
+  const consensus = computeConsensus(profileEvaluations, profile.style);
+  trace?.(formatConsensus(consensus));
+  if (consensus.agreementRate < 1 && profiles.length > 1) {
+    trace?.(
+      `prescription consensus warning: ${consensus.mismatches.join(',')} ` +
+      `did not match ${consensus.primaryStyle}`,
     );
-    if (isBetter(evaluation, best)) {
-      best = evaluation;
-    }
   }
 
-  const bestParams = best!.params;
+  const bestParams = best.params;
   const changes = diffParams(
     strategy.params,
     bestParams,
   ) as ParameterChanges;
   const summary = summarizeChanges(strategy.params, changes, adapter);
+  trace?.(
+    `selected candidate #${best.index + 1} with ${
+      Object.keys(changes).length
+    } parameter edit(s).`,
+  );
   return {
     changes,
-    rationale: `${rationale.join('；')}；最终处方：${summary}`,
+    rationale: `${rationale.join('; ')}; final prescription: ${summary}`,
+    consensus,
     patchedStrategy: {
       ...strategy,
       id: `${strategy.id}-rx`,
-      name: `${strategy.name}（处方修补版）`,
+      name: `${strategy.name} (prescription-adjusted)`,
       params: bestParams,
     } as Strategy,
   };

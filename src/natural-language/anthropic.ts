@@ -1,4 +1,4 @@
-import type { DraftAssumption, StrategyDraft } from '../platform/contracts.ts';
+﻿import type { DraftAssumption, StrategyDraft } from '../platform/contracts.ts';
 import { parseStrategy } from '../strategy/parse.ts';
 import { strategyRegistry } from '../strategy/registry.ts';
 
@@ -8,6 +8,9 @@ export interface AnthropicParserOptions {
   env?: Record<string, string | undefined>;
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
+  model?: string;
+  ensembleMode?: 'cascade' | 'parallel';
+  onTrace?: (entry: string) => void;
 }
 
 function object(value: unknown): Record<string, unknown> | undefined {
@@ -104,21 +107,50 @@ function validateDefaults(
   return assumptions;
 }
 
-export async function parseWithAnthropic(
+function parseModelList(
+  options: AnthropicParserOptions,
+): string[] {
+  const env = options.env ?? process.env;
+  const models = [
+    options.model ?? env.DOCTOR_NL_MODEL,
+    ...(env.DOCTOR_NL_SECONDARY_MODELS ?? '')
+      .split(',')
+      .map(model => model.trim())
+      .filter(Boolean),
+  ];
+  return models.filter(
+    (value, index, all): value is string => (
+      typeof value === 'string'
+      && value.length > 0
+      && all.indexOf(value) === index
+    ),
+  );
+}
+
+function shouldCascade(options: AnthropicParserOptions): boolean {
+  const mode = (options.ensembleMode
+    ?? options.env?.DOCTOR_NL_ENSEMBLE_MODE
+    ?? 'cascade').toLowerCase();
+  return mode !== 'parallel';
+}
+
+async function parseWithAnthropicModel(
   description: string,
-  options: AnthropicParserOptions = {},
+  options: AnthropicParserOptions,
+  model: string,
 ): Promise<StrategyDraft | undefined> {
   const env = options.env ?? process.env;
   const apiKey = env.ANTHROPIC_API_KEY;
-  const model = env.DOCTOR_NL_MODEL;
-  if (env.DOCTOR_NL_AI_ENABLED !== '1' || !apiKey || !model) {
+  if (env.DOCTOR_NL_AI_ENABLED !== '1' || !apiKey) {
     return undefined;
   }
-
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(),
     options.timeoutMs ?? 3000,
+  );
+  options.onTrace?.(
+    `parse model call: name=${model}, enabled=${env.DOCTOR_NL_AI_ENABLED}`,
   );
   try {
     const response = await (options.fetch ?? globalThis.fetch)(
@@ -178,4 +210,53 @@ export async function parseWithAnthropic(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function parseWithAnthropic(
+  description: string,
+  options: AnthropicParserOptions = {},
+): Promise<StrategyDraft | undefined> {
+  const env = options.env ?? process.env;
+  const model = options.model ?? env.DOCTOR_NL_MODEL;
+  if (!model) {
+    return undefined;
+  }
+  return parseWithAnthropicModel(description, options, model);
+}
+
+export async function parseWithAnthropicModels(
+  description: string,
+  options: AnthropicParserOptions = {},
+): Promise<Array<{
+  model: string;
+  draft?: StrategyDraft;
+}>> {
+  const models = parseModelList(options);
+  if (models.length === 0) {
+    return [];
+  }
+  const entries = [];
+
+  if (shouldCascade(options)) {
+    for (const model of models) {
+      const draft = await parseWithAnthropicModel(description, options, model);
+      entries.push({ model, draft });
+    }
+    return entries;
+  }
+
+  return Promise.all(models.map(async model => ({
+    model,
+    draft: await parseWithAnthropicModel(description, options, model),
+  })));
+}
+
+export function strategyFingerprint(strategy: ReturnType<typeof parseStrategy>): string {
+  return JSON.stringify({
+    archetype: strategy.archetype,
+    params: strategy.params,
+    universe: strategy.universe,
+    timeframe: strategy.timeframe,
+    name: strategy.name,
+  });
 }

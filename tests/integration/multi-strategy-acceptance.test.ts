@@ -59,6 +59,9 @@ const assertComplete = (
     Object.keys(scorecard.prescription.changes)
       .every(key => allowed.has(key)),
   );
+  assert.equal(scorecard.scenarioSetId, 'tx42/ho100042');
+  assert.equal(scorecard.evaluations.length, 5);
+  assert.ok(scorecard.tradeoff.returnCost <= 1);
 };
 
 test('both strategies complete deterministic diagnosis and prescription on shared scenarios', async () => {

@@ -5,6 +5,8 @@ import type {
 } from '../platform/contracts.ts';
 import {
   parseWithAnthropic,
+  parseWithAnthropicModels,
+  strategyFingerprint,
   type AnthropicParserOptions,
 } from './anthropic.ts';
 import { DescriptionParseError } from './errors.ts';
@@ -23,6 +25,54 @@ function configuredForAi(options: ParseDescriptionOptions): boolean {
   return env.DOCTOR_NL_AI_ENABLED === '1'
     && Boolean(env.ANTHROPIC_API_KEY)
     && Boolean(env.DOCTOR_NL_MODEL);
+}
+
+function normalizeModelOutputs(entries: Array<{ model: string; draft?: StrategyDraft }>) {
+  const successful = entries.filter(entry => entry.draft !== undefined);
+  const first = successful[0];
+  if (!first || !first.draft) {
+    return undefined;
+  }
+
+  const base = strategyFingerprint(first.draft.strategy);
+  const agreed = successful
+    .filter(entry => entry.draft && strategyFingerprint(entry.draft.strategy) === base)
+    .map(entry => entry.model);
+
+  return {
+    primaryModel: first.model,
+    requestedModels: successful.map(entry => entry.model),
+    agreeingModels: agreed,
+    agreementRate: successful.length > 0
+      ? agreed.length / successful.length
+      : 0,
+    mismatches: successful
+      .filter(entry => entry.draft && strategyFingerprint(entry.draft.strategy) !== base)
+      .map(entry => entry.model),
+  };
+}
+
+function attachConsensusMetadata(
+  draft: StrategyDraft,
+  consensus?: ReturnType<typeof normalizeModelOutputs>,
+): StrategyDraft {
+  if (!consensus) {
+    return draft;
+  }
+
+  const enriched: StrategyDraft = { ...draft };
+  enriched.consensus = consensus;
+  if (consensus.agreementRate < 1 && consensus.requestedModels.length > 1) {
+    enriched.warnings = [
+      ...draft.warnings,
+      {
+        code: 'MULTI_MODEL_DISAGREEMENT',
+        message:
+          `Parsing consistency check did not fully agree (${consensus.agreementRate.toFixed(2)}).`,
+      },
+    ];
+  }
+  return enriched;
 }
 
 function fallbackWarning(): DraftWarning {
@@ -71,9 +121,25 @@ export async function parseStrategyDescription(
     throw localError;
   }
 
-  const aiDraft = await anthropic(normalized, options);
+  const useSingleModelPath = typeof options.anthropic === 'function';
+  const candidates = useSingleModelPath
+    ? [{ model: options.env?.DOCTOR_NL_MODEL ?? 'anthropic', draft: await anthropic(normalized, options) }]
+    : await parseWithAnthropicModels(normalized, options);
+  const aiDraft = candidates
+    .find(entry => entry.draft !== undefined)
+    ?.draft;
+  const consensus = candidates.length > 1
+    ? normalizeModelOutputs(candidates)
+    : undefined;
+  if (aiDraft && consensus) {
+    aiDraft.consensus = consensus;
+  }
+
   if (aiDraft) {
-    return aiDraft;
+    return attachConsensusMetadata(
+      aiDraft,
+      candidates.length > 0 ? consensus : undefined,
+    );
   }
   if (localDraft) {
     return {

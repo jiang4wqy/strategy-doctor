@@ -9,7 +9,9 @@ import { ScenarioTimelineChart } from '../charts/ScenarioTimelineChart.tsx';
 import {
   downloadText,
   exportDiagnosisJson,
+  exportRiskDashboardJson,
   renderDiagnosisMarkdown,
+  renderRiskDashboardMarkdown,
 } from '../export/report.ts';
 import { DeveloperPanel } from './DeveloperPanel.tsx';
 import { ScenarioTable } from './ScenarioTable.tsx';
@@ -27,6 +29,7 @@ export function DiagnosisWorkspace({
   view,
 }: DiagnosisWorkspaceProps) {
   const filename = `strategy-doctor-${request.strategy.id}`;
+  const hasDashboard = Boolean(view.riskDashboard);
   return (
     <div className="diagnosis-workspace">
       <header className="workspace-header">
@@ -59,10 +62,113 @@ export function DiagnosisWorkspace({
           >
             Export Markdown
           </button>
+          {hasDashboard ? (
+            <>
+              <button
+                type="button"
+                onClick={() => downloadText(
+                  `${filename}-risk-dashboard.json`,
+                  exportRiskDashboardJson(request, view),
+                  'application/json',
+                )}
+              >
+                Export Risk Dashboard JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadText(
+                  `${filename}-risk-dashboard.md`,
+                  renderRiskDashboardMarkdown(request, view),
+                  'text/markdown',
+                )}
+              >
+                Export Risk Dashboard Markdown
+              </button>
+            </>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => downloadText(
+              `${filename}-decision-snapshot.md`,
+              renderRiskDashboardMarkdown(request, view),
+              'text/markdown',
+            )}
+          >
+            Export Decision Snapshot
+          </button>
         </div>
       </header>
 
       <SummaryCards summary={view.summary} />
+      {view.riskDashboard ? (
+        <section className="risk-dashboard-panel" aria-labelledby="risk-dashboard-title">
+          <p className="eyebrow">Risk dashboard</p>
+          <h2 id="risk-dashboard-title">Risk-control signals</h2>
+          <div className="risk-dashboard-grid">
+            <div className="risk-dashboard-card">
+              <span>Trend score</span>
+              <strong>{view.riskDashboard.trendScore.toFixed(2)}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Defense score</span>
+              <strong>{view.riskDashboard.defenseScore.toFixed(2)}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Trend/defense gap</span>
+              <strong>{view.riskDashboard.trendDefenseGap.toFixed(2)}</strong>
+            </div>
+            <div className="risk-dashboard-card">
+              <span>Cost efficiency</span>
+              <strong>{view.riskDashboard.costEfficiency.toFixed(4)}</strong>
+            </div>
+          </div>
+          <ul>
+            {view.riskDashboard.alerts.length > 0 ? (
+              view.riskDashboard.alerts.map(alert => (
+                <li key={alert.code}>
+                  <span className={`severity-${alert.severity}`}>
+                    {alert.severity.toUpperCase()}
+                  </span>
+                  {' '}
+                  {alert.code}: {alert.message}
+                  {' '}
+                  ({alert.value.toFixed(4)} vs {alert.threshold})
+                </li>
+              ))
+            ) : (
+              <li>All risk-control thresholds passed.</li>
+            )}
+          </ul>
+          {view.modelConsistency ? (
+            <div className="model-consistency-grid">
+              <h3>Model consensus</h3>
+              <p>
+                Prescription agreement:
+                {' '}
+                {view.modelConsistency.prescription
+                  ? `${(view.modelConsistency.prescription.agreementRate * 100).toFixed(2)}%`
+                  : 'n/a'}
+                {' '}
+                (requested styles:
+                {' '}
+                {view.modelConsistency.prescription?.requestedStyles.join('/')}
+                )
+              </p>
+              <p>
+                Narration agreement:
+                {' '}
+                {view.modelConsistency.narration
+                  ? `${(view.modelConsistency.narration.agreementRate * 100).toFixed(2)}%`
+                  : 'n/a'}
+                {' '}(similarity=
+                {view.modelConsistency.narration
+                  ? `${view.modelConsistency.narration.avgSimilarity.toFixed(3)}`
+                  : 'n/a'})
+              </p>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="stress-strip" aria-label="Five-dimension stress trace">
         {view.charts.riskRadar.map(risk => (

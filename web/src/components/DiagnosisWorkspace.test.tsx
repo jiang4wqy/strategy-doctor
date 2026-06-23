@@ -42,6 +42,14 @@ describe('DiagnosisWorkspace', () => {
     expect(screen.getByText('27')).toBeTruthy();
     expect(screen.getByText('+12')).toBeTruthy();
     expect(screen.getByText('-2.0%')).toBeTruthy();
+    expect(screen.getByText('Risk-control signals')).toBeTruthy();
+    expect(screen.getByText('50.00')).toBeTruthy();
+    expect(screen.getByText('38.00')).toBeTruthy();
+    expect(screen.getByText('12.00')).toBeTruthy();
+    expect(screen.getByText('0.5000')).toBeTruthy();
+    expect(screen.getByText('Export Risk Dashboard JSON')).toBeTruthy();
+    expect(screen.getByText('Export Risk Dashboard Markdown')).toBeTruthy();
+    expect(screen.getByText('Export Decision Snapshot')).toBeTruthy();
     expect(screen.getAllByRole('img')).toHaveLength(4);
     expect(screen.getAllByTestId('scenario-row')).toHaveLength(5);
     expect(screen.getByText(

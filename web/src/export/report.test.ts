@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   exportDiagnosisJson,
+  exportRiskDashboardJson,
   renderDiagnosisMarkdown,
+  renderRiskDashboardMarkdown,
 } from './report.ts';
 import {
   diagnosisFixture,
@@ -34,5 +36,24 @@ describe('diagnosis exports', () => {
     expect(markdown).toContain('Lower leverage');
     expect(markdown).toContain('Held-out trade-off');
     expect(markdown).toMatch(/does not guarantee|not guarantee/i);
+  });
+
+  it('exports a risk dashboard payload', () => {
+    const markdown = renderRiskDashboardMarkdown(
+      requestFixture,
+      diagnosisFixture,
+    );
+    const parsed = JSON.parse(
+      exportRiskDashboardJson(requestFixture, diagnosisFixture),
+    );
+
+    expect(markdown).toContain('Risk dashboard');
+    expect(markdown).toContain('Trend score');
+    expect(parsed.riskDashboard.trendScore).toBe(
+      diagnosisFixture.riskDashboard?.trendScore,
+    );
+    expect(parsed.tradeoff.robustnessGain).toBe(
+      diagnosisFixture.scorecard.tradeoff.robustnessGain,
+    );
   });
 });

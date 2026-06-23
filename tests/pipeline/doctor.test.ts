@@ -102,6 +102,43 @@ test('runDoctorDetailed preserves the legacy scorecard and held-out metrics', as
   assert.equal(detailed.heldOut.patchedMetrics.length, heldOut.length);
 });
 
+test('runDoctorDetailed surfaces prescription traces when onTrace is provided', async () => {
+  const logs: string[] = [];
+  const result = await runDoctorDetailed(strategy, new MockBacktester(), {
+    style: 'conservative',
+    treatment: buildScenarioSet(42),
+    heldOut: buildScenarioSet(100042),
+    onTrace: message => logs.push(message),
+  });
+  const { prescription } = result.scorecard;
+
+  assert.ok(logs.length > 0);
+  assert.ok(logs.some(entry => entry.startsWith('prescribe start:')));
+  assert.ok(
+    logs.some(entry => entry.includes('candidate #') && entry.includes('risk=')),
+  );
+  assert.ok(logs.some(entry => entry.startsWith('selected candidate #')));
+  assert.ok(
+    prescription.changes !== undefined
+    && prescription.patchedStrategy.id.endsWith('-rx'),
+  );
+});
+
+test('runDoctorDetailed surfaces doctor-level trace entries', async () => {
+  const logs: string[] = [];
+  await runDoctorDetailed(strategy, new MockBacktester(), {
+    style: 'conservative',
+    treatment: buildScenarioSet(42),
+    heldOut: buildScenarioSet(100042),
+    onTrace: message => logs.push(message),
+  });
+
+  assert.equal(logs[0], 'doctor-start');
+  assert.ok(logs.some(entry => entry.startsWith('doctor start strategy=')));
+  assert.ok(logs.some(entry => entry.includes('scorecard-style-summaries')));
+  assert.ok(logs.some(entry => entry.startsWith('doctor end:')));
+});
+
 test('runDoctorDetailed evaluates each held-out strategy exactly once', async () => {
   const treatment = buildScenarioSet(42);
   const heldOut = buildScenarioSet(100042);

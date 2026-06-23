@@ -50,6 +50,7 @@ test('CLI prints help without reading a strategy', () => {
   assert.ok(output.includes('--backtest'));
   assert.ok(output.includes('--format'));
   assert.ok(output.includes('--output'));
+  assert.ok(output.includes('--trace'));
 });
 
 test('CLI emits a complete JSON scorecard and writes output files', () => {
@@ -193,4 +194,30 @@ test('CLI rejects malformed strategies with a non-zero exit code', () => {
 
   assert.notEqual(result.status, 0);
   assert.ok(result.stderr.includes('invalid strategy'));
+});
+
+test('CLI emits trace entries when --trace is provided', () => {
+  const cliPath = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
+  const strategyPath = fileURLToPath(
+    new URL('../examples/trend-follower.json', import.meta.url),
+  );
+  const result = spawnSync(
+    process.execPath,
+    [
+      cliPath,
+      strategyPath,
+      '--style',
+      'conservative',
+      '--seed',
+      '42',
+      '--candidates',
+      '6',
+      '--trace',
+    ],
+    { encoding: 'utf8' },
+  );
+
+  assert.equal(result.status, 0);
+  assert.ok(result.stderr.includes('diagnose start:'));
+  assert.ok(result.stderr.includes('doctor start strategy='));
 });

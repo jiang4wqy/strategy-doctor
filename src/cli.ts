@@ -18,9 +18,10 @@ Options:
   --style conservative|aggressive|trend  Prescription profile (default: conservative)
   --seed <integer>                      Treatment seed (default: 42)
   --candidates <1-50>                   Candidates per dimension (default: 6)
-  --backtest mock|bitget                Backtest source (default: mock)
+ --backtest mock|bitget                Backtest source (default: mock)
   --format markdown|json                Output format (default: markdown)
   --output <path>                       Write the report to a file
+  --trace                               Emit stage-by-stage diagnosis traces to stderr
   --help                                Show this help
 `;
 
@@ -41,6 +42,11 @@ export async function runCli(args: string[]): Promise<void> {
     JSON.parse(readFileSync(options.strategyPath!, 'utf8')),
   );
   const adapter = backtester(options.backtest);
+  const onTrace = options.trace
+    ? (entry: string) => {
+      process.stderr.write(`${entry}\n`);
+    }
+    : undefined;
   const { scorecard } = await diagnoseStrategy({
     strategy,
     style: options.style,
@@ -49,6 +55,7 @@ export async function runCli(args: string[]): Promise<void> {
   }, {
     backtest: adapter,
     narrator: createAnthropicNarrator(),
+    onTrace,
   });
   const report = options.format === 'json'
     ? JSON.stringify(scorecard, null, 2)

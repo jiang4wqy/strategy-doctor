@@ -27,8 +27,60 @@ export interface DraftAssumption {
 }
 
 export interface DraftWarning {
-  code: 'LOW_CONFIDENCE' | 'AI_FALLBACK_FAILED';
+  code: 'LOW_CONFIDENCE' | 'AI_FALLBACK_FAILED' | 'MULTI_MODEL_DISAGREEMENT';
   message: string;
+}
+
+export interface ParseConsensus {
+  primaryModel: string;
+  requestedModels: string[];
+  agreeingModels: string[];
+  agreementRate: number;
+  mismatches: string[];
+}
+
+export interface PrescriptionConsensus {
+  primaryStyle: StyleName;
+  requestedStyles: StyleName[];
+  agreeingStyles: StyleName[];
+  agreementRate: number;
+  mismatches: StyleName[];
+}
+
+export interface DashboardAlert {
+  code: string;
+  severity: 'critical' | 'warning' | 'info';
+  message: string;
+  value: number;
+  threshold: number;
+}
+
+export interface RiskDashboard {
+  trendScore: number;
+  defenseScore: number;
+  costEfficiency: number;
+  trendDefenseGap: number;
+  costEfficiencyThreshold: number;
+  trendThreshold: number;
+  defenseThreshold: number;
+  alerts: DashboardAlert[];
+}
+
+export interface DiagnosisModelConsistency {
+  prescription?: {
+    agreementRate: number;
+    requestedStyles: StyleName[];
+    agreeingStyles: StyleName[];
+    mismatches: string[];
+  };
+  narration?: {
+    agreementRate: number;
+    requestedModels: string[];
+    agreeingModels: string[];
+    mismatches: string[];
+    avgSimilarity: number;
+    sampleCount: number;
+  };
 }
 
 export interface StrategyDraft {
@@ -37,6 +89,7 @@ export interface StrategyDraft {
   confidence: number;
   assumptions: DraftAssumption[];
   warnings: DraftWarning[];
+  consensus?: ParseConsensus;
 }
 
 export type ApiErrorCode =
@@ -113,6 +166,8 @@ export interface DiagnosisView {
     robustnessGain: number;
     returnDelta: number;
   };
+  riskDashboard?: RiskDashboard;
+  modelConsistency?: DiagnosisModelConsistency;
   charts: {
     treatmentEquity: DimensionEquity[];
     heldOutComparison: DimensionEquityComparison[];

@@ -112,8 +112,7 @@ test('prescribe lowers leverage and does not reduce treatment risk score', async
     prescription.patchedStrategy.params.slowMA,
     fragile.params.slowMA,
   );
-  assert.ok(prescription.rationale.includes('杠杆'));
-  assert.ok(prescription.rationale.includes('最终处方'));
+  assert.ok(prescription.rationale.includes('final prescription'));
   assert.ok(
     prescription.rationale.includes(
       String(prescription.patchedStrategy.params.leverage),
@@ -148,6 +147,40 @@ test('prescribe is deterministic for identical inputs', async () => {
   );
 
   assert.deepEqual(first, second);
+});
+
+test('prescribe computes prescription consensus across secondary styles', async () => {
+  const backtest = new MockBacktester();
+  const treatment = treatmentScenarios();
+  const deaths = await diagnose(fragile, treatment, backtest);
+  const options = {
+    candidates: 8,
+    seed: 7,
+    validationProfiles: ['trend', 'aggressive'] as const,
+  };
+  const prescription = await prescribe(
+    fragile,
+    deaths,
+    treatment,
+    backtest,
+    getProfile('conservative'),
+    options,
+  );
+
+  assert.ok(prescription.consensus);
+  if (!prescription.consensus) {
+    assert.fail('expected prescription consensus');
+  }
+  assert.equal(prescription.consensus.primaryStyle, 'conservative');
+  assert.ok(
+    prescription.consensus.requestedStyles.includes('conservative'),
+  );
+  assert.ok(prescription.consensus.requestedStyles.includes('trend'));
+  assert.ok(prescription.consensus.requestedStyles.includes('aggressive'));
+  assert.equal(
+    prescription.consensus.agreementRate,
+    prescription.consensus.agreeingStyles.length / 3,
+  );
 });
 
 test('prescribe leaves a strategy unchanged when there are no actionable deaths', async () => {
@@ -257,6 +290,30 @@ test('prescribe delegates mutation policy and labels to the strategy adapter', a
   assert.ok(calls.targetedFields > 0);
   assert.ok(calls.jitterParams > 0);
   assert.ok(calls.paramLabel > 0);
+});
+
+test('prescribe publishes execution traces through the onTrace option', async () => {
+  const logs: string[] = [];
+  const backtest = new MockBacktester();
+  const treatment = treatmentScenarios();
+  const deaths = await diagnose(fragile, treatment, backtest);
+  await prescribe(
+    fragile,
+    deaths,
+    treatment,
+    backtest,
+    getProfile('conservative'),
+    {
+      candidates: 6,
+      seed: 7,
+      onTrace: message => logs.push(message),
+    },
+  );
+
+  assert.ok(logs.length > 0);
+  assert.ok(logs.some(entry => entry.includes('prescribe start')));
+  assert.ok(logs.some(entry => entry.includes('candidate #1')));
+  assert.ok(logs.some(entry => entry.includes('selected candidate #')));
 });
 
 test('prescription search contains no moving-average parameter policy', () => {
