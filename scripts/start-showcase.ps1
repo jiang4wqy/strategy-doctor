@@ -43,7 +43,7 @@ function Stop-ExistingPort {
   $listeners |
     Select-Object -ExpandProperty OwningProcess -Unique |
     ForEach-Object {
-      Write-Host "Stopping existing process on port $LocalPort: PID $_"
+      Write-Host "Stopping existing process on port ${LocalPort}: PID $_"
       Stop-Process -Id $_ -Force
     }
 }

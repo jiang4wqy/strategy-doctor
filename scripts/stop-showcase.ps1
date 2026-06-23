@@ -11,7 +11,7 @@ if (-not $listeners) {
 $listeners |
   Select-Object -ExpandProperty OwningProcess -Unique |
   ForEach-Object {
-    Write-Host "Stopping process on port $Port: PID $_"
+    Write-Host "Stopping process on port ${Port}: PID $_"
     Stop-Process -Id $_ -Force
   }
 
