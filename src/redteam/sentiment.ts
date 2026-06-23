@@ -76,16 +76,18 @@ export function buildSentimentScenario(snapshot: SentimentSnapshot, seed: number
     ? Math.max(0, (0.5 - snapshot.takerBuySellRatio) * 2)
     : Math.max(0, (snapshot.takerBuySellRatio - 0.5) * 2);
   const risk = clamp01(crowding * 0.45 + moodExtremity * 0.35 + opposingPressure * 0.2);
-  const crowdedSide = longsCrowded ? '多头拥挤' : '空头拥挤';
-  const reversal = longsCrowded ? '先上冲诱多，随后快速下杀' : '先下探诱空，随后快速反抽';
+  const crowdedSide = longsCrowded ? 'long crowding' : 'short crowding';
+  const reversal = longsCrowded
+    ? 'a squeeze upward that traps late longs before a fast selloff'
+    : 'a flush downward that traps late shorts before a fast rebound';
 
   return {
     id: `sentiment-${snapshot.symbol.toLowerCase()}-${seed}`,
-    name: `情绪挤压·${crowdedSide}`,
+    name: `Sentiment squeeze: ${crowdedSide}`,
     dimension: 'sentiment',
     sourceSkill: 'sentiment-analyst',
     sourceObservedAt: snapshot.observedAt,
-    narrative: `${crowdedSide}，恐惧贪婪指数 ${snapshot.fearGreed}，主动买方占比 ${(snapshot.takerBuySellRatio * 100).toFixed(1)}%。场景模拟${reversal}，检验高杠杆趋势策略的清算风险。`,
+    narrative: `${crowdedSide}; fear-greed index ${snapshot.fearGreed}; taker buy share ${(snapshot.takerBuySellRatio * 100).toFixed(1)}%. The scenario simulates ${reversal}, testing liquidation risk in leveraged trend strategies.`,
     severity: 1 + Math.round(risk * 4),
     shock: {
       kind: 'squeeze',

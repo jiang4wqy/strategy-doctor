@@ -77,7 +77,7 @@ test('buildTechnicalScenario is deterministic and emits a bounded whipsaw shock'
   assert.ok(first.shock.magnitude >= 0.15 && first.shock.magnitude <= 0.4);
   assert.ok(first.shock.durationBars >= 40 && first.shock.durationBars <= 100);
   assert.ok(first.shock.volMult >= 1 && first.shock.volMult <= 2);
-  assert.match(first.narrative, /假突破/);
+  assert.match(first.narrative, /false breakouts/);
 });
 
 test('buildTechnicalScenario maps stable trend and maximum chop to endpoints', () => {

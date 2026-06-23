@@ -1,13 +1,15 @@
-# 环境、运行与团队分享
+# Setup And Operations
 
-## 必需环境
+This guide is written for teammates, reviewers, and demo operators. It keeps the default workflow offline, deterministic, and safe.
 
-| 依赖 | 版本 | 用途 |
-|---|---|---|
-| Node.js | 24 或更高 | 原生执行 TypeScript、测试、CLI 和 API |
-| npm | Node 随附版本 | 安装依赖并运行脚本 |
+## Requirements
 
-项目不需要 Python、数据库、Docker 或 Bitget 私有凭证。
+| Dependency | Version | Purpose |
+|---|---:|---|
+| Node.js | 24+ | Native TypeScript execution, tests, CLI, API, and Web build |
+| npm | Bundled with Node | Dependency installation and package scripts |
+
+The project does not require Python, Docker, a database, or private Bitget trading credentials.
 
 ```powershell
 git clone https://github.com/jiang4wqy/strategy-doctor.git
@@ -16,16 +18,111 @@ npm.cmd ci
 npm.cmd run verify
 ```
 
-## CLI
+If `npm.cmd` is not in `PATH`, set `NODE_EXE` or use the local helper scripts. They search `D:\tools\node-v24.14.0-win-x64\node.exe` before falling back to `node`.
 
-默认演示完全离线，读取冻结快照并使用 `MockBacktester`：
+```powershell
+$env:NODE_EXE='D:\tools\node-v24.14.0-win-x64\node.exe'
+```
+
+## Recommended Local Showcase
+
+```powershell
+.\scripts\start-showcase.ps1
+```
+
+If PowerShell script execution is disabled, use the wrapper:
+
+```powershell
+.\scripts\start-showcase.cmd
+```
+
+The script:
+
+- clears an existing listener on the selected port;
+- sets safe local demo environment variables;
+- disables auth rate limiting for local preview by default;
+- builds the Web client;
+- starts the API/Web server in the background;
+- prints URL, access code, PID, and log files.
+
+Default URL:
+
+```text
+http://127.0.0.1:8080/showcase
+```
+
+Default access code:
+
+```text
+team-preview-code-change-me
+```
+
+Stop the showcase:
+
+```powershell
+.\scripts\stop-showcase.ps1
+```
+
+Use a different port:
+
+```powershell
+.\scripts\start-showcase.ps1 -Port 8090
+```
+
+Keep production-like auth rate limiting:
+
+```powershell
+.\scripts\start-showcase.ps1 -KeepAuthRateLimit
+```
+
+## Manual Web/API Startup
+
+```powershell
+$env:DOCTOR_WEB_ACCESS_CODE='team-preview-code-change-me'
+$env:DOCTOR_SESSION_SECRET='replace-this-with-a-random-32-char-secret'
+$env:DOCTOR_API_KEYS='replace-this-with-a-private-agent-key'
+$env:DOCTOR_HOST='127.0.0.1'
+$env:DOCTOR_PORT='8080'
+$env:DOCTOR_AUTH_RATE_LIMIT_DISABLED='1'
+
+npm.cmd run build:web
+npm.cmd run server
+```
+
+If npm is not available:
+
+```powershell
+$Node='D:\tools\node-v24.14.0-win-x64\node.exe'
+& $Node node_modules\vite\bin\vite.js build --config web/vite.config.ts
+& $Node src/server/start.ts
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---:|---|
+| `DOCTOR_WEB_ACCESS_CODE` | Web login | Access code entered on the browser login page |
+| `DOCTOR_SESSION_SECRET` | Web login | At least 32 characters; signs HttpOnly browser sessions |
+| `DOCTOR_API_KEYS` | Agent/API | Comma-separated Bearer keys |
+| `DOCTOR_HOST` | No | Defaults to `127.0.0.1` |
+| `DOCTOR_PORT` | No | Defaults to `8080` |
+| `DOCTOR_SESSION_TTL_SECONDS` | No | Defaults to 12 hours |
+| `DOCTOR_BODY_LIMIT` | No | Defaults to 32768 bytes |
+| `DOCTOR_STATIC_ROOT` | No | Defaults to `web/dist` |
+| `DOCTOR_AUTH_RATE_LIMIT_DISABLED` | No | Set to `1` only for trusted local demos |
+| `DOCTOR_AUTH_RATE_LIMIT_MAX` | No | Defaults to `5` attempts |
+| `DOCTOR_AUTH_RATE_LIMIT_WINDOW` | No | Defaults to `15 minutes` |
+
+Never commit access codes, session secrets, API keys, or private exchange credentials.
+
+## CLI
 
 ```powershell
 npm.cmd run demo
 npm.cmd run demo:json
 ```
 
-自定义参数：
+Custom run:
 
 ```powershell
 node src/cli.ts examples/trend-follower.json `
@@ -36,38 +133,28 @@ node src/cli.ts examples/trend-follower.json `
   --output report.md
 ```
 
-## 启动 Web 与 API
-
-在 PowerShell 设置三个保护变量：
+## Submission Pack
 
 ```powershell
-$env:DOCTOR_WEB_ACCESS_CODE='team-preview-code-change-me'
-$env:DOCTOR_SESSION_SECRET='replace-this-with-a-random-32-char-secret'
-$env:DOCTOR_API_KEYS='replace-this-with-a-private-agent-key'
-$env:DOCTOR_HOST='127.0.0.1'
-npm.cmd run web
+.\scripts\build-submission-pack.ps1 -Seed 42 -Candidates 6
 ```
 
-打开 `http://127.0.0.1:8080`。`npm.cmd run web` 会先构建 React 客户端，再由同一个 Fastify 进程提供页面和 `/api/v1/*`。
+Execution-policy-safe wrapper:
 
-变量说明：
+```powershell
+.\scripts\build-submission-pack.cmd -Seed 42 -Candidates 6
+```
 
-| 变量 | 必需 | 说明 |
-|---|---:|---|
-| `DOCTOR_WEB_ACCESS_CODE` | Web 必需 | 队友登录页面时输入的 access code |
-| `DOCTOR_SESSION_SECRET` | Web 必需 | 至少 32 字符，用于签名 HttpOnly 会话 cookie |
-| `DOCTOR_API_KEYS` | Agent/API 必需 | 一个或多个逗号分隔的 Bearer key |
-| `DOCTOR_HOST` | 否 | 默认 `127.0.0.1` |
-| `DOCTOR_PORT` | 否 | 默认 `8080` |
-| `DOCTOR_SESSION_TTL_SECONDS` | 否 | 默认 12 小时 |
-| `DOCTOR_BODY_LIMIT` | 否 | 默认 32768 字节 |
-| `DOCTOR_STATIC_ROOT` | 否 | 默认 `web/dist` |
+Generated files:
 
-不要把 access code、session secret 或 API key 提交到仓库。
+```text
+artifacts/submission-pack/strategy-doctor-submission-pack.json
+artifacts/submission-pack/strategy-doctor-submission-pack.md
+```
 
-## REST 与 TypeScript
+## REST And TypeScript Clients
 
-服务运行后，另开一个 PowerShell：
+Start the server first, then run:
 
 ```powershell
 $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
@@ -76,39 +163,29 @@ $env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 node examples/agent-client.ts
 ```
 
-OpenAPI 地址：
+OpenAPI:
 
 ```text
 http://127.0.0.1:8080/api/v1/openapi.json
 ```
 
-OpenAPI 受认证保护。浏览器已登录时可以直接打开；脚本调用需携带 Bearer key。
+OpenAPI is protected. Use an authenticated browser session or a Bearer API key.
 
-## 让队友临时访问
+## Team Sharing
 
-先按上一节启动服务并保持终端运行。再新开一个 PowerShell：
+For a short team preview:
 
 ```powershell
 cloudflared tunnel --url http://localhost:8080
 ```
 
-`cloudflared` 会输出一个临时 `https://...trycloudflare.com` URL。
+Share the generated URL and the Web access code through a private channel. Agent/API callers also need a Bearer key.
 
-分享规则：
+Quick Tunnel is for demos and temporary collaboration only. A durable deployment should add TLS, access control, log retention, key rotation, and operational monitoring.
 
-- 终端和 Strategy Doctor 服务必须持续运行；关闭任一进程都会中断访问。
-- Quick Tunnel 重启后 URL 会变化，需要重新发送。
-- URL、Web access code 和 API key 应通过私密渠道发送。
-- 普通 Web 使用者只需要 URL 与 access code。
-- Agent/REST/TypeScript 使用者需要 URL 与 API key。
-- Quick Tunnel 只用于 demo、测试和短期协作，不是永久生产托管。
-- 不要提供 Bitget 私有凭证；系统不需要也不接受这些凭证。
+## Optional AI Fallback
 
-若团队需要长期稳定地址，应改用有访问控制、TLS、日志和密钥轮换的正式部署。
-
-## 可选自然语言 AI fallback
-
-规则解析器默认离线工作。只有显式设置以下变量时，未被本地规则可靠识别的描述才会尝试 Anthropic：
+The natural-language parser is rules-first and offline by default. Anthropic fallback only runs when explicitly enabled:
 
 ```powershell
 $env:DOCTOR_NL_AI_ENABLED='1'
@@ -117,9 +194,7 @@ $env:DOCTOR_NL_MODEL='<available-model-id>'
 npm.cmd run web
 ```
 
-缺少任一变量时不会发起请求。不要把 key 写入仓库。默认 CI 不启用此能力。
-
-## 可选 CLI 叙事增强
+LLM narration is also opt-in:
 
 ```powershell
 $env:DOCTOR_LLM_NARRATE='1'
@@ -128,53 +203,77 @@ $env:DOCTOR_LLM_MODEL='<available-model-id>'
 npm.cmd run demo
 ```
 
-配置缺失、超时或响应错误时会回退本地模板。
-
-## 可选 Bitget 公共数据
+## Optional Bitget Public Data
 
 ```powershell
 npm.cmd run demo:live
 npm.cmd run snapshots:refresh
 ```
 
-这些命令只读取公开市场数据，不需要 Bitget API key。默认 demo、Web/API、测试和 CI 均不运行在线路径。
+These commands read public market data only. They do not require private Bitget account credentials.
 
-## 开发检查
+## Verification
 
 ```powershell
-npm.cmd run test:coverage
-npm.cmd run test:web
-npm.cmd run typecheck
-npm.cmd run build:web
-npm.cmd run test:e2e
-npm.cmd run demo
+.\scripts\verify-project.ps1 -SkipWebServer
 git diff --check
 ```
 
-首次本地运行 Playwright 前安装 Chromium：
+For browser acceptance tests, install Chromium once:
 
 ```powershell
-npx.cmd playwright install chromium
+$env:PLAYWRIGHT_BROWSERS_PATH='D:\tools\ms-playwright'
+& 'D:\tools\node-v24.14.0-win-x64\node.exe' node_modules\@playwright\test\cli.js install chromium
+& 'D:\tools\node-v24.14.0-win-x64\node.exe' node_modules\@playwright\test\cli.js test -c tests\e2e\playwright.config.ts
 ```
 
-## 常见问题
+## Troubleshooting
 
-### PowerShell 阻止 `npm.ps1`
+### `npm.cmd` Is Not Recognized
 
-使用本文中的 `npm.cmd` 和 `npx.cmd`。
+Use the helper scripts or run Node directly:
 
-### 页面无法打开
+```powershell
+$Node='D:\tools\node-v24.14.0-win-x64\node.exe'
+& $Node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
+```
 
-确认运行 `npm.cmd run web` 的终端仍在工作，并检查 `http://127.0.0.1:8080/api/v1/health`。
+### Port 8080 Is Already In Use
 
-### 登录失败
+```powershell
+.\scripts\stop-showcase.ps1 -Port 8080
+.\scripts\start-showcase.ps1 -Port 8080
+```
 
-确认输入值与 `DOCTOR_WEB_ACCESS_CODE` 完全一致，并确认 `DOCTOR_SESSION_SECRET` 至少 32 字符。
+If `.ps1` execution is blocked:
 
-### API 返回 401
+```powershell
+.\scripts\stop-showcase.cmd -Port 8080
+.\scripts\start-showcase.cmd -Port 8080
+```
 
-确认请求头为 `Authorization: Bearer <key>`，且 `<key>` 是 `DOCTOR_API_KEYS` 中的一项。
+### Login Says `RATE_LIMITED`
 
-### Quick Tunnel 失效
+You are hitting an old process or production-like auth limits. Restart through:
 
-确认本地服务和 `cloudflared` 都仍在运行。进程重启后使用新生成的 URL。
+```powershell
+.\scripts\start-showcase.ps1
+```
+
+For manual startup, set:
+
+```powershell
+$env:DOCTOR_AUTH_RATE_LIMIT_DISABLED='1'
+```
+
+### Login Says Credentials Are Invalid
+
+Make sure the browser access code exactly matches `DOCTOR_WEB_ACCESS_CODE`.
+
+### API Returns 401
+
+Use:
+
+```text
+Authorization: Bearer <one value from DOCTOR_API_KEYS>
+```

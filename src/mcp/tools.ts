@@ -1,9 +1,3 @@
-// src/mcp/tools.ts — MCP 工具定义
-//
-// 只负责：定义工具名、描述、Zod 输入 schema、通过 Client 委派。
-// 不包含应用/策略/回测逻辑。
-// 不直接导入 application、strategy、backtest 模块。
-
 import { z } from 'zod';
 import type {
   StrategyDoctorClient,
@@ -13,8 +7,6 @@ import type {
   DiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';
-
-// ── Schema ──────────────────────────────────────────
 
 const descriptionSchema = z
   .string()
@@ -29,8 +21,6 @@ const diagnoseInputSchema = z.object({
   seed: z.number().int().positive().optional().default(42),
   candidates: z.number().int().min(1).max(50).optional().default(6),
 });
-
-// ── Tool 定义 ───────────────────────────────────────
 
 export interface McpTool<TInput = unknown, TOutput = unknown> {
   name: string;
@@ -68,30 +58,26 @@ function defineMcpTool<TInput, TOutput>(
   };
 }
 
-/**
- * 列出策略医生支持的策略类型和能力
- */
 export const listCapabilitiesTool: McpTool<
   Record<string, never>,
   readonly AnyStrategyDefinition[]
 > = defineMcpTool({
   name: 'list_strategy_capabilities',
-  description: '列出策略医生当前支持的策略类型、参数定义和边界',
+  description:
+    'List the registered strategy archetypes, parameter definitions, examples, and validation boundaries.',
   inputSchema: z.object({}).strict(),
   async handler(client) {
     return client.capabilities();
   },
 });
 
-/**
- * 用自然语言描述策略，解析为结构化 JSON
- */
 export const parseStrategyTool: McpTool<
   { description: string },
   StrategyDraft
 > = defineMcpTool({
   name: 'parse_strategy_description',
-  description: '用一句话描述交易策略，返回结构化的策略 JSON 参数',
+  description:
+    'Parse a natural-language trading-strategy description into a structured strategy draft.',
   inputSchema: z.object({
     description: descriptionSchema,
   }),
@@ -100,9 +86,6 @@ export const parseStrategyTool: McpTool<
   },
 });
 
-/**
- * 对策略进行五维压力体检
- */
 export const diagnoseStrategyTool: McpTool<
   {
     strategy: string;
@@ -113,16 +96,16 @@ export const diagnoseStrategyTool: McpTool<
   DiagnosisView
 > = defineMcpTool({
   name: 'diagnose_strategy',
-  description: '对策略进行五维体检：诊断死因、三风格评分、开处方、held-out 复测',
+  description:
+    'Run five-dimension strategy diagnosis with failure causes, profile scores, targeted prescription, and held-out validation.',
   inputSchema: diagnoseInputSchema,
   async handler(client, input) {
-    // strategy 从 JSON 字符串解析为对象
     let strategy: unknown;
     try {
       strategy = JSON.parse(input.strategy);
     } catch {
       throw new Error(
-        `invalid strategy JSON: the strategy field must be a valid JSON string`,
+        'invalid strategy JSON: the strategy field must be a valid JSON string',
       );
     }
 
@@ -135,7 +118,6 @@ export const diagnoseStrategyTool: McpTool<
   },
 });
 
-/** 所有工具的注册表 */
 export const ALL_TOOLS: readonly RegisteredMcpTool[] = [
   listCapabilitiesTool,
   parseStrategyTool,

@@ -1,9 +1,9 @@
-# redteam
+# Redteam Scenario Builders
 
-五个 snapshot parser/builder 分别负责 `macro`、`market-intel`、`news`、`sentiment` 和 `technical`。
+Each snapshot parser/builder owns one stress dimension: `macro`, `market-intel`, `news`, `sentiment`, or `technical`.
 
-- `search.ts`：每维生成 1-50 个确定性候选，并按 damage score 选择最坏场景。
-- `diagnose.ts`：分类 liquidation、drawdown breach、stop-loss bleed 和 survived。
-- `narrate.ts`：默认本地叙事，可选 Anthropic `/v1/messages`，3 秒失败回退。
+- `search.ts` generates 1-50 deterministic candidates per dimension and selects the highest-damage scenario.
+- `diagnose.ts` classifies `liquidation`, `drawdown-breach`, `stop-loss-bleed`, and `survived`.
+- `narrate.ts` provides local narration with optional Anthropic enhancement and a fast fallback.
 
-候选不会突破维度边界，也不会人为保证策略死亡。
+Candidates stay inside their source dimension and never force artificial strategy failure.

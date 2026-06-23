@@ -16,7 +16,7 @@ export interface PlatformMeasurement {
 }
 
 const description =
-  'BTC 4小时 RSI 10 配合布林带 14，趋势过滤周期 30';
+  'BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30';
 const headers = {
   authorization: 'Bearer measurement-key',
   'content-type': 'application/json',

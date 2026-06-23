@@ -195,10 +195,10 @@ test('RSI Bollinger adapter exposes stable targets and labels', () => {
       'trendFilterThreshold',
     ],
   );
-  assert.equal(rsiBollingerAdapter.paramLabel('rsiPeriod'), 'RSI 周期');
+  assert.equal(rsiBollingerAdapter.paramLabel('rsiPeriod'), 'RSI period');
   assert.equal(
     rsiBollingerAdapter.paramLabel('trendFilterThreshold'),
-    '趋势偏离阈值',
+    'Trend-deviation threshold',
   );
 });
 

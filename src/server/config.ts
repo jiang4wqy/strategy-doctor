@@ -9,6 +9,13 @@ export interface ServerConfig {
   sessionTtlSeconds: number;
   bodyLimit: number;
   staticRoot: string;
+  authRateLimit: AuthRateLimitConfig;
+}
+
+export interface AuthRateLimitConfig {
+  enabled: boolean;
+  max: number;
+  timeWindow: string;
 }
 
 function positiveInteger(
@@ -29,6 +36,20 @@ function positiveInteger(
     throw new Error(`${label} must be a positive integer`);
   }
   return parsed;
+}
+
+function trimmedString(
+  value: string | undefined,
+  fallback: string,
+): string {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : fallback;
+}
+
+function isEnabledFlag(value: string | undefined): boolean {
+  return ['1', 'true', 'yes', 'on'].includes(
+    (value ?? '').trim().toLowerCase(),
+  );
 }
 
 export function isLoopbackHost(host: string): boolean {
@@ -81,5 +102,17 @@ export function parseServerConfig(
       'body limit',
     ),
     staticRoot: path.resolve(env.DOCTOR_STATIC_ROOT ?? 'web/dist'),
+    authRateLimit: Object.freeze({
+      enabled: !isEnabledFlag(env.DOCTOR_AUTH_RATE_LIMIT_DISABLED),
+      max: positiveInteger(
+        env.DOCTOR_AUTH_RATE_LIMIT_MAX,
+        5,
+        'auth rate limit max',
+      ),
+      timeWindow: trimmedString(
+        env.DOCTOR_AUTH_RATE_LIMIT_WINDOW,
+        '15 minutes',
+      ),
+    }),
   });
 }

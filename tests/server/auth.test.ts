@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import Fastify from 'fastify';
 import { registerAuth } from '../../src/server/auth.ts';
+import { buildServer } from '../../src/server/app.ts';
 import { parseServerConfig } from '../../src/server/config.ts';
 
 const config = parseServerConfig({
@@ -103,4 +104,54 @@ test('logout expires the browser session cookie', async t => {
     String(logout.headers['set-cookie']),
     /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
   );
+});
+
+test('access-code login is rate-limited by default', async t => {
+  const app = await buildServer({
+    env: {
+      DOCTOR_WEB_ACCESS_CODE: 'team-code',
+      DOCTOR_SESSION_SECRET: 's'.repeat(32),
+      DOCTOR_STATIC_ROOT: 'intentionally-missing-build',
+    },
+  });
+  t.after(() => app.close());
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth',
+      payload: { accessCode: 'wrong-code' },
+    });
+    assert.equal(response.statusCode, 401);
+  }
+
+  const limited = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth',
+    payload: { accessCode: 'wrong-code' },
+  });
+  assert.equal(limited.statusCode, 429);
+  assert.equal(limited.json().error.code, 'RATE_LIMITED');
+});
+
+test('access-code rate limit can be disabled for local preview', async t => {
+  const app = await buildServer({
+    env: {
+      DOCTOR_WEB_ACCESS_CODE: 'team-code',
+      DOCTOR_SESSION_SECRET: 's'.repeat(32),
+      DOCTOR_AUTH_RATE_LIMIT_DISABLED: '1',
+      DOCTOR_STATIC_ROOT: 'intentionally-missing-build',
+    },
+  });
+  t.after(() => app.close());
+
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth',
+      payload: { accessCode: 'wrong-code' },
+    });
+    assert.equal(response.statusCode, 401);
+    assert.equal(response.json().error.code, 'AUTH_INVALID');
+  }
 });

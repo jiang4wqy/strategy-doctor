@@ -3,4 +3,6 @@ node_modules/
 .env.*
 *.log
 dist/
+artifacts/
+test-results/
 .DS_Store

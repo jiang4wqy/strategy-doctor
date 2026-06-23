@@ -289,7 +289,7 @@
       },
       "cause": "drawdown-breach",
       "damageScore": -5.55476445284485,
-      "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+      "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury yield 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
     },
     {
       "scenarioId": "market-intel-42-c4",
@@ -555,7 +555,7 @@
       },
       "cause": "drawdown-breach",
       "damageScore": 110.11165921032864,
-      "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+      "narrative": "Crypto market cap 24h change -0.35%, stablecoin supply 30d change -1.88%, BTC open-interest change 0.29%, and top-trader long share 54.1%."
     },
     {
       "scenarioId": "news-42-c1",
@@ -821,11 +821,11 @@
       },
       "cause": "liquidation",
       "damageScore": 1199.8458355344726,
-      "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+      "narrative": "8 frozen news items show 25.0% negative headlines, 75.0% high-impact items, and 25.0% regulatory exposure. The scenario simulates gap risk from a sudden catalyst."
     },
     {
       "scenarioId": "sentiment-42-c1",
-      "scenarioName": "情绪挤压·多头拥挤",
+      "scenarioName": "Sentiment squeeze: long crowding",
       "dimension": "sentiment",
       "sourceSkill": "sentiment-analyst",
       "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -1087,11 +1087,11 @@
       },
       "cause": "drawdown-breach",
       "damageScore": -894.2786999929282,
-      "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+      "narrative": "long crowding; fear-greed index 13; taker buy share 46.2%. The scenario simulates a squeeze upward that traps late longs before a fast selloff, testing liquidation risk in leveraged trend strategies."
     },
     {
       "scenarioId": "technical-42-c5",
-      "scenarioName": "技术震荡·假突破绞肉机",
+      "scenarioName": "Technical whipsaw: false-breakout grinder",
       "dimension": "technical",
       "sourceSkill": "technical-analysis",
       "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -1353,7 +1353,7 @@
       },
       "cause": "liquidation",
       "damageScore": 1189.3547434079874,
-      "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+      "narrative": "ADX 29.3, 1 DMI switches over the last 20 candles, 4 RSI midline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chase-and-reversal losses in trend strategies."
     }
   ],
   "deaths": [
@@ -1610,7 +1610,7 @@
           1.5794220251962403
         ]
       },
-      "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+      "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury yield 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
     },
     {
       "scenarioId": "market-intel-42-c4",
@@ -1865,7 +1865,7 @@
           0.6465303012394348
         ]
       },
-      "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+      "narrative": "Crypto market cap 24h change -0.35%, stablecoin supply 30d change -1.88%, BTC open-interest change 0.29%, and top-trader long share 54.1%."
     },
     {
       "scenarioId": "news-42-c1",
@@ -2120,11 +2120,11 @@
           0.001
         ]
       },
-      "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+      "narrative": "8 frozen news items show 25.0% negative headlines, 75.0% high-impact items, and 25.0% regulatory exposure. The scenario simulates gap risk from a sudden catalyst."
     },
     {
       "scenarioId": "sentiment-42-c1",
-      "scenarioName": "情绪挤压·多头拥挤",
+      "scenarioName": "Sentiment squeeze: long crowding",
       "dimension": "sentiment",
       "cause": "drawdown-breach",
       "metrics": {
@@ -2375,11 +2375,11 @@
           10.746317090582497
         ]
       },
-      "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+      "narrative": "long crowding; fear-greed index 13; taker buy share 46.2%. The scenario simulates a squeeze upward that traps late longs before a fast selloff, testing liquidation risk in leveraged trend strategies."
     },
     {
       "scenarioId": "technical-42-c5",
-      "scenarioName": "技术震荡·假突破绞肉机",
+      "scenarioName": "Technical whipsaw: false-breakout grinder",
       "dimension": "technical",
       "cause": "liquidation",
       "metrics": {
@@ -2630,7 +2630,7 @@
           0.1010804098626776
         ]
       },
-      "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+      "narrative": "ADX 29.3, 1 DMI switches over the last 20 candles, 4 RSI midline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chase-and-reversal losses in trend strategies."
     }
   ],
   "prescription": {

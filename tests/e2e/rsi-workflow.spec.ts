@@ -6,7 +6,7 @@ import {
   RSI_DESCRIPTION,
 } from './fixtures.ts';
 
-test('Chinese RSI strategy reaches diagnosis and local history', async ({
+test('English RSI strategy reaches diagnosis and local history', async ({
   page,
 }) => {
   await login(page);
@@ -57,7 +57,7 @@ test('Chinese RSI strategy reaches diagnosis and local history', async ({
   ).toBeVisible();
   await expect(
     page.getByRole('heading', {
-      name: 'RSI Bollinger 趋势过滤均值回归',
+      name: 'RSI Bollinger trend-filtered mean reversion',
     }),
   ).toBeVisible();
 });

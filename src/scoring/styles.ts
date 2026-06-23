@@ -35,7 +35,7 @@ export const STYLES: StyleProfile[] = [
 export function getProfile(name: StyleName): StyleProfile {
   const profile = STYLES.find(candidate => candidate.style === name);
   if (!profile) {
-    throw new Error(`未知风格: ${name}`);
+    throw new Error(`unknown style: ${name}`);
   }
   return profile;
 }

@@ -1,5 +1,5 @@
-# scoring
+# Scoring
 
-`styles.ts` 定义 conservative、aggressive、trend 三种 profile。
+`styles.ts` defines the conservative, aggressive, and trend profiles.
 
-`scoreStyle(metrics, profile)` 结合清算比例、非清算场景回撤和平均收益，输出 0-100 风险分。未满足 profile 阈值时，分数不会显示成通过状态；空结果集会被拒绝。
+`scoreStyle(metrics, profile)` combines liquidation count, non-liquidated drawdown, and mean return into a 0-100 risk score. A score is not treated as passing unless it satisfies the selected profile thresholds. Empty metric sets are rejected.

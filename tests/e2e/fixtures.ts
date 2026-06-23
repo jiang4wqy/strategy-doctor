@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 export const RSI_DESCRIPTION =
-  'BTC 4小时 RSI 10 配合布林带 14，趋势过滤周期 30';
+  'BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30';
 
 export const MA_DESCRIPTION =
   'BTCUSDT 1h moving average crossover, fast MA 8, slow MA 30';

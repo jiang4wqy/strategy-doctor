@@ -88,8 +88,8 @@ test('buildSentimentScenario distinguishes long-crowded and short-crowded narrat
     topTraderLongShare: 0.25,
   }, 1);
 
-  assert.match(longCrowded.narrative, /多头拥挤/);
-  assert.match(shortCrowded.narrative, /空头拥挤/);
+  assert.match(longCrowded.narrative, /long crowding/);
+  assert.match(shortCrowded.narrative, /short crowding/);
   assert.notEqual(longCrowded.narrative, shortCrowded.narrative);
 });
 

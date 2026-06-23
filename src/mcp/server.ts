@@ -1,9 +1,6 @@
-// src/mcp/server.ts — MCP stdio 服务器
+// Strategy Doctor MCP stdio server.
 //
-// 读取 STRATEGY_DOCTOR_URL 和 STRATEGY_DOCTOR_API_KEY 环境变量。
-// 通过 stdio 传输协议暴露 3 个工具给 MCP 客户端。
-//
-// 使用方式：
+// Usage:
 //   $env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
 //   $env:STRATEGY_DOCTOR_API_KEY='your-api-key'
 //   npm run mcp
@@ -32,10 +29,8 @@ if (!apiKey) {
   fail('STRATEGY_DOCTOR_API_KEY environment variable is required');
 }
 
-// 初始化 client
 const client = createStrategyDoctor({ baseUrl, apiKey });
 
-// 创建 MCP server
 const server = new Server(
   {
     name: 'strategy-doctor',
@@ -48,7 +43,6 @@ const server = new Server(
   },
 );
 
-// 列出工具
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: ALL_TOOLS.map(tool => ({
@@ -59,7 +53,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   };
 });
 
-// 调用工具
 server.setRequestHandler(CallToolRequestSchema, async request => {
   const tool = ALL_TOOLS.find(t => t.name === request.params.name);
   if (!tool) {
@@ -99,20 +92,17 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 });
 
 /**
- * 将 Zod schema 转换为 MCP 兼容的 JSON Schema 格式。
- * MCP SDK 的 inputSchema 字段与 OpenAI 工具调用格式兼容，
- * 需要标准 JSON Schema。
+ * Convert the small Zod subset used by these tools into MCP-compatible
+ * JSON Schema.
  */
 function zodSchemaToJsonSchema(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any,
 ): Record<string, unknown> {
-  // 对于简单的 object schema，直接生成 properties
   if (schema._def?.typeName === 'ZodObject') {
     return zodObjectToJsonSchema(schema);
   }
 
-  // fallback: 返回宽松 schema
   return { type: 'object' };
 }
 
@@ -131,12 +121,10 @@ function zodObjectToJsonSchema(
     const fs = fieldSchema as any;
     properties[key] = zodTypeToJsonType(fs);
 
-    // 检查是否为非 optional 字段
     const isOptional =
       fs._def?.typeName === 'ZodOptional' ||
       fs.isOptional?.();
     if (!isOptional) {
-      // 默认值字段也算非必须
       const hasDefault = fs._def?.defaultValue !== undefined;
       if (!hasDefault) {
         required.push(key);
@@ -188,7 +176,6 @@ function zodTypeToJsonType(schema: any): Record<string, unknown> {
   }
 }
 
-// 启动
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error('strategy-doctor MCP server running on stdio');

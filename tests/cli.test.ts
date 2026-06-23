@@ -24,18 +24,18 @@ test('CLI renders the complete offline doctor report', () => {
     { encoding: 'utf8' },
   );
 
-  assert.ok(output.includes('策略体检报告'));
-  assert.ok(output.includes('五维压力覆盖'));
-  assert.ok(output.includes('三风格评分'));
-  assert.ok(output.includes('死因清单'));
-  assert.ok(output.includes('处方'));
+  assert.ok(output.includes('Strategy Doctor diagnosis'));
+  assert.ok(output.includes('Five-dimension stress coverage'));
+  assert.ok(output.includes('Three-profile risk scores'));
+  assert.ok(output.includes('Failure ledger'));
+  assert.ok(output.includes('Prescription'));
   assert.ok(output.includes('held-out'));
   assert.ok(output.includes('macro'));
   assert.ok(output.includes('market-intel'));
   assert.ok(output.includes('news'));
   assert.ok(output.includes('sentiment'));
   assert.ok(output.includes('technical'));
-  assert.ok(output.includes('不承诺'));
+  assert.ok(output.includes('does not promise'));
 });
 
 test('CLI prints help without reading a strategy', () => {
@@ -80,7 +80,11 @@ test('CLI emits a complete JSON scorecard and writes output files', () => {
     [cliPath, strategyPath, '--output', outputPath],
     { encoding: 'utf8' },
   );
-  assert.ok(readFileSync(outputPath, 'utf8').includes('五维压力覆盖'));
+  assert.ok(
+    readFileSync(outputPath, 'utf8').includes(
+      'Five-dimension stress coverage',
+    ),
+  );
 });
 
 test('CLI preserves the frozen MA golden JSON output', () => {

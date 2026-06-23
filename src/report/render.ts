@@ -6,16 +6,16 @@ import type {
 } from '../contracts.ts';
 
 const STYLE_LABELS: Record<StyleName, string> = {
-  conservative: '稳健型',
-  aggressive: '激进型',
-  trend: '趋势型',
+  conservative: 'Conservative',
+  aggressive: 'Aggressive',
+  trend: 'Trend-following',
 };
 
 const CAUSE_LABELS: Record<DeathCause, string> = {
-  liquidation: '强制清算',
-  'drawdown-breach': '回撤击穿',
-  'stop-loss-bleed': '震荡止损放血',
-  survived: '存活',
+  liquidation: 'forced liquidation',
+  'drawdown-breach': 'drawdown breach',
+  'stop-loss-bleed': 'stop-loss bleed',
+  survived: 'survived',
 };
 
 const percent = (value: number): string =>
@@ -24,17 +24,21 @@ const percent = (value: number): string =>
 const signedPercent = (value: number): string =>
   `${value >= 0 ? '+' : ''}${percent(value)}`;
 
+function signedNumber(value: number): string {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(4)}`;
+}
+
 export function renderScorecard(
   scorecard: Scorecard,
   strategy: Strategy,
 ): string {
   const lines: string[] = [
-    `# 策略体检报告：${strategy.name}`,
+    `# Strategy Doctor diagnosis: ${strategy.name}`,
     '',
-    `> 场景集：\`${scorecard.scenarioSetId}\`，治疗集与 held-out 验证集使用不同 seed。`,
+    `> Scenario set: \`${scorecard.scenarioSetId}\`. Treatment and held-out validation use different root seeds.`,
     '',
-    '## 五维压力覆盖',
-    '| 维度 | Skill | 数据时间 | 严重度 | shock | PnL | 最大回撤 | 交易 | damage | 结果 |',
+    '## Five-dimension stress coverage',
+    '| Dimension | Skill | Observed at | Severity | Shock | PnL | Max drawdown | Trades | Damage | Result |',
     '|---|---|---|---:|---|---:|---:|---:|---:|---|',
   ];
 
@@ -46,50 +50,49 @@ export function renderScorecard(
 
   lines.push(
     '',
-    '## 三风格评分',
-    '| 风格 | 风险分 | 达标 | 最差回撤 | 平均收益 |',
+    '## Three-profile risk scores',
+    '| Profile | Risk score | Survived | Worst drawdown | Mean PnL |',
     '|---|---:|---|---:|---:|',
   );
 
   for (const score of Object.values(scorecard.perStyle)) {
     lines.push(
-      `| ${STYLE_LABELS[score.style]} | ${score.riskScore} | ${score.survived ? '是' : '否'} | ${percent(score.worstDrawdownPct)} | ${percent(score.meanPnlPct)} |`,
+      `| ${STYLE_LABELS[score.style]} | ${score.riskScore} | ${score.survived ? 'yes' : 'no'} | ${percent(score.worstDrawdownPct)} | ${percent(score.meanPnlPct)} |`,
     );
   }
 
-  lines.push('', '## 死因清单');
+  lines.push('', '## Failure ledger');
   if (scorecard.deaths.length === 0) {
-    lines.push('当前治疗场景未发现致死结果。');
+    lines.push('No fatal treatment scenarios were found.');
   } else {
     for (const death of scorecard.deaths) {
       lines.push(
-        `- **${death.scenarioName}**（${death.dimension}）：${CAUSE_LABELS[death.cause]}；收益 ${percent(death.metrics.pnlPct)}，最大回撤 ${percent(death.metrics.maxDrawdownPct)}，交易 ${death.metrics.numTrades} 次。`,
+        `- **${death.scenarioName}** (${death.dimension}): ${CAUSE_LABELS[death.cause]}; PnL ${percent(death.metrics.pnlPct)}, max drawdown ${percent(death.metrics.maxDrawdownPct)}, trades ${death.metrics.numTrades}.`,
         `  - ${death.narrative}`,
       );
     }
   }
 
-  if (scorecard.prescription) {
-    lines.push(
-      '',
-      '## 处方',
-      `- 参数修改：\`${JSON.stringify(scorecard.prescription.changes)}\``,
-      `- 修改依据：${scorecard.prescription.rationale}`,
-    );
-  }
+  lines.push(
+    '',
+    '## Prescription',
+    `- Parameter changes: \`${JSON.stringify(scorecard.prescription.changes)}\``,
+    `- Rationale: ${scorecard.prescription.rationale}`,
+  );
 
-  if (scorecard.tradeoff) {
+  if (scorecard.prescription.consensus) {
     lines.push(
-      '',
-      '## held-out 复测（诚实取舍）',
-      `- 风险分变化：${scorecard.tradeoff.robustnessGain >= 0 ? '+' : ''}${scorecard.tradeoff.robustnessGain}`,
-      `- 平均收益变化：${signedPercent(scorecard.tradeoff.returnCost)}`,
+      `- Consensus: ${(scorecard.prescription.consensus.agreementRate * 100).toFixed(1)}% agreement across ${scorecard.prescription.consensus.requestedStyles.join(', ')} profiles.`,
     );
   }
 
   lines.push(
     '',
-    '> 本报告不承诺“一键变好”。处方效果以未参与治疗的 held-out 场景结果为准，未达标项仍应保留为风险。',
+    '## Held-out validation',
+    `- Robustness score change: ${signedNumber(scorecard.tradeoff.robustnessGain)}`,
+    `- Average return change: ${signedPercent(scorecard.tradeoff.returnCost)}`,
+    '',
+    '> Strategy Doctor is a diagnostic and risk-control tool. It does not promise future returns, and every prescription must be judged by the independent held-out result above.',
   );
 
   return lines.join('\n');

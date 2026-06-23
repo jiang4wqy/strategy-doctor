@@ -64,7 +64,7 @@ export function StrategyComposer({
             setText(event.target.value);
             onDescriptionChange(event.target.value);
           }}
-          placeholder="BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30…"
+          placeholder="BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30..."
         />
         <div className="composer-examples" aria-label="Supported examples">
           <button
@@ -82,7 +82,7 @@ export function StrategyComposer({
             type="button"
             onClick={() => {
               const value =
-                'BTC 四小时 RSI 10 配合布林带 14，趋势过滤周期 30';
+                'BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30';
               setText(value);
               onDescriptionChange(value);
             }}

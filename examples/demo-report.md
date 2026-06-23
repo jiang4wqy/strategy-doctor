@@ -1,41 +1,42 @@
-# 策略体检报告：高杠杆趋势跟随
+# Strategy Doctor diagnosis: 高杠杆趋势跟随
 
-> 场景集：`tx42/ho100042`，治疗集与 held-out 验证集使用不同 seed。
+> Scenario set: `tx42/ho100042`. Treatment and held-out validation use different root seeds.
 
-## 五维压力覆盖
-| 维度 | Skill | 数据时间 | 严重度 | shock | PnL | 最大回撤 | 交易 | damage | 结果 |
+## Five-dimension stress coverage
+| Dimension | Skill | Observed at | Severity | Shock | PnL | Max drawdown | Trades | Damage | Result |
 |---|---|---|---:|---|---:|---:|---:|---:|---|
-| macro | macro-analyst | 2026-06-13T04:15:45.396Z | 2 | grind | 57.9% | 52.4% | 7 | -5.6 | 回撤击穿 |
-| market-intel | market-intel | 2026-06-13T04:15:45.396Z | 1 | crash | -35.3% | 74.8% | 9 | 110.1 | 回撤击穿 |
-| news | news-briefing | 2026-06-13T04:15:45.396Z | 3 | gap | -99.9% | 99.9% | 4 | 1199.8 | 强制清算 |
-| sentiment | sentiment-analyst | 2026-06-13T04:15:45.396Z | 3 | squeeze | 974.6% | 80.4% | 7 | -894.3 | 回撤击穿 |
-| technical | technical-analysis | 2026-06-13T04:15:45.396Z | 3 | whipsaw | -89.9% | 99.5% | 5 | 1189.4 | 强制清算 |
+| macro | macro-analyst | 2026-06-13T04:15:45.396Z | 2 | grind | 57.9% | 52.4% | 7 | -5.6 | drawdown breach |
+| market-intel | market-intel | 2026-06-13T04:15:45.396Z | 1 | crash | -35.3% | 74.8% | 9 | 110.1 | drawdown breach |
+| news | news-briefing | 2026-06-13T04:15:45.396Z | 3 | gap | -99.9% | 99.9% | 4 | 1199.8 | forced liquidation |
+| sentiment | sentiment-analyst | 2026-06-13T04:15:45.396Z | 3 | squeeze | 974.6% | 80.4% | 7 | -894.3 | drawdown breach |
+| technical | technical-analysis | 2026-06-13T04:15:45.396Z | 3 | whipsaw | -89.9% | 99.5% | 5 | 1189.4 | forced liquidation |
 
-## 三风格评分
-| 风格 | 风险分 | 达标 | 最差回撤 | 平均收益 |
+## Three-profile risk scores
+| Profile | Risk score | Survived | Worst drawdown | Mean PnL |
 |---|---:|---|---:|---:|
-| 稳健型 | 6 | 否 | 99.9% | 161.5% |
-| 激进型 | 21 | 否 | 99.9% | 161.5% |
-| 趋势型 | 15 | 否 | 99.9% | 161.5% |
+| Conservative | 6 | no | 99.9% | 161.5% |
+| Aggressive | 21 | no | 99.9% | 161.5% |
+| Trend-following | 15 | no | 99.9% | 161.5% |
 
-## 死因清单
-- **Macro grind: rates and liquidity pressure**（macro）：回撤击穿；收益 57.9%，最大回撤 52.4%，交易 7 次。
-  - 联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。
-- **Market structure liquidity crash**（market-intel）：回撤击穿；收益 -35.3%，最大回撤 74.8%，交易 9 次。
-  - 加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。
-- **News catalyst gap**（news）：强制清算；收益 -99.9%，最大回撤 99.9%，交易 4 次。
-  - 8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。
-- **情绪挤压·多头拥挤**（sentiment）：回撤击穿；收益 974.6%，最大回撤 80.4%，交易 7 次。
-  - 多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。
-- **技术震荡·假突破绞肉机**（technical）：强制清算；收益 -89.9%，最大回撤 99.5%，交易 5 次。
-  - ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。
+## Failure ledger
+- **Macro grind: rates and liquidity pressure** (macro): drawdown breach; PnL 57.9%, max drawdown 52.4%, trades 7.
+  - Fed funds 3.50%-3.75%, 10Y Treasury yield 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path.
+- **Market structure liquidity crash** (market-intel): drawdown breach; PnL -35.3%, max drawdown 74.8%, trades 9.
+  - Crypto market cap 24h change -0.35%, stablecoin supply 30d change -1.88%, BTC open-interest change 0.29%, and top-trader long share 54.1%.
+- **News catalyst gap** (news): forced liquidation; PnL -99.9%, max drawdown 99.9%, trades 4.
+  - 8 frozen news items show 25.0% negative headlines, 75.0% high-impact items, and 25.0% regulatory exposure. The scenario simulates gap risk from a sudden catalyst.
+- **Sentiment squeeze: long crowding** (sentiment): drawdown breach; PnL 974.6%, max drawdown 80.4%, trades 7.
+  - long crowding; fear-greed index 13; taker buy share 46.2%. The scenario simulates a squeeze upward that traps late longs before a fast selloff, testing liquidation risk in leveraged trend strategies.
+- **Technical whipsaw: false-breakout grinder** (technical): forced liquidation; PnL -89.9%, max drawdown 99.5%, trades 5.
+  - ADX 29.3, 1 DMI switches over the last 20 candles, 4 RSI midline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chase-and-reversal losses in trend strategies.
 
-## 处方
-- 参数修改：`{"leverage":5,"stopLossPct":0.072,"positionPct":0.6}`
-- 修改依据：清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内；回撤击穿 → 降低仓位暴露；最终处方：杠杆 10→5，止损比例 0.5→0.072，仓位比例 1→0.6
+## Prescription
+- Parameter changes: `{"leverage":5,"stopLossPct":0.072,"positionPct":0.6}`
+- Rationale: Reduce leverage and tighten stop-loss to within half of the liquidation line.; Lower position exposure to reduce drawdown pressure.; final prescription: leverage 10 -> 5; stopLossPct 0.5 -> 0.072; positionPct 1 -> 0.6
+- Consensus: 100.0% agreement across conservative profiles.
 
-## held-out 复测（诚实取舍）
-- 风险分变化：+2
-- 平均收益变化：+37.1%
+## Held-out validation
+- Robustness score change: +2.0000
+- Average return change: +37.1%
 
-> 本报告不承诺“一键变好”。处方效果以未参与治疗的 held-out 场景结果为准，未达标项仍应保留为风险。
+> Strategy Doctor is a diagnostic and risk-control tool. It does not promise future returns, and every prescription must be judged by the independent held-out result above.

@@ -32,7 +32,7 @@ const buildScenarioSet = (seed: number): Scenario[] => [
   ),
 ];
 
-test('renderScorecard includes scores, deaths, prescription, and honest tradeoff', async () => {
+test('renderScorecard includes English scores, deaths, prescription, and honest tradeoff', async () => {
   const strategy = loadJson(
     '../../examples/trend-follower.json',
   ) as Strategy;
@@ -45,23 +45,23 @@ test('renderScorecard includes scores, deaths, prescription, and honest tradeoff
   const markdown = renderScorecard(card, strategy);
 
   assert.ok(markdown.includes(strategy.name));
-  assert.ok(markdown.includes('五维压力覆盖'));
+  assert.ok(markdown.includes('Five-dimension stress coverage'));
   assert.ok(markdown.includes('Skill'));
-  assert.ok(markdown.includes('数据时间'));
-  assert.ok(markdown.includes('damage'));
+  assert.ok(markdown.includes('Observed at'));
+  assert.ok(markdown.toLowerCase().includes('damage'));
   assert.ok(markdown.includes('sentiment-analyst'));
   assert.ok(markdown.includes('technical-analysis'));
   assert.ok(markdown.includes('squeeze'));
   assert.ok(markdown.includes('whipsaw'));
-  assert.ok(markdown.includes('三风格评分'));
-  assert.ok(markdown.includes('死因清单'));
-  assert.ok(markdown.includes('处方'));
+  assert.ok(markdown.includes('Three-profile risk scores'));
+  assert.ok(markdown.includes('Failure ledger'));
+  assert.ok(markdown.includes('Prescription'));
   assert.ok(markdown.includes('held-out'));
   assert.ok(markdown.includes('tx42/ho100042'));
-  assert.ok(markdown.includes('不承诺'));
+  assert.ok(markdown.includes('does not promise'));
 });
 
-test('renderScorecard explicitly reports survivors and zero-change prescription', async () => {
+test('renderScorecard explicitly reports survivors and zero-change prescription in English', async () => {
   const strategy = loadJson(
     '../../examples/trend-follower.json',
   ) as Strategy;
@@ -84,8 +84,8 @@ test('renderScorecard explicitly reports survivors and zero-change prescription'
 
   const markdown = renderScorecard(card, strategy);
 
-  assert.ok(markdown.includes('存活'));
-  assert.ok(markdown.includes('当前治疗场景未发现致死结果'));
-  assert.ok(markdown.includes('参数修改：`{}`'));
-  assert.ok(markdown.includes('平均收益变化：+0.0%'));
+  assert.ok(markdown.includes('survived'));
+  assert.ok(markdown.includes('No fatal treatment scenarios were found.'));
+  assert.ok(markdown.includes('Parameter changes: `{}`'));
+  assert.ok(markdown.includes('Average return change: +0.0%'));
 });

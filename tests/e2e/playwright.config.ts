@@ -1,6 +1,8 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const node = JSON.stringify(process.execPath);
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 export default defineConfig({
   testDir: '.',
@@ -21,7 +23,9 @@ export default defineConfig({
     },
   }],
   webServer: {
-    command: `${npm} run web`,
+    command:
+      `${node} node_modules/vite/bin/vite.js build --config web/vite.config.ts && ${node} src/server/start.ts`,
+    cwd: repoRoot,
     url: 'http://127.0.0.1:8080/api/v1/health',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

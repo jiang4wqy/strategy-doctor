@@ -12,6 +12,11 @@ test('parseServerConfig applies local offline defaults', () => {
   assert.equal(config.sessionTtlSeconds, 12 * 60 * 60);
   assert.equal(config.bodyLimit, 32 * 1024);
   assert.equal(config.staticRoot, path.resolve('web/dist'));
+  assert.deepEqual(config.authRateLimit, {
+    enabled: true,
+    max: 5,
+    timeWindow: '15 minutes',
+  });
 });
 
 test('parseServerConfig trims configured API keys and numeric settings', () => {
@@ -24,6 +29,8 @@ test('parseServerConfig trims configured API keys and numeric settings', () => {
     DOCTOR_SESSION_TTL_SECONDS: '3600',
     DOCTOR_BODY_LIMIT: '4096',
     DOCTOR_STATIC_ROOT: './custom-dist',
+    DOCTOR_AUTH_RATE_LIMIT_MAX: '20',
+    DOCTOR_AUTH_RATE_LIMIT_WINDOW: '30 minutes',
   });
 
   assert.deepEqual(config.apiKeys, ['agent-one', 'agent-two']);
@@ -31,6 +38,23 @@ test('parseServerConfig trims configured API keys and numeric settings', () => {
   assert.equal(config.sessionTtlSeconds, 3600);
   assert.equal(config.bodyLimit, 4096);
   assert.equal(config.staticRoot, path.resolve('custom-dist'));
+  assert.deepEqual(config.authRateLimit, {
+    enabled: true,
+    max: 20,
+    timeWindow: '30 minutes',
+  });
+});
+
+test('parseServerConfig can disable auth rate limits for local demos', () => {
+  const config = parseServerConfig({
+    DOCTOR_AUTH_RATE_LIMIT_DISABLED: '1',
+  });
+
+  assert.deepEqual(config.authRateLimit, {
+    enabled: false,
+    max: 5,
+    timeWindow: '15 minutes',
+  });
 });
 
 test('parseServerConfig protects non-loopback binding and invalid values', () => {
@@ -52,5 +76,9 @@ test('parseServerConfig protects non-loopback binding and invalid values', () =>
   assert.throws(
     () => parseServerConfig({ DOCTOR_BODY_LIMIT: '0' }),
     /body limit/i,
+  );
+  assert.throws(
+    () => parseServerConfig({ DOCTOR_AUTH_RATE_LIMIT_MAX: '0' }),
+    /auth rate limit max/i,
   );
 });

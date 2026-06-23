@@ -1,11 +1,11 @@
-# pipeline
+# Diagnosis Pipeline
 
-`runDoctor(strategy, backtest, options)` 完成：
+`runDoctor(strategy, backtest, options)` performs the end-to-end diagnosis:
 
-1. 校验 ID、维度、Skill、shock 和 treatment/held-out seed。
-2. 回测选中场景并生成全部 `evaluations`。
-3. 生成三风格评分和 deaths 子集。
-4. 生成死因定向处方。
-5. 在独立 held-out 场景上计算风险分和收益变化。
+1. Validate scenario IDs, dimensions, source skills, shocks, and treatment/held-out seeds.
+2. Backtest the selected stress scenarios and build all evaluations.
+3. Produce three profile scores and the death subset.
+4. Generate failure-targeted prescriptions.
+5. Score the original and patched strategy on independent held-out scenarios.
 
-即使没有 death，也返回零改动处方和零 trade-off。
+Even when no death is found, the pipeline returns a zero-change prescription and an explicit trade-off result.

@@ -41,37 +41,6 @@ function bearerCredential(request: FastifyRequest): string | undefined {
   return authorization.slice('Bearer '.length);
 }
 
-const DEFAULT_AUTH_RATE_LIMIT_MAX = 5;
-const DEFAULT_AUTH_RATE_LIMIT_WINDOW = '15 minutes';
-
-function parseAuthRateLimitMax(value: string | undefined): number {
-  if (!value) {
-    return DEFAULT_AUTH_RATE_LIMIT_MAX;
-  }
-  const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < 1) {
-    return DEFAULT_AUTH_RATE_LIMIT_MAX;
-  }
-  return parsed;
-}
-
-function parseAuthRateLimitWindow(value: string | undefined): string {
-  if (!value || value.trim() === '') {
-    return DEFAULT_AUTH_RATE_LIMIT_WINDOW;
-  }
-  return value.trim();
-}
-
-function getAuthRateLimit() {
-  if (process.env.DOCTOR_AUTH_RATE_LIMIT_DISABLED === '1') {
-    return undefined;
-  }
-  return {
-    max: parseAuthRateLimitMax(process.env.DOCTOR_AUTH_RATE_LIMIT_MAX),
-    timeWindow: parseAuthRateLimitWindow(process.env.DOCTOR_AUTH_RATE_LIMIT_WINDOW),
-  };
-}
-
 function validBearer(
   request: FastifyRequest,
   config: ServerConfig,
@@ -115,7 +84,12 @@ export async function registerAuth(
   await app.register(cookie, config.sessionSecret
     ? { secret: config.sessionSecret }
     : {});
-  const authRateLimit = getAuthRateLimit();
+  const authRateLimit = config.authRateLimit.enabled
+    ? {
+      max: config.authRateLimit.max,
+      timeWindow: config.authRateLimit.timeWindow,
+    }
+    : undefined;
 
   app.decorate('requireAuth', async (
     request: FastifyRequest,
