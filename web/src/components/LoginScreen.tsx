@@ -41,6 +41,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           Enter the shared preview code to inspect deterministic failure
           diagnoses and targeted repairs.
         </p>
+        <p className="section-subtitle">
+          Demo access control is designed for judges and review sessions.
+        </p>
         <form onSubmit={submit}>
           <label htmlFor="access-code">
             <LockKeyhole aria-hidden="true" />
@@ -55,7 +58,11 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             onChange={event => setAccessCode(event.target.value)}
           />
           {error ? <p role="alert">{error}</p> : null}
-          <button type="submit" disabled={loading || accessCode.length === 0}>
+          <button
+            type="submit"
+            className="primary-action"
+            disabled={loading || accessCode.length === 0}
+          >
             {loading ? 'Checking access...' : 'Enter workspace'}
             <ArrowRight aria-hidden="true" />
           </button>

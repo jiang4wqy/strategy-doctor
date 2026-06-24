@@ -38,6 +38,16 @@ export const strategyExamples: readonly StrategyExample[] = [
     description:
       'XRPUSDT 1d RSI Bollinger mean reversion using RSI period 12, Bollinger period 24, oversold 28, overbought 72, trend filter period 55, leverage 2',
   },
+  {
+    label: 'ETH volatility swing',
+    description:
+      'ETHUSDT 4h moving average crossover with fast MA 9, slow MA 34, leverage 4, stop loss 0.21, position size 0.5',
+  },
+  {
+    label: 'SOL momentum with RSI guard',
+    description:
+      'SOLUSDT 4h RSI 11 with Bollinger period 16 and trend filter period 52, oversold 24, overbought 70, leverage 5, stop loss 0.18, position size 0.62',
+  },
 ];
 
 const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];

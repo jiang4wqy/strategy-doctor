@@ -15,10 +15,17 @@ export function EquityComparisonChart({
   const comparison = charts.heldOutComparison.find(
     item => item.dimension === dimension,
   ) ?? charts.heldOutComparison[0];
+  const isOverlapping = comparison?.original.every((value, index) => {
+    const candidate = comparison?.patched[index];
+    return candidate !== undefined && value === candidate;
+  }) ?? false;
   const option = useMemo(() => ({
     animation: false,
     tooltip: { trigger: 'axis' },
-    legend: { data: ['Original', 'Patched'], textStyle: { color: '#a9b8c9' } },
+    legend: {
+      data: ['Original', 'Patched'],
+      textStyle: { color: '#a9b8c9' },
+    },
     grid: { left: 44, right: 18, top: 42, bottom: 30 },
     xAxis: {
       type: 'category',
@@ -36,14 +43,25 @@ export function EquityComparisonChart({
         type: 'line',
         showSymbol: false,
         data: comparison?.original ?? [],
-        lineStyle: { color: '#ef7d68', width: 2 },
+        lineStyle: {
+          color: '#ef7d68',
+          width: 2.4,
+          type: isOverlapping ? 'dashed' : 'solid',
+        },
+        emphasis: { focus: 'series' },
       },
       {
         name: 'Patched',
         type: 'line',
         showSymbol: false,
         data: comparison?.patched ?? [],
-        lineStyle: { color: '#66d4d0', width: 2 },
+        lineStyle: {
+          color: '#66d4d0',
+          width: 2.8,
+          shadowBlur: 4,
+          shadowColor: 'rgba(102, 212, 208, 0.45)',
+        },
+        emphasis: { focus: 'series' },
       },
     ],
   }), [comparison]);

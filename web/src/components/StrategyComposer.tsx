@@ -1,9 +1,11 @@
 import {
   useEffect,
+  useMemo,
   useState,
   type FormEvent,
 } from 'react';
 import {
+  ArrowLeft,
   Dice5,
   Sparkles,
 } from 'lucide-react';
@@ -22,6 +24,7 @@ export interface StrategyComposerProps {
   onDescriptionChange(description: string): void;
   onParsed(description: string, draft: StrategyDraft): void;
   onOpenLearn?(): void;
+  onBack?(): void;
 }
 
 export function StrategyComposer({
@@ -30,10 +33,25 @@ export function StrategyComposer({
   onDescriptionChange,
   onParsed,
   onOpenLearn,
+  onBack,
 }: StrategyComposerProps) {
   const [text, setText] = useState(description);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+
+  const asReadableDraft = useMemo(() => (draft: StrategyDraft) => {
+    if (draft.strategy.archetype === 'ma-cross') {
+      return `${draft.strategy.universe[0]} ${draft.strategy.timeframe} MA crossover, `
+        + `fast MA ${draft.strategy.params.fastMA}, slow MA ${draft.strategy.params.slowMA}, `
+        + `leverage ${draft.strategy.params.leverage}, stop loss ${draft.strategy.params.stopLossPct}, `
+        + `position size ${draft.strategy.params.positionPct}`;
+    }
+    return `${draft.strategy.universe[0]} ${draft.strategy.timeframe} RSI ${draft.strategy.params.rsiPeriod} `
+      + `with Bollinger period ${draft.strategy.params.bollingerPeriod} and deviation ${draft.strategy.params.bollingerStdDev}, `
+      + `oversold ${draft.strategy.params.rsiOversold}, overbought ${draft.strategy.params.rsiOverbought}, `
+      + `trend filter period ${draft.strategy.params.trendFilterPeriod}, leverage ${draft.strategy.params.leverage}, `
+      + `stop loss ${draft.strategy.params.stopLossPct}, position size ${draft.strategy.params.positionPct}`;
+  }, []);
 
   useEffect(() => {
     setText(description);
@@ -57,8 +75,7 @@ export function StrategyComposer({
 
   function useRandomStrategy() {
     const draft = randomStrategyDraft();
-    const generatedDescription =
-      `${draft.strategy.name}: generated ${draft.strategy.archetype} strategy for ${draft.strategy.universe[0]} ${draft.strategy.timeframe}`;
+    const generatedDescription = asReadableDraft(draft);
     setText(generatedDescription);
     onDescriptionChange(generatedDescription);
     onParsed(generatedDescription, draft);
@@ -67,7 +84,7 @@ export function StrategyComposer({
   return (
     <section className="composer-panel" aria-labelledby="composer-title">
       <div className="panel-heading-row">
-        <div>
+        <div className="panel-title">
           <p className="eyebrow">01 / Strategy intake</p>
           <h2 id="composer-title">Describe the strategy</h2>
           <p>
@@ -75,12 +92,24 @@ export function StrategyComposer({
             run a diagnosis until you confirm every field.
           </p>
         </div>
-        {onOpenLearn ? (
-          <button type="button" onClick={onOpenLearn}>
-            <Sparkles aria-hidden="true" />
-            Tutorial / QA
-          </button>
-        ) : null}
+        <div className="toolbar">
+          {onBack ? (
+            <button type="button" className="ghost-action" onClick={onBack}>
+              <ArrowLeft aria-hidden="true" />
+              Back to workspace
+            </button>
+          ) : null}
+          {onOpenLearn ? (
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={onOpenLearn}
+            >
+              <Sparkles aria-hidden="true" />
+              Tutorial / QA
+            </button>
+          ) : null}
+        </div>
       </div>
       <form onSubmit={submit}>
         <label htmlFor="strategy-description">Strategy description</label>
@@ -100,6 +129,7 @@ export function StrategyComposer({
             <button
               key={example.label}
               type="button"
+              className="secondary-action"
               onClick={() => {
                 setText(example.description);
                 onDescriptionChange(example.description);
@@ -108,7 +138,7 @@ export function StrategyComposer({
               {example.label}
             </button>
           ))}
-          <button type="button" onClick={useRandomStrategy}>
+          <button type="button" className="primary-action" onClick={useRandomStrategy}>
             <Dice5 aria-hidden="true" />
             Random strategy
           </button>
@@ -122,7 +152,7 @@ export function StrategyComposer({
         {error ? (
           <div className="parser-fallback">
             <p role="alert">{error}</p>
-            <button type="button" onClick={useRandomStrategy}>
+            <button type="button" className="secondary-action" onClick={useRandomStrategy}>
               <Dice5 aria-hidden="true" />
               Generate a playable strategy instead
             </button>

@@ -9,6 +9,11 @@ import {
   StrategyValidationError,
   type StrategyValidationCode,
 } from '../contracts.ts';
+import {
+  getSymbolFirstTradeDate,
+  isDateBefore,
+  isDateInFuture,
+} from '../market-calendar.ts';
 import { strategyRegistry } from './registry.ts';
 
 function fail(
@@ -47,7 +52,10 @@ function optionalDate(value: unknown, field: string): string | undefined {
   return value;
 }
 
-function parseBacktest(value: unknown): BacktestSelection | undefined {
+function parseBacktest(
+  value: unknown,
+  symbol?: string,
+): BacktestSelection | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -80,6 +88,14 @@ function parseBacktest(value: unknown): BacktestSelection | undefined {
     backtest.endDate,
     'strategy.backtest.endDate',
   );
+  const symbolLimit = getSymbolFirstTradeDate(symbol ?? 'BTCUSDT');
+  if (startDate && isDateBefore(startDate, symbolLimit)) {
+    fail(
+      `backtest startDate cannot be before ${symbolLimit}`,
+      'INVALID_REQUEST',
+      'strategy.backtest.startDate',
+    );
+  }
   if (
     startDate
     && endDate
@@ -90,6 +106,20 @@ function parseBacktest(value: unknown): BacktestSelection | undefined {
       'backtest startDate must be on or before endDate',
       'INVALID_REQUEST',
       'strategy.backtest.startDate',
+    );
+  }
+  if (startDate && isDateInFuture(startDate)) {
+    fail(
+      'backtest startDate cannot be in the future',
+      'INVALID_REQUEST',
+      'strategy.backtest.startDate',
+    );
+  }
+  if (endDate && isDateInFuture(endDate)) {
+    fail(
+      'backtest endDate cannot be in the future',
+      'INVALID_REQUEST',
+      'strategy.backtest.endDate',
     );
   }
   return {
@@ -194,7 +224,7 @@ export function parseStrategy(value: unknown): Strategy {
     name: nonEmptyString(strategy.name, 'name'),
     universe: [symbol],
     timeframe,
-    backtest: parseBacktest(strategy.backtest),
+    backtest: parseBacktest(strategy.backtest, symbol),
     execution: parseExecution(strategy.execution),
   };
 

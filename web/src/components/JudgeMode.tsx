@@ -1,6 +1,7 @@
 import {
   Activity,
   ArrowUpRight,
+  ArrowLeft,
   BookOpen,
   Bot,
   CheckCircle2,
@@ -103,6 +104,10 @@ export function JudgeMode() {
             evidence instead of hidden chart calculations.
           </p>
           <div className="judge-actions" aria-label="Demo actions">
+            <a className="primary-action" href="/showcase">
+              Back to workspace
+              <ArrowLeft aria-hidden="true" />
+            </a>
             <a href="/showcase">
               Open private workspace
               <ArrowUpRight aria-hidden="true" />

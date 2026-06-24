@@ -1,16 +1,29 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from 'react';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 import type {
   AnyStrategyDefinition,
   DiagnoseRequest,
   StrategyDraft,
 } from '../api/types.ts';
 import { ParameterField } from './ParameterField.tsx';
+import {
+  availableTradeSymbols,
+  getSymbolFirstTradeDate,
+  isDateBefore,
+  todayIsoDate,
+} from '../data/symbol-calendar.ts';
 
 export interface StrategyConfirmationProps {
   draft: StrategyDraft;
   capabilities: readonly AnyStrategyDefinition[];
   externalError?: string;
   onBack?(): void;
+  onOpenLearn?(): void;
   onConfirm(request: DiagnoseRequest): Promise<void>;
 }
 
@@ -25,6 +38,7 @@ export function StrategyConfirmation({
   capabilities,
   externalError,
   onBack,
+  onOpenLearn,
   onConfirm,
 }: StrategyConfirmationProps) {
   const definition = capabilities.find(
@@ -67,6 +81,7 @@ export function StrategyConfirmation({
   );
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [today] = useState(todayIsoDate());
 
   const parameters = useMemo(
     () => definition?.parameters ?? [],
@@ -75,6 +90,19 @@ export function StrategyConfirmation({
   if (!definition) {
     return <p role="alert">Capability metadata is missing for this strategy.</p>;
   }
+
+  useEffect(() => {
+    const firstTradeDate = getSymbolFirstTradeDate(symbol);
+    if (startDate && isDateBefore(startDate, firstTradeDate)) {
+      setStartDate(firstTradeDate);
+    }
+    if (endDate && isDateBefore(endDate, firstTradeDate)) {
+      setEndDate(firstTradeDate);
+    }
+    if (startDate && endDate && endDate < startDate) {
+      setEndDate(startDate);
+    }
+  }, [symbol]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,6 +140,20 @@ export function StrategyConfirmation({
       || parsedCandleLimit > 1000
     ) {
       setError('Candle limit must be an integer from 50 to 1000.');
+      return;
+    }
+
+    const firstTradeDate = getSymbolFirstTradeDate(symbol);
+    if (startDate && isDateBefore(startDate, firstTradeDate)) {
+      setError(`Start date cannot be earlier than first ${symbol} data at ${firstTradeDate}.`);
+      return;
+    }
+    if (startDate && startDate > today) {
+      setError('Start date cannot be in the future.');
+      return;
+    }
+    if (endDate && endDate > today) {
+      setError('End date cannot be in the future.');
       return;
     }
     if (startDate && endDate && startDate > endDate) {
@@ -164,16 +206,25 @@ export function StrategyConfirmation({
   return (
     <section className="confirmation-panel" aria-labelledby="confirm-title">
       <div className="panel-heading-row">
-        <div>
+        <div className="panel-title">
           <p className="eyebrow">02 / Confirmation boundary</p>
           <h2 id="confirm-title">{definition.displayName}</h2>
           <p>{definition.description}</p>
         </div>
-        {onBack ? (
-          <button type="button" onClick={onBack}>
-            Back to strategy
-          </button>
-        ) : null}
+        <div className="toolbar">
+          {onOpenLearn ? (
+            <button type="button" className="secondary-action" onClick={onOpenLearn}>
+              <BookOpen aria-hidden="true" />
+              Tutorial / QA
+            </button>
+          ) : null}
+          {onBack ? (
+            <button type="button" className="ghost-action" onClick={onBack}>
+              <ArrowLeft aria-hidden="true" />
+              Back to strategy
+            </button>
+          ) : null}
+        </div>
       </div>
       <div className="draft-meta">
         <span>{draft.source}</span>
@@ -195,7 +246,7 @@ export function StrategyConfirmation({
           {warning.message}
         </p>
       ))}
-      <form onSubmit={submit}>
+      <form noValidate onSubmit={submit}>
         <div className="parameter-grid">
           {parameters.map(parameter => (
             <ParameterField
@@ -232,11 +283,11 @@ export function StrategyConfirmation({
             value={symbol}
             onChange={event => setSymbol(event.target.value)}
           >
-            <option value="BTCUSDT">BTCUSDT</option>
-            <option value="ETHUSDT">ETHUSDT</option>
-            <option value="SOLUSDT">SOLUSDT</option>
-            <option value="XRPUSDT">XRPUSDT</option>
-            <option value="DOGEUSDT">DOGEUSDT</option>
+            {availableTradeSymbols.map(item => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
           <label htmlFor="market-timeframe">Timeframe</label>
           <select
@@ -274,6 +325,8 @@ export function StrategyConfirmation({
             id="start-date"
             type="date"
             value={startDate}
+            min={getSymbolFirstTradeDate(symbol)}
+            max={endDate || today}
             onChange={event => setStartDate(event.target.value)}
           />
           <label htmlFor="end-date">End date</label>
@@ -281,6 +334,8 @@ export function StrategyConfirmation({
             id="end-date"
             type="date"
             value={endDate}
+            min={startDate || getSymbolFirstTradeDate(symbol)}
+            max={today}
             onChange={event => setEndDate(event.target.value)}
           />
           <label htmlFor="fee-rate">Fee rate</label>

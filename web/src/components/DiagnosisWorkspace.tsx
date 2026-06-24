@@ -41,7 +41,7 @@ export function DiagnosisWorkspace({
   return (
     <div className="diagnosis-workspace">
       <header className="workspace-header">
-        <div>
+        <div className="panel-title">
           <p className="eyebrow">03 / Adversarial diagnosis</p>
           <h1>{request.strategy.name}</h1>
           <p>
@@ -49,14 +49,19 @@ export function DiagnosisWorkspace({
             validation from one deterministic run.
           </p>
         </div>
-        <div className="export-actions">
+        <div className="command-actions">
           {onEditParameters ? (
-            <button type="button" onClick={onEditParameters}>
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={onEditParameters}
+            >
               Edit parameters
             </button>
           ) : null}
           <button
             type="button"
+            className="secondary-action"
             onClick={() => downloadText(
               `${filename}.json`,
               exportDiagnosisJson(request, view),
@@ -67,6 +72,7 @@ export function DiagnosisWorkspace({
           </button>
           <button
             type="button"
+            className="secondary-action"
             onClick={() => downloadText(
               `${filename}.md`,
               renderDiagnosisMarkdown(request, view),
@@ -79,6 +85,7 @@ export function DiagnosisWorkspace({
             <>
               <button
                 type="button"
+                className="secondary-action"
                 onClick={() => downloadText(
                   `${filename}-risk-dashboard.json`,
                   exportRiskDashboardJson(request, view),
@@ -89,6 +96,7 @@ export function DiagnosisWorkspace({
               </button>
               <button
                 type="button"
+                className="secondary-action"
                 onClick={() => downloadText(
                   `${filename}-risk-dashboard.md`,
                   renderRiskDashboardMarkdown(request, view),
@@ -101,6 +109,7 @@ export function DiagnosisWorkspace({
           ) : null}
           <button
             type="button"
+            className="secondary-action"
             onClick={() => downloadText(
               `${filename}-decision-snapshot.md`,
               renderRiskDashboardMarkdown(request, view),
@@ -112,14 +121,24 @@ export function DiagnosisWorkspace({
         </div>
       </header>
 
-      <SummaryCards summary={view.summary} />
-      {baseline ? (
-        <ComparisonPanel
-          baseline={baseline}
-          request={request}
-          view={view}
-        />
-      ) : null}
+      <section className="analysis-workbench" aria-label="Executive report area">
+        <section className="analysis-overview">
+          <p className="eyebrow">Executive report</p>
+          <h2>Core risk snapshot</h2>
+          <SummaryCards summary={view.summary} />
+        </section>
+        {baseline ? (
+          <section className="analysis-overview">
+            <p className="eyebrow">Before and after</p>
+            <h2>Diagnostic comparison</h2>
+            <ComparisonPanel
+              baseline={baseline}
+              request={request}
+              view={view}
+            />
+          </section>
+        ) : null}
+      </section>
       {view.riskDashboard ? (
         <section className="risk-dashboard-panel" aria-labelledby="risk-dashboard-title">
           <p className="eyebrow">Risk dashboard</p>

@@ -155,6 +155,54 @@ test('parseStrategy rejects unsupported market boundaries with stable codes', ()
   );
 });
 
+test('parseStrategy enforces symbol-specific and global date boundaries', () => {
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      universe: ['ETHUSDT'],
+      backtest: {
+        startDate: '2014-01-01',
+        endDate: '2016-01-01',
+      },
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'INVALID_REQUEST'
+      && error.field === 'strategy.backtest.startDate'
+    ),
+  );
+
+  const futureDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      backtest: {
+        startDate: futureDate,
+      },
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'INVALID_REQUEST'
+      && error.field === 'strategy.backtest.startDate'
+    ),
+  );
+  assert.throws(
+    () => parseStrategy({
+      ...validStrategy,
+      backtest: {
+        endDate: futureDate,
+      },
+    }),
+    (error: unknown) => (
+      error instanceof StrategyValidationError
+      && error.code === 'INVALID_REQUEST'
+      && error.field === 'strategy.backtest.endDate'
+    ),
+  );
+});
+
 test('parseStrategy rejects invalid parameter invariants', () => {
   const invalidParams = [
     { fastMA: 1 },

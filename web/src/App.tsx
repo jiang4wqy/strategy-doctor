@@ -3,6 +3,12 @@ import {
   Suspense,
   useReducer,
 } from 'react';
+import {
+  ArrowLeft,
+  Compass,
+  BookOpen,
+  Home,
+} from 'lucide-react';
 import { createApiClient } from './api/client.ts';
 import type { ApiClient } from './api/types.ts';
 import { LoginScreen } from './components/LoginScreen.tsx';
@@ -27,6 +33,64 @@ const DiagnosisWorkspace = lazy(async () => {
 
 export interface AppProps {
   client?: ApiClient;
+}
+
+interface WorkspaceHeaderProps {
+  heading: string;
+  description: string;
+  onBack?: () => void;
+  onNewStrategy?: () => void;
+  onOpenLearn?: () => void;
+}
+
+function WorkspaceHeader({
+  heading,
+  description,
+  onBack,
+  onNewStrategy,
+  onOpenLearn,
+}: WorkspaceHeaderProps) {
+  return (
+    <header className="enterprise-topbar" role="navigation" aria-label="Workspace navigation">
+      <div className="enterprise-brand">
+        <p className="eyebrow">Strategy Doctor</p>
+        <h1 className="enterprise-brand-title">{heading}</h1>
+        <p>{description}</p>
+      </div>
+      <div className="enterprise-actions">
+        {onBack ? (
+          <button
+            type="button"
+            className="ghost-action"
+            onClick={onBack}
+          >
+            <ArrowLeft aria-hidden="true" />
+            Back
+          </button>
+        ) : null}
+        {onNewStrategy ? (
+          <button type="button" onClick={onNewStrategy}>
+            <Compass aria-hidden="true" />
+            New strategy
+          </button>
+        ) : null}
+        {onOpenLearn ? (
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={onOpenLearn}
+          >
+            <BookOpen aria-hidden="true" />
+            Tutorial / QA
+          </button>
+        ) : null}
+        <a className="secondary-action home-link" href="/judge">
+          <Home aria-hidden="true" />
+          Judge mode
+        </a>
+      </div>
+    </header>
+  );
 }
 
 export function App({ client = defaultClient }: AppProps) {
@@ -56,6 +120,12 @@ export function App({ client = defaultClient }: AppProps) {
   if (state.status === 'describing') {
     return (
       <main className="app-shell">
+        <WorkspaceHeader
+          heading="Strategy workspace"
+          description="Describe a strategy, pick a sample, or generate one randomly before signing into diagnosis."
+          onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+          onNewStrategy={() => dispatch({ type: 'newStrategy' })}
+        />
         <StrategyComposer
           client={client}
           description={state.description}
@@ -68,7 +138,6 @@ export function App({ client = defaultClient }: AppProps) {
             description,
             draft,
           })}
-          onOpenLearn={() => dispatch({ type: 'learnOpened' })}
         />
         <HistoryPanel onOpen={record => dispatch({
           type: 'restored',
@@ -81,11 +150,16 @@ export function App({ client = defaultClient }: AppProps) {
   if (state.status === 'confirming') {
     return (
       <main className="app-shell">
+        <WorkspaceHeader
+          heading="Strategy confirmation"
+          description="Review assumptions, trading costs and backtest boundaries. Then launch deterministic diagnosis."
+          onBack={() => dispatch({ type: 'back' })}
+          onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+        />
         <StrategyConfirmation
           draft={state.draft}
           capabilities={state.capabilities}
           externalError={state.error}
-          onBack={() => dispatch({ type: 'back' })}
           onConfirm={async request => {
             const draft = state.draft;
             dispatch({ type: 'diagnosisStarted', request });
@@ -125,6 +199,34 @@ export function App({ client = defaultClient }: AppProps) {
   if (state.status === 'diagnosing') {
     return (
       <main className="app-shell" aria-live="polite">
+        <WorkspaceHeader
+          heading="Diagnosis progress"
+          description="Adversarial stress suite running. One strategy path remains accessible below when complete."
+          onBack={() => dispatch({ type: 'back' })}
+          onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+        />
+        <div className="workspace-nav">
+          <button
+            type="button"
+            className="ghost-action"
+            onClick={() => dispatch({ type: 'back' })}
+          >
+            <ArrowLeft aria-hidden="true" />
+            Back to parameters
+          </button>
+          <button type="button" onClick={() => dispatch({ type: 'back' })}>
+            <Compass aria-hidden="true" />
+            Re-run diagnosis
+          </button>
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => dispatch({ type: 'learnOpened' })}
+          >
+            <BookOpen aria-hidden="true" />
+            Tutorial / QA
+          </button>
+        </div>
         <p className="eyebrow">Running adversarial scenarios</p>
         <h1>Diagnosis in progress</h1>
       </main>
@@ -133,23 +235,28 @@ export function App({ client = defaultClient }: AppProps) {
 
   if (state.status === 'learning') {
     return (
-      <LearnMode onBack={() => dispatch({ type: 'back' })} />
+      <main className="app-shell">
+        <WorkspaceHeader
+          heading="Tutorial / QA"
+          description="Learn workflow, assumptions and judge handoff process."
+          onBack={() => dispatch({ type: 'back' })}
+        />
+        <LearnMode onBack={() => dispatch({ type: 'back' })} />
+      </main>
     );
   }
 
   return (
     <main className="app-shell">
-      <div className="workspace-nav" aria-label="Workspace navigation">
-        <button type="button" onClick={() => dispatch({ type: 'back' })}>
-          Back to strategy
-        </button>
-        <button type="button" onClick={() => dispatch({ type: 'newStrategy' })}>
-          New strategy
-        </button>
-        <button type="button" onClick={() => dispatch({ type: 'learnOpened' })}>
-          Tutorial / QA
-        </button>
-      </div>
+      <WorkspaceHeader
+        heading="Diagnosis report"
+        description={state.request?.strategy.name
+          ? `${state.request.strategy.name} - enterprise diagnostics`
+          : 'Deterministic adversarial results'}
+        onBack={() => dispatch({ type: 'back' })}
+        onNewStrategy={() => dispatch({ type: 'newStrategy' })}
+        onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+      />
       <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
           request={state.request}

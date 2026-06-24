@@ -97,17 +97,23 @@ export function LearnMode({ onBack }: LearnModeProps) {
             the generated contract, diagnose failures, and export evidence.
           </p>
         </div>
-        {onBack ? (
-          <button type="button" onClick={onBack}>
-            <ArrowLeft aria-hidden="true" />
-            Back
-          </button>
-        ) : (
-          <a className="learn-link" href="/showcase">
-            <ArrowLeft aria-hidden="true" />
-            Open workspace
-          </a>
-        )}
+        <div className="toolbar">
+          {onBack ? (
+            <button
+              type="button"
+              className="ghost-action"
+              onClick={onBack}
+            >
+              <ArrowLeft aria-hidden="true" />
+              Back
+            </button>
+          ) : (
+            <a className="learn-link" href="/showcase">
+              <ArrowLeft aria-hidden="true" />
+              Open workspace
+            </a>
+          )}
+        </div>
       </section>
 
       <section className="learn-steps" aria-label="Workflow tutorial">

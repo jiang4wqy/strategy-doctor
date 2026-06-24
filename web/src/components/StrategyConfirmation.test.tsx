@@ -56,4 +56,33 @@ describe('StrategyConfirmation', () => {
       }),
     }));
   });
+
+  it('validates symbol-aware window controls on confirmation', async () => {
+    const diagnose = vi.fn(async () => undefined);
+    const user = userEvent.setup();
+    render(
+      <StrategyConfirmation
+        draft={draftFixture}
+        capabilities={capabilityFixture}
+        onConfirm={diagnose}
+      />,
+    );
+
+    const symbolSelect = screen.getByLabelText('Symbol');
+    await user.selectOptions(symbolSelect, 'ETHUSDT');
+
+    const startInput = screen.getByLabelText('Start date');
+    const endInput = screen.getByLabelText('End date');
+    expect(startInput.getAttribute('min')).toBe('2015-07-30');
+    expect(endInput.getAttribute('min')).toBe('2015-07-30');
+
+    await user.clear(startInput);
+    await user.type(startInput, '2026-01-01');
+    await user.clear(endInput);
+    await user.type(endInput, '2025-01-01');
+    await user.click(screen.getByRole('button', { name: 'Confirm and diagnose' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toBe('Start date must be on or before end date.');
+    expect(diagnose).not.toHaveBeenCalled();
+  });
 });
