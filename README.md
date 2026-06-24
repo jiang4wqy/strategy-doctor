@@ -86,6 +86,27 @@ Stop the local server:
 .\scripts\stop-showcase.ps1
 ```
 
+## Long-Lived Public URL
+
+For a durable public link, do **not** use the temporary Cloudflare tunnel.
+
+- Deploy with `render.yaml` (recommended) using `Dockerfile`.
+- Bind host to `0.0.0.0` and set `DOCTOR_WEB_ACCESS_CODE` +
+  `DOCTOR_SESSION_SECRET` in production environment variables.
+- Keep `/judge` public, and keep `/showcase` protected by the access code.
+
+See:
+
+- [Public deployment playbook](docs/DEPLOY_PUBLIC.md)
+- [Public demo and quick tunnel](docs/PUBLIC_DEMO.md)
+
+Typical host outputs:
+
+```text
+https://<service>.onrender.com/judge
+https://<service>.onrender.com/showcase
+```
+
 ## Generate The Submission Evidence Pack
 
 ```powershell

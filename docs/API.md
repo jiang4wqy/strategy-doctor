@@ -333,7 +333,7 @@ $env:STRATEGY_DOCTOR_API_KEY='replace-this-with-a-private-agent-key'
 .\examples\agent-curl.ps1
 ```
 
-## Temporary remote URL
+## Remote access URL
 
 Keep the local service running and start:
 
@@ -341,7 +341,12 @@ Keep the local service running and start:
 cloudflared tunnel --url http://localhost:8080
 ```
 
-Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL`. The URL changes after restart. Share the URL and API key privately. Quick Tunnel is for demo/testing, not permanent production.
+Use the generated `trycloudflare.com` URL as `STRATEGY_DOCTOR_URL` for quick manual checks.
+
+The URL changes after each restart.
+
+For a durable address suitable for judges or long-running demos, use
+`docs/DEPLOY_PUBLIC.md` (Render/Railway/custom domain guidance).
 
 ## P1 limits
 

@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+artifacts
+test-results
+coverage
+web/dist
+dist

@@ -63,7 +63,7 @@ export function isLoopbackHost(host: string): boolean {
 export function parseServerConfig(
   env: Record<string, string | undefined>,
 ): ServerConfig {
-  const host = env.DOCTOR_HOST?.trim() || '127.0.0.1';
+  const host = trimmedString(env.DOCTOR_HOST ?? env.HOST, '127.0.0.1');
   const accessCode = env.DOCTOR_WEB_ACCESS_CODE?.trim() || undefined;
   const sessionSecret = env.DOCTOR_SESSION_SECRET?.trim() || undefined;
 
@@ -87,7 +87,12 @@ export function parseServerConfig(
 
   return Object.freeze({
     host,
-    port: positiveInteger(env.DOCTOR_PORT, 8080, 'port', 65_535),
+    port: positiveInteger(
+      env.DOCTOR_PORT ?? env.PORT,
+      8080,
+      'port',
+      65_535,
+    ),
     accessCode,
     sessionSecret,
     apiKeys,

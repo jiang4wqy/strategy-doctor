@@ -183,6 +183,28 @@ Share the generated URL and the Web access code through a private channel. Agent
 
 Quick Tunnel is for demos and temporary collaboration only. A durable deployment should add TLS, access control, log retention, key rotation, and operational monitoring.
 
+### Long-lived Public URL
+
+Do **not** share a new `trycloudflare.com` link for final demo. Use a durable host:
+
+- Render (recommended): `render.yaml` + `Dockerfile`.
+- Railway: deploy this repository as Docker.
+- Custom domain + CDN/WAF at your infra provider.
+
+Share with judges:
+
+```text
+https://<your-host>/judge
+https://<your-host>/showcase
+```
+
+Operational checklist:
+
+1. Build passes: `npm run verify`.
+2. Health check is green: `GET /api/v1/health`.
+3. Access code works for `/showcase`.
+4. `/judge` is reachable without sharing the access code.
+
 ## Optional AI Fallback
 
 The natural-language parser is rules-first and offline by default. Anthropic fallback only runs when explicitly enabled:

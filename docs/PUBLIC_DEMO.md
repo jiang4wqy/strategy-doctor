@@ -45,6 +45,22 @@ https://<generated>.trycloudflare.com/showcase
 
 Use the `/judge` URL for reviewers. Share `/showcase` only with the access code.
 
+## Long-lived public URL
+
+The temporary tunnel URL changes on every restart.
+For a long-lived URL, prefer container deployment:
+
+- Render: [docs/DEPLOY_PUBLIC.md](DEPLOY_PUBLIC.md) (`render.yaml` + `Dockerfile`)
+- Railway: same Docker deployment configuration
+- Cloudflare Tunnel with fixed domain mapping (optional, if you already own a domain)
+
+Recommended production endpoints:
+
+```text
+https://<your-service-host>/judge
+https://<your-service-host>/showcase
+```
+
 ## Playbook bridge check
 
 After starting the server, this endpoint accepts a Bitget Playbook export or

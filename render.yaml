@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: strategy-doctor
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DOCTOR_HOST
+        value: 0.0.0.0
+      - key: DOCTOR_PORT
+        value: 8080
+      - key: DOCTOR_AUTH_RATE_LIMIT_DISABLED
+        value: "0"
+      - key: DOCTOR_WEB_ACCESS_CODE
+        sync: false
+      - key: DOCTOR_SESSION_SECRET
+        sync: false
+      - key: DOCTOR_API_KEYS
+        sync: false
+    healthCheckPath: /api/v1/health
