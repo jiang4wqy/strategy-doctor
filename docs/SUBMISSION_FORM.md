@@ -32,20 +32,20 @@ https://github.com/jiang4wqy/strategy-doctor
 Public demo:
 
 ```text
-TODO: replace with deployed /showcase URL
+Temporary preview: https://mirrors-resolution-device-weblogs.trycloudflare.com/showcase
 Local preview: http://127.0.0.1:8080/showcase
 ```
 
 Demo video:
 
 ```text
-TODO: add three-minute video URL
+Pending: add three-minute video URL
 ```
 
 Published Playbook:
 
 ```text
-TODO: add Bitget Playbook published URL after managed upload/backtest/publish
+Pending: add Bitget Playbook published URL after managed upload/backtest/publish
 ```
 
 ## What It Does
@@ -116,6 +116,7 @@ http://127.0.0.1:8080/showcase
 ## Evidence Files
 
 - `docs/SUBMISSION_EVIDENCE.md`
+- `docs/TEST_CASES.md`
 - `docs/PLAYBOOK_EVIDENCE.md`
 - `submission-package/index.md` after running `npm.cmd run submission:package`
 - `examples/submission/api-call-log.jsonl`

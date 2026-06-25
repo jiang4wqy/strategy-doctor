@@ -5,156 +5,159 @@
 **Name:** Strategy Doctor
 **Track:** Track 2 - Trading Infra
 **Repository:** https://github.com/jiang4wqy/strategy-doctor
-**Demo video:** 待录制并上传后填写
+**Temporary public demo:** https://mirrors-resolution-device-weblogs.trycloudflare.com/showcase
+**Local showcase:** http://127.0.0.1:8080/showcase
 
-## One-line pitch
+## One-Line Pitch
 
-Strategy Doctor is the diagnostic layer for trading Agents: it discovers a strategy's worst reproducible market failures, explains the causes, proposes constrained parameter fixes, and validates the risk-return tradeoff on independent held-out scenarios.
+Strategy Doctor is a Playbook pre-publication risk auditor for trading Agents: it discovers how a strategy fails, repairs only failure-related parameters, validates the trade-off on held-out scenarios, and reports whether the strategy is safe enough for sandbox publication.
 
-## 为什么属于 Track 2
+## Why It Fits Track 2
 
-Track 2 关注产品能力、其他开发者能否直接接入、上手成本，以及是否解决 Agent 开发中的真实痛点。Strategy Doctor 对应这四点：
+Track 2 rewards developer-facing infrastructure that other builders and Agents can integrate. Strategy Doctor is not another strategy generator; it is the missing diagnostic layer between AI strategy creation and deployment.
 
-1. **直接 Agent 集成**：提供受认证 REST API 和 TypeScript Client，而不要求调用者嵌入诊断源码。
-2. **低接入成本**：`/api/v1/capabilities`、`/api/v1/openapi.json`、PowerShell 示例和 TypeScript 示例形成完整上手路径。
-3. **解决缺失层**：它不是又一个策略生成器，而是生成与执行之间的压力测试、解释和验证基础设施。
-4. **可扩展契约**：封闭 capability definitions、`StrategyAdapter` registry 和稳定 envelope 允许增加新策略；后续薄 MCP adapter 只需复用 REST Client。
+- Direct Agent integration through REST, OpenAPI, TypeScript Client, PowerShell examples, and capability discovery.
+- A closed registry of validated strategy archetypes instead of arbitrary code execution.
+- Reproducible API call logs, sample input/output artifacts, and deterministic seed-based stress tests.
+- A validated Bitget Playbook package that can be uploaded through the official GetAgent workflow without committing credentials.
+- A no-login public showcase for judges and a protected workspace for team use.
 
 ## Problem
 
-Trading Agents can generate strategies, but commonly lack a trustworthy way to answer:
+Trading Agents can generate strategies, but they often cannot answer:
 
 - Which unseen market regime breaks this strategy?
 - Why did it fail?
 - Which parameter should change?
 - Did the patch improve robustness without hiding the return cost?
-- Can another Agent discover and invoke this capability safely?
+- Can another developer or Agent invoke the same diagnosis safely?
 
 ## Solution
 
-1. Accept a registered strategy directly or parse a natural-language description into a confirmable draft.
-2. Convert five audited market snapshots into deterministic stress families.
+1. Accept a registered strategy or parse a natural-language description into a confirmable draft.
+2. Convert five audited market dimensions into deterministic stress families: macro, market intelligence, news, sentiment, and technical whipsaw.
 3. Generate seeded candidates and select the highest-damage scenario per dimension.
-4. Produce five evaluations, three style scores, failure narratives, and chart-ready data.
-5. Mutate only death-related parameters.
-6. Validate the patch on a separate held-out root seed.
-7. Return a stable API envelope with request ID, typed errors, capabilities, and OpenAPI.
+4. Return five evaluations, three style scores, failure narratives, and chart-ready data.
+5. Mutate only death-related parameters through the strategy adapter policy.
+6. Validate the patch on an independent held-out seed.
+7. Report a Playbook readiness score with explicit deployment gates.
 
-## Developer experience
+## Product Surface
 
-Four supported entry points:
+- Public no-login showcase route.
+- Protected React diagnosis workspace.
+- Natural-language strategy compiler with rules, Qwen, Anthropic, and DeepSeek provider support.
+- Five-dimensional charts, scorecards, deployment gates, and local history.
+- REST API with stable envelopes, request IDs, typed errors, and OpenAPI.
+- Native TypeScript Client and copy-ready Agent examples.
+- Deterministic CLI for offline reproducibility.
+
+## Strategy Coverage
+
+Executable strategy examples:
+
+```text
+examples/trend-follower.json
+examples/rsi-bollinger.json
+examples/breakout-confirmation.json
+```
+
+Registered archetypes:
+
+- `ma-cross`: moving-average trend following.
+- `rsi-bollinger-mean-reversion`: RSI/Bollinger mean reversion with trend filter.
+- `breakout-confirmation`: confirmed range breakout with volatility gate and invalidation exit.
+
+## Bitget And Playbook Integration
+
+- Bitget public market data can refresh snapshot evidence without private API keys.
+- `BitgetBacktester` can read public Bitget OHLCV data.
+- Default Web/API/CLI paths use offline deterministic backtesting to keep the public preview safe.
+- `examples/playbook/strategy-doctor-adaptive-playbook` is a credential-free Playbook package validated with the official GetAgent validator.
+
+No account, balance, position, order, or private exchange endpoint is used in the default product surface.
+
+## DeepSeek Agent Test
+
+DeepSeek natural-language strategy parsing is supported through the OpenAI-compatible chat endpoint. The recommended model for structured strategy compilation is:
+
+```text
+deepseek-v4-flash
+```
+
+Latest local smoke result:
+
+```text
+POST /api/v1/strategies/parse
+description: BTC moving average strategy
+source: deepseek
+archetype: ma-cross
+status: passed
+```
+
+## Reproducibility
+
+Local validation:
 
 ```powershell
-# CLI
-npm.cmd run demo
+cd D:\github\strategy-doctor-submission
+$env:PATH='D:\tools\node-v24.14.0-win-x64;' + $env:PATH
+.\scripts\run-local-submission.ps1
+```
 
-# Explicit three-strategy CLI regression
+Public or local smoke:
+
+```powershell
+.\scripts\run-smoke-tests.ps1 `
+  -BaseUrl 'https://mirrors-resolution-device-weblogs.trycloudflare.com' `
+  -ApiKey 'agent-key-if-needed'
+```
+
+Manual CLI regression:
+
+```powershell
 node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/rsi-bollinger.json --style conservative --seed 42 --candidates 6
 node src/cli.ts examples/breakout-confirmation.json --style conservative --seed 42 --candidates 6
-
-# Web/API
-$env:DOCTOR_WEB_ACCESS_CODE='demo-code-change-me'
-$env:DOCTOR_SESSION_SECRET='demo-session-secret-at-least-32-chars'
-$env:DOCTOR_API_KEYS='demo-private-agent-key'
-npm.cmd run web
-
-# REST
-$env:STRATEGY_DOCTOR_URL='http://127.0.0.1:8080'
-$env:STRATEGY_DOCTOR_API_KEY='demo-private-agent-key'
-.\examples\agent-curl.ps1
-
-# TypeScript
-node examples/agent-client.ts
 ```
 
-## Product surface
+## Evidence Index
 
-- Protected React diagnosis workspace
-- Natural-language strategy draft with explicit confirmation boundary
-- Five-dimension visual diagnosis and local result history
-- Playbook readiness score with explicit deployment gates
-- REST endpoints for capability discovery, parsing, and diagnosis
-- OpenAPI 3.0 document
-- Native TypeScript Client and copy-ready examples
-- Existing deterministic CLI
+- [TEST_CASES.md](TEST_CASES.md)
+- [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
+- [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md)
+- [DEMO.md](DEMO.md)
+- [API.md](API.md)
+- `examples/submission/api-call-log.jsonl`
+- `examples/submission/*-diagnose-request.json`
+- `examples/submission/*-scorecard.json`
+- `examples/submission/*-diagnosis-view.json`
 
-## Bitget integration
+## Latest Verified Result
 
-- Five official analyst domains are structural stress inputs.
-- Public market-data MCP can refresh snapshots.
-- `BitgetBacktester` can read public Bitget OHLCV without an API key.
-- No account, balance, position, order, or trading endpoint is used.
-
-The public P1 Web/API intentionally uses offline `MockBacktester`. This keeps the developer workflow deterministic and prevents a public preview from accepting exchange credentials.
-
-## Reliability and security
-
-- Same seed and frozen snapshots produce identical output.
-- Runtime validation rejects unsupported archetypes, symbols, timeframes, and invalid parameter relationships.
-- Browser sessions use signed HttpOnly cookies; Agents use Bearer keys.
-- Rate limits, body limits, same-origin checks, and diagnosis concurrency limits protect the preview service.
-- Anthropic and live Bitget calls are disabled in CI and opt-in locally.
-- CI enforces 90% lines, 80% branches, and 95% functions, plus Web tests, typechecking, build, demo, and Playwright acceptance.
-- Deployment readiness blocks Playbook publication when liquidation, excess drawdown, poor survival rate, negative held-out robustness, or unacceptable return cost appears.
-
-## Scope
-
-- Three registered strategies: `ma-cross`, `rsi-bollinger-mean-reversion`, and `breakout-confirmation`
-- One symbol per diagnosis
-- Supported timeframes: `1h`, `4h`, `1d`
-- No arbitrary strategy DSL or dynamic code execution
-- No real trading or performance guarantee
-- Browser history remains local; no database in P1
-- Quick Tunnel is temporary demo infrastructure, not production hosting
-
-The project deliberately prefers a closed, validated capability registry over claiming unsupported arbitrary-strategy generation.
-
-## Demo
-
-```powershell
-npm.cmd ci
-npm.cmd run verify
-npm.cmd run web
-```
-
-Open the no-login public showcase at:
+As of 2026-06-25 Asia/Shanghai:
 
 ```text
-http://127.0.0.1:8080/showcase
+Core tests: 256 passed, 1 skipped
+Web tests: 21 passed
+DeepSeek parse smoke: passed with source="deepseek"
+Public health smoke: passed
+Public showcase smoke: passed
 ```
-
-See [DEMO.md](DEMO.md) for the three-minute Web-first script,
-[API.md](API.md) for developer integration, [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
-for reproducible artifacts, and [PLAYBOOK_EVIDENCE.md](PLAYBOOK_EVIDENCE.md)
-for the Bitget Playbook bridge.
 
 ## Checklist
 
 - [x] Five-dimensional deterministic diagnosis
-- [x] Two strategy adapters
-- [x] Prescription and independent held-out validation
+- [x] Three registered strategy adapters
+- [x] Adapter-driven prescription and held-out validation
 - [x] Protected Web workspace
-- [x] REST API and TypeScript Client
-- [x] Capability discovery, OpenAPI, and examples
-- [x] Automated core, Web, integration, and browser gates
-- [x] Temporary team-sharing instructions
-- [x] Three-minute demo script
-- [x] No-login public showcase route
+- [x] Public no-login showcase route
+- [x] REST API, OpenAPI, and TypeScript Client
+- [x] Natural-language parser with DeepSeek support
 - [x] Reproducible sample input/output artifacts
-- [x] Validated GetAgent Playbook package
-- [ ] Record and upload demo video
-- [ ] Fill video URL
-- [ ] Fill public showcase URL
-- [ ] Fill published Playbook URL after managed run
-- [ ] Submit before 2026-06-24
-
-## P1.1
-
-The next integration surface is a thin MCP adapter exposing:
-
-- `list_strategy_capabilities`
-- `parse_strategy_description`
-- `diagnose_strategy`
-
-It will call the existing REST Client rather than duplicate diagnosis logic.
+- [x] Submission-grade test cases
+- [x] Validated Playbook package
+- [x] Temporary public preview
+- [ ] Long-lived managed public URL
+- [ ] Demo video URL
+- [ ] Published Playbook URL after managed upload/backtest/publish

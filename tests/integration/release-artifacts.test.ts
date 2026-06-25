@@ -151,6 +151,26 @@ test('hackathon evidence docs point reviewers to public UI and Playbook proof', 
   );
 });
 
+test('judge test cases document covers reproducible product paths', () => {
+  const text = readRepoText('docs/TEST_CASES.md');
+  for (const expectedReference of [
+    'TC-A01',
+    'TC-P01',
+    'TC-API03',
+    'TC-S03',
+    'TC-G05',
+    'scripts\\run-smoke-tests.ps1',
+    'deepseek-v4-flash',
+    'examples/submission/api-call-log.jsonl',
+  ]) {
+    assert.ok(
+      text.includes(expectedReference),
+      `docs/TEST_CASES.md should mention ${expectedReference}`,
+    );
+  }
+  assert.doesNotMatch(text, SECRET_LIKE_PATTERN);
+});
+
 test('published strategy examples parse and produce complete offline scorecards', () => {
   for (const example of EXAMPLES) {
     const strategy = parseStrategy(
