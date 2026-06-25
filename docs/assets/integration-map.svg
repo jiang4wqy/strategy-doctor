@@ -1,0 +1,56 @@
+<svg width="1200" height="560" viewBox="0 0 1200 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Strategy Doctor integration map</title>
+  <desc id="desc">A hub-and-spoke map showing how humans, agents, APIs, CLI, MCP and evidence outputs connect to Strategy Doctor.</desc>
+  <rect width="1200" height="560" rx="28" fill="#07090D"/>
+  <rect x="1" y="1" width="1198" height="558" rx="27" stroke="#2D3947" stroke-width="2"/>
+  <text x="54" y="72" fill="#E9BC63" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">INTEGRATION MAP</text>
+  <text x="54" y="118" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="42" font-weight="800">One risk engine, several ways to inspect it</text>
+
+  <g transform="translate(432 190)">
+    <circle cx="168" cy="140" r="118" fill="#0D1C2B" stroke="#63E2D7" stroke-width="3"/>
+    <circle cx="168" cy="140" r="84" fill="#102836" stroke="#2B6D70"/>
+    <path d="M91 141 H126 L141 94 L168 189 L194 82 L218 198 L238 141 H248" stroke="#63E2D7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="65" y="282" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="800">Strategy Doctor</text>
+    <text x="89" y="311" fill="#A8B4C0" font-family="Cascadia Code, Consolas, monospace" font-size="15">diagnosis core</text>
+  </g>
+
+  <g stroke="#2D3947" stroke-width="3" stroke-linecap="round">
+    <path d="M600 300 C441 260 347 230 220 178"/>
+    <path d="M600 300 C760 260 849 230 980 178"/>
+    <path d="M600 300 C424 330 341 371 210 428"/>
+    <path d="M600 300 C764 330 852 371 990 428"/>
+    <path d="M600 300 C600 236 600 202 600 170"/>
+  </g>
+
+  <g>
+    <rect x="62" y="118" width="272" height="96" rx="16" fill="#0C151E" stroke="#2D3947"/>
+    <text x="88" y="155" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">Human reviewer</text>
+    <text x="88" y="184" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">Judge mode and protected showcase</text>
+  </g>
+
+  <g>
+    <rect x="866" y="118" width="272" height="96" rx="16" fill="#0C151E" stroke="#2D3947"/>
+    <text x="892" y="155" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">Agent client</text>
+    <text x="892" y="184" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">REST API, OpenAPI, TypeScript SDK</text>
+  </g>
+
+  <g>
+    <rect x="62" y="390" width="272" height="96" rx="16" fill="#0C151E" stroke="#2D3947"/>
+    <text x="88" y="427" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">Local operator</text>
+    <text x="88" y="456" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">CLI, scripts, deterministic packs</text>
+  </g>
+
+  <g>
+    <rect x="866" y="390" width="272" height="96" rx="16" fill="#0C151E" stroke="#2D3947"/>
+    <text x="892" y="427" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">MCP tools</text>
+    <text x="892" y="456" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">Reusable diagnosis surface for agents</text>
+  </g>
+
+  <g>
+    <rect x="468" y="118" width="264" height="78" rx="16" fill="#1A1710" stroke="#725F2E"/>
+    <text x="494" y="153" fill="#E9BC63" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">Evidence pack</text>
+    <text x="494" y="178" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">JSON · Markdown · screenshots</text>
+  </g>
+
+  <text x="54" y="526" fill="#728190" font-family="Cascadia Code, Consolas, monospace" font-size="15">Security boundary: no order placement · no account data · no private exchange credentials required by default</text>
+</svg>

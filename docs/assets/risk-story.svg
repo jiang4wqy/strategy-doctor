@@ -1,0 +1,45 @@
+<svg width="1200" height="620" viewBox="0 0 1200 620" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Strategy Doctor risk story</title>
+  <desc id="desc">A visual comparison between an attractive historical backtest and a hidden unseen-market failure.</desc>
+  <rect width="1200" height="620" rx="28" fill="#060A11"/>
+  <rect x="1" y="1" width="1198" height="618" rx="27" stroke="#234154" stroke-width="2"/>
+  <circle cx="205" cy="112" r="190" fill="#123A4B" opacity="0.28"/>
+  <circle cx="965" cy="512" r="220" fill="#5B1D22" opacity="0.22"/>
+  <text x="54" y="72" fill="#E9BC63" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">THE HIDDEN KILLER</text>
+  <text x="54" y="118" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="42" font-weight="800">Backtests can look healthy while risk is terminal.</text>
+  <text x="54" y="158" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20">Strategy Doctor asks how a strategy dies before an agent or team trusts it.</text>
+
+  <g transform="translate(70 220)">
+    <rect width="450" height="270" rx="18" fill="#0C151E" stroke="#2D3947"/>
+    <text x="26" y="44" fill="#D5FAF5" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">Historical backtest</text>
+    <text x="26" y="73" fill="#728190" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">Looks stable in familiar data</text>
+    <path d="M35 210 C88 178 115 184 156 138 C197 92 219 132 259 98 C304 60 326 95 365 58 C397 28 417 48 426 39" stroke="#63E2D7" stroke-width="7" stroke-linecap="round"/>
+    <path d="M35 210 C88 178 115 184 156 138 C197 92 219 132 259 98 C304 60 326 95 365 58 C397 28 417 48 426 39" stroke="#63E2D7" stroke-width="18" stroke-linecap="round" opacity="0.12"/>
+    <line x1="35" y1="226" x2="426" y2="226" stroke="#2D3947"/>
+    <line x1="35" y1="110" x2="426" y2="110" stroke="#1A2937" stroke-dasharray="8 10"/>
+    <rect x="26" y="92" width="143" height="36" rx="18" fill="#122D34" stroke="#2B6D70"/>
+    <text x="45" y="116" fill="#D5FAF5" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">Sharpe 3.5</text>
+  </g>
+
+  <g transform="translate(565 300)">
+    <path d="M0 0 H86" stroke="#E9BC63" stroke-width="4" stroke-linecap="round"/>
+    <path d="M70 -16 L92 0 L70 16" stroke="#E9BC63" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="-18" y="-34" fill="#E9BC63" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">unseen market</text>
+  </g>
+
+  <g transform="translate(685 220)">
+    <rect width="445" height="270" rx="18" fill="#160E13" stroke="#4B2830"/>
+    <text x="26" y="44" fill="#FFD8D1" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">Failure path</text>
+    <text x="26" y="73" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15">Crash + leverage + cost drag</text>
+    <path d="M34 67 C71 82 95 55 132 92 C171 130 190 111 227 153 C267 198 291 190 330 224 C365 254 398 244 420 238" stroke="#FF8B7D" stroke-width="7" stroke-linecap="round"/>
+    <path d="M34 67 C71 82 95 55 132 92 C171 130 190 111 227 153 C267 198 291 190 330 224 C365 254 398 244 420 238" stroke="#FF8B7D" stroke-width="18" stroke-linecap="round" opacity="0.14"/>
+    <line x1="34" y1="226" x2="420" y2="226" stroke="#4B2830"/>
+    <line x1="34" y1="110" x2="420" y2="110" stroke="#2C1B22" stroke-dasharray="8 10"/>
+    <rect x="238" y="92" width="171" height="36" rx="18" fill="#351B20" stroke="#A64B43"/>
+    <text x="257" y="116" fill="#FFD8D1" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">liquidation risk</text>
+    <rect x="26" y="202" width="164" height="38" rx="19" fill="#351B20" stroke="#A64B43"/>
+    <text x="45" y="227" fill="#FFD8D1" font-family="Cascadia Code, Consolas, monospace" font-size="15" font-weight="700">-99.9% drawdown</text>
+  </g>
+
+  <text x="54" y="560" fill="#D5FAF5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">The useful output is not a prettier strategy. It is a reproducible explanation of failure.</text>
+</svg>

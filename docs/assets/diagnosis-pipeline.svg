@@ -1,0 +1,75 @@
+<svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Strategy Doctor diagnosis pipeline</title>
+  <desc id="desc">A seven-step pipeline from natural language strategy input to validated evidence outputs.</desc>
+  <rect width="1200" height="520" rx="28" fill="#07090D"/>
+  <rect x="1" y="1" width="1198" height="518" rx="27" stroke="#2D3947" stroke-width="2"/>
+  <text x="54" y="72" fill="#E9BC63" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">ONE DIAGNOSIS RUN</text>
+  <text x="54" y="118" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="42" font-weight="800">From strategy idea to auditable repair evidence</text>
+
+  <defs>
+    <linearGradient id="card" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#132331"/>
+      <stop offset="1" stop-color="#0B1118"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(54 178)">
+    <g>
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">01</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Draft</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Natural language</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">or JSON</text>
+    </g>
+    <path d="M150 85 H177" stroke="#E9BC63" stroke-width="3" stroke-linecap="round"/>
+    <path d="M170 76 L181 85 L170 94" stroke="#E9BC63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(190 0)">
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">02</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Confirm</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Human reviews</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">parameters</text>
+    </g>
+    <path d="M340 85 H367" stroke="#E9BC63" stroke-width="3" stroke-linecap="round"/>
+    <path d="M360 76 L371 85 L360 94" stroke="#E9BC63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(380 0)">
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">03</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Attack</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Five market</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">stress lenses</text>
+    </g>
+    <path d="M530 85 H557" stroke="#E9BC63" stroke-width="3" stroke-linecap="round"/>
+    <path d="M550 76 L561 85 L550 94" stroke="#E9BC63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(570 0)">
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">04</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Explain</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Deaths, costs,</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">drawdowns</text>
+    </g>
+    <path d="M720 85 H747" stroke="#E9BC63" stroke-width="3" stroke-linecap="round"/>
+    <path d="M740 76 L751 85 L740 94" stroke="#E9BC63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(760 0)">
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">05</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Repair</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Bounded adapter</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">mutations</text>
+    </g>
+    <path d="M910 85 H937" stroke="#E9BC63" stroke-width="3" stroke-linecap="round"/>
+    <path d="M930 76 L941 85 L930 94" stroke="#E9BC63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(950 0)">
+      <rect width="140" height="170" rx="16" fill="url(#card)" stroke="#2D3947"/>
+      <text x="20" y="42" fill="#63E2D7" font-family="Cascadia Code, Consolas, monospace" font-size="18" font-weight="700">06</text>
+      <text x="20" y="76" fill="#F3F6F8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">Validate</text>
+      <text x="20" y="110" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Held-out</text>
+      <text x="20" y="132" fill="#A8B4C0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">trade-offs</text>
+    </g>
+  </g>
+
+  <g transform="translate(144 408)">
+    <rect width="912" height="50" rx="25" fill="#0D1C2B" stroke="#2D3947"/>
+    <text x="38" y="33" fill="#D5FAF5" font-family="Cascadia Code, Consolas, monospace" font-size="17" font-weight="700">Output: Web report · REST API · TypeScript client · CLI · MCP · deterministic evidence pack</text>
+  </g>
+</svg>

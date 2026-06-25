@@ -17,6 +17,10 @@ API, TypeScript client, CLI, and MCP adapter.
 
 ## What It Does In One Run
 
+<p align="center">
+  <img src="docs/assets/diagnosis-pipeline.svg" alt="Strategy Doctor diagnosis pipeline from strategy draft to held-out validation and evidence outputs" width="92%">
+</p>
+
 1. **Draft** a strategy from natural language or JSON.
 2. **Confirm** every parsed parameter before diagnosis starts.
 3. **Stress-test** the strategy across five market-risk dimensions.
@@ -29,6 +33,10 @@ API, TypeScript client, CLI, and MCP adapter.
 
 Most trading-agent demos stop at generation: "Here is a strategy." Strategy
 Doctor starts where that demo ends.
+
+<p align="center">
+  <img src="docs/assets/risk-story.svg" alt="A historical backtest can look strong while an unseen market path causes liquidation risk" width="92%">
+</p>
 
 It answers the questions a team actually needs before evaluation:
 
@@ -45,6 +53,12 @@ The result is not a promise of profit. It is a reproducible risk report.
 | Judge review surface | GitHub submission surface |
 |---|---|
 | ![Judge landing and risk cockpit](docs/assets/strategy-doctor-judge-optimized.png) | ![GitHub review links and evidence checklist](docs/assets/strategy-doctor-github-review-surface.png) |
+
+## Integration Map
+
+<p align="center">
+  <img src="docs/assets/integration-map.svg" alt="Strategy Doctor integration map connecting human reviewers, agent clients, local operators, MCP tools, and evidence packs" width="92%">
+</p>
 
 ## Core Capabilities
 
