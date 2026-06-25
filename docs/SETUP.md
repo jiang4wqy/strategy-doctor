@@ -132,7 +132,7 @@ $env:DOCTOR_NL_AI_ENABLED='1'
 $env:DOCTOR_NL_DEEPSEEK_ENABLED='1'
 $env:DOCTOR_NL_PROVIDER='deepseek'
 $env:DEEPSEEK_API_KEY='<your-deepseek-key>'
-$env:DOCTOR_DEEPSEEK_MODEL='deepseek-v4-pro'
+$env:DOCTOR_DEEPSEEK_MODEL='deepseek-v4-flash'
 npm.cmd run web
 ```
 

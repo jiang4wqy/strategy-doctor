@@ -135,3 +135,26 @@ test('parseWithDeepSeek respects timeout abort', async () => {
   assert.equal(result, undefined);
   assert.equal(aborted, true);
 });
+
+test('parseWithDeepSeek gives live models a longer default timeout', async () => {
+  let abortedEarly = false;
+  const result = await parseWithDeepSeek('description', {
+    env: enabledEnv,
+    fetch: async (_input, init) => {
+      init?.signal?.addEventListener('abort', () => {
+        abortedEarly = true;
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      return deepseekResponse({
+        strategy: validStrategy,
+        explicitFields: [
+          'strategy.universe.0',
+          'strategy.timeframe',
+        ],
+      });
+    },
+  });
+
+  assert.equal(abortedEarly, false);
+  assert.equal(result?.source, 'deepseek');
+});

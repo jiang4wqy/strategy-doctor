@@ -137,7 +137,7 @@ export async function parseWithDeepSeek(
     ?? env.DOCTOR_DEEPSEEK_MODEL
     ?? env.DOCTOR_NL_MODEL
     ?? env.DEEPSEEK_MODEL
-    ?? 'deepseek-v4-pro';
+    ?? 'deepseek-v4-flash';
   if (
     (env.DOCTOR_NL_AI_ENABLED !== '1' && env.DOCTOR_NL_DEEPSEEK_ENABLED !== '1')
     || !apiKey
@@ -149,7 +149,7 @@ export async function parseWithDeepSeek(
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(),
-    options.timeoutMs ?? 5000,
+    options.timeoutMs ?? 15000,
   );
   try {
     const response = await (options.fetch ?? globalThis.fetch)(
@@ -172,6 +172,13 @@ export async function parseWithDeepSeek(
               content: [
                 'Return JSON only with keys strategy and explicitFields.',
                 'Do not generate source code or execution logic.',
+                'The strategy object must be complete: id, name, archetype, params, universe, and timeframe.',
+                'Use a registered archetype exactly as written in the capability definitions.',
+                'Use symbols exactly as supported, for example BTCUSDT instead of BTC.',
+                'If the user does not explicitly state a timeframe, set strategy.timeframe to 4h.',
+                'For every parameter the user did not explicitly mention, use the registered default value.',
+                'explicitFields must contain only full JSON paths such as strategy.universe.0, strategy.timeframe, and strategy.params.fastMA.',
+                'Do not include strategy.id, strategy.name, strategy.archetype, or broad parent objects in explicitFields.',
                 'Use exactly one of these capability definitions:',
                 JSON.stringify(strategyRegistry.listDefinitions()),
               ].join('\n'),

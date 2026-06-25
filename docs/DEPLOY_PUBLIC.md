@@ -22,7 +22,7 @@ DOCTOR_NL_AI_ENABLED=1
 DOCTOR_NL_PROVIDER=deepseek
 DOCTOR_NL_DEEPSEEK_ENABLED=1
 DEEPSEEK_API_KEY=your-deepseek-key
-DOCTOR_DEEPSEEK_MODEL=deepseek-v4-pro
+DOCTOR_DEEPSEEK_MODEL=deepseek-v4-flash
 ```
 
 5. After deploy, Render provides a fixed URL like:

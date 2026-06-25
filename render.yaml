@@ -24,6 +24,6 @@ services:
       - key: DEEPSEEK_API_KEY
         sync: false
       - key: DOCTOR_DEEPSEEK_MODEL
-        value: deepseek-v4-pro
+        value: deepseek-v4-flash
       - key: DOCTOR_STATIC_ROOT
         value: web/dist
