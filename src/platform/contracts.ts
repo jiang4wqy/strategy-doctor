@@ -272,6 +272,145 @@ export interface PaperSignalView {
   notes: string[];
 }
 
+export interface PaperSandboxRequest {
+  strategy: Strategy;
+  prices?: number[];
+  maxBars?: number;
+}
+
+export interface PaperSandboxStepRequest {
+  steps?: number;
+}
+
+export interface PaperSignalStepSnapshot {
+  index: number;
+  time: string;
+  signal: 'long' | 'short' | 'hold';
+  position: 'long' | 'short' | 'flat';
+  equity: number;
+  totalTrades: number;
+  turnoverPct: number;
+  feeCostPct: number;
+  slippageCostPct: number;
+}
+
+export interface PaperSandboxSessionSummary {
+  id: string;
+  strategyId: string;
+  strategyName: string;
+  symbol: string;
+  timeframe: string;
+  status: 'active' | 'ended';
+  currentIndex: number;
+  totalBars: number;
+  lastUpdatedAt: string;
+  createdAt: string;
+}
+
+export interface PaperSandboxSessionView {
+  id: string;
+  strategyId: string;
+  strategyName: string;
+  symbol: string;
+  timeframe: string;
+  status: 'active' | 'ended';
+  createdAt: string;
+  updatedAt: string;
+  currentIndex: number;
+  totalBars: number;
+  signal: 'long' | 'short' | 'hold';
+  position: 'long' | 'short' | 'flat';
+  equity: number;
+  totalTrades: number;
+  turnoverPct: number;
+  feeCostPct: number;
+  slippageCostPct: number;
+  latestNotes: string[];
+  history: PaperSignalStepSnapshot[];
+}
+
+export interface PaperSandboxCloseRequest {
+  sessionId: string;
+}
+
+export interface PaperSandboxCreateResponse {
+  session: PaperSandboxSessionView;
+}
+
+export interface PaperSandboxListView {
+  sessions: PaperSandboxSessionSummary[];
+}
+
+export interface PaperSandboxStatus {
+  id: string;
+  status: 'ended' | 'removed';
+}
+
+export interface OnChainDashboardRequest {
+  symbol: string;
+  timeframe: string;
+}
+
+export interface ApiCallRecord {
+  id: string;
+  requestId: string;
+  method: 'GET' | 'POST' | 'DELETE' | 'PATCH' | 'PUT';
+  path: string;
+  statusCode: number;
+  durationMs: number;
+  timestamp: string;
+}
+
+export interface ApiCallPathMetric {
+  path: string;
+  count: number;
+  errorCount: number;
+  avgDurationMs: number;
+  successRate: number;
+  lastStatus: number;
+  lastSeen: string;
+}
+
+export interface ApiCallTelemetry {
+  windowStart: string;
+  windowEnd: string;
+  totalCalls: number;
+  totalErrors: number;
+  successRate: number;
+  topPaths: ApiCallPathMetric[];
+  recent: ApiCallRecord[];
+}
+
+export interface OnChainSymbolDashboard {
+  symbol: string;
+  timeframe: string;
+  asOf: string;
+  onChainFlowUsd: number;
+  spotVolumeUsd: number;
+  perpsOpenInterestUsd: number;
+  fundingRate: number;
+  liquidationsUsd: number;
+}
+
+export interface OnChainDashboardView {
+  symbol: string;
+  timeframe: string;
+  asOf: string;
+  metrics: {
+    flowPressure: OnChainSymbolDashboard;
+    liquidityPressure: {
+      bidAskSpreadBps: number;
+      whaleOrderDepthUsd: number;
+      borrowRate: number;
+    };
+    riskSignals: {
+      squeezeRisk: number;
+      liquidationRisk: number;
+      momentumSkew: number;
+    };
+  };
+}
+
 export interface NotebookTemplate {
   id: string;
   title: string;

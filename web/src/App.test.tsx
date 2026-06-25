@@ -40,16 +40,134 @@ vi.mock('./charts/ParameterChangeChart.tsx', () => ({
   ),
 }));
 
+function mockResearchClient(overrides: Partial<ApiClient> = {}): ApiClient {
+  let req = 0;
+  const envelope = <T,>(data: T) => ({
+    apiVersion: 'v1' as const,
+    requestId: `req-${req += 1}`,
+    data,
+  });
+
+  const sandboxSession = {
+    id: 'session-0',
+    strategyId: 'template-ma',
+    strategyName: 'preset',
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    status: 'active' as const,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    currentIndex: 0,
+    totalBars: 0,
+    signal: 'hold' as const,
+    position: 'flat' as const,
+    equity: 1,
+    totalTrades: 0,
+    turnoverPct: 0,
+    feeCostPct: 0,
+    slippageCostPct: 0,
+    latestNotes: [],
+    history: [],
+  };
+
+  return {
+    login: vi.fn(async () => undefined),
+    logout: vi.fn(async () => undefined),
+    capabilities: vi.fn(async () => envelope(capabilityFixture)),
+    parse: vi.fn(async () => ({
+      apiVersion: 'v1' as const,
+      requestId: 'req-parse',
+      data: draftFixture,
+    })),
+    diagnose: vi.fn(async () => ({
+      apiVersion: 'v1' as const,
+      requestId: 'req-diagnosis',
+      data: diagnosisFixture,
+    })),
+    apiCallMonitor: vi.fn(async () => envelope({
+      windowStart: '2026-01-01T00:00:00.000Z',
+      windowEnd: '2026-01-01T00:01:00.000Z',
+      totalCalls: 0,
+      totalErrors: 0,
+      successRate: 100,
+      topPaths: [],
+      recent: [],
+    })),
+    createPaperSandbox: vi.fn(async () => envelope({
+      session: sandboxSession,
+    })),
+    listPaperSandboxes: vi.fn(async () => envelope({ sessions: [] })),
+    getPaperSandbox: vi.fn(async () => envelope(sandboxSession)),
+    stepPaperSandbox: vi.fn(async () => envelope({
+      ...sandboxSession,
+      currentIndex: 1,
+      totalBars: 3,
+    })),
+    closePaperSandbox: vi.fn(async () => envelope({
+      id: 'session-0',
+      status: 'ended' as const,
+    })),
+    onChainDashboard: vi.fn(async () => envelope({
+      symbol: 'BTCUSDT',
+      timeframe: '1h',
+      asOf: '2026-01-01T00:00:00.000Z',
+      metrics: {
+        flowPressure: {
+          symbol: 'BTCUSDT',
+          timeframe: '1h',
+          asOf: '2026-01-01T00:00:00.000Z',
+          onChainFlowUsd: 1,
+          spotVolumeUsd: 2,
+          perpsOpenInterestUsd: 3,
+          fundingRate: 0.001,
+          liquidationsUsd: 4,
+        },
+        liquidityPressure: {
+          bidAskSpreadBps: 0.1,
+          whaleOrderDepthUsd: 1,
+          borrowRate: 0.001,
+        },
+        riskSignals: {
+          squeezeRisk: 0.1,
+          liquidationRisk: 0.01,
+          momentumSkew: 0.02,
+        },
+      },
+    })),
+    factors: vi.fn(async () => envelope({ factors: [], frameworkVersion: 'v0' })),
+    notebooks: vi.fn(async () => envelope({ templates: [] })),
+    multiFactorFramework: vi.fn(async () => envelope({
+      version: 'v1',
+      stages: [],
+      factorGroups: [],
+      outputs: [],
+      safeguards: [],
+    })),
+    paperSignal: vi.fn(async () => ({
+      apiVersion: 'v1' as const,
+      requestId: 'req-paper',
+      data: {
+        strategyId: 'template-ma',
+        symbol: 'BTCUSDT',
+        timeframe: '1h',
+        latestSignal: 'hold' as const,
+        simulatedPosition: 'flat' as const,
+        paperEquity: 1,
+        totalTrades: 0,
+        turnoverPct: 0,
+        feeCostPct: 0,
+        slippageCostPct: 0,
+        lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+        notes: [],
+      },
+    })),
+    ...overrides,
+  };
+}
+
 describe('App workflow', () => {
   it('moves from login to a fully named diagnosis workspace', async () => {
-    const client: ApiClient = {
-      login: vi.fn(async () => undefined),
-      logout: vi.fn(async () => undefined),
-      capabilities: vi.fn(async () => ({
-        apiVersion: 'v1' as const,
-        requestId: 'req-capabilities',
-        data: capabilityFixture,
-      })),
+    const client = mockResearchClient({
       parse: vi.fn(async () => ({
         apiVersion: 'v1' as const,
         requestId: 'req-parse',
@@ -60,7 +178,7 @@ describe('App workflow', () => {
         requestId: 'req-diagnosis',
         data: diagnosisFixture,
       })),
-    };
+    });
     const user = userEvent.setup();
     render(<App client={client} />);
 
@@ -91,14 +209,7 @@ describe('App workflow', () => {
   });
 
   it('sends selected market, timeframe, data source, and candle window', async () => {
-    const client: ApiClient = {
-      login: vi.fn(async () => undefined),
-      logout: vi.fn(async () => undefined),
-      capabilities: vi.fn(async () => ({
-        apiVersion: 'v1' as const,
-        requestId: 'req-capabilities',
-        data: capabilityFixture,
-      })),
+    const client = mockResearchClient({
       parse: vi.fn(async () => ({
         apiVersion: 'v1' as const,
         requestId: 'req-parse',
@@ -109,7 +220,7 @@ describe('App workflow', () => {
         requestId: 'req-diagnosis',
         data: diagnosisFixture,
       })),
-    };
+    });
     const user = userEvent.setup();
     render(<App client={client} />);
 
@@ -162,14 +273,7 @@ describe('App workflow', () => {
         worstDrawdownPct: 0.3,
       },
     };
-    const client: ApiClient = {
-      login: vi.fn(async () => undefined),
-      logout: vi.fn(async () => undefined),
-      capabilities: vi.fn(async () => ({
-        apiVersion: 'v1' as const,
-        requestId: 'req-capabilities',
-        data: capabilityFixture,
-      })),
+    const client = mockResearchClient({
       parse: vi.fn(async () => ({
         apiVersion: 'v1' as const,
         requestId: 'req-parse',
@@ -186,7 +290,7 @@ describe('App workflow', () => {
           requestId: 'req-diagnosis-2',
           data: secondDiagnosis,
         }),
-    };
+    });
     const user = userEvent.setup();
     render(<App client={client} />);
 

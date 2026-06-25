@@ -1,5 +1,6 @@
 import type {
   AnyStrategyDefinition,
+  ApiCallTelemetry,
   ApiEnvelope,
   ApiErrorEnvelope,
   DiagnoseRequest,
@@ -7,8 +8,13 @@ import type {
   FactorLibraryView,
   MultiFactorFrameworkView,
   NotebookCatalogView,
+  OnChainDashboardView,
+  PaperSandboxCreateResponse,
+  PaperSandboxListView,
   PaperSignalRequest,
   PaperSignalView,
+  PaperSandboxSessionView,
+  PaperSandboxStatus,
   PlaybookDiagnosisView,
   StrategyDraft,
 } from '../platform/contracts.ts';
@@ -58,6 +64,36 @@ export interface StrategyDoctorClient {
     input: PaperSignalRequest,
     options?: RequestOptions,
   ): Promise<PaperSignalView>;
+  apiCallMonitor(
+    limit?: number,
+    options?: RequestOptions,
+  ): Promise<ApiCallTelemetry>;
+  createPaperSandbox(
+    input: {
+      strategy: DiagnoseRequest['strategy'];
+      prices?: number[];
+      maxBars?: number;
+    },
+    options?: RequestOptions,
+  ): Promise<PaperSandboxCreateResponse>;
+  listPaperSandboxes(options?: RequestOptions): Promise<PaperSandboxListView>;
+  getPaperSandbox(
+    sessionId: string,
+    options?: RequestOptions,
+  ): Promise<PaperSandboxSessionView>;
+  stepPaperSandbox(
+    sessionId: string,
+    body: { steps?: number },
+    options?: RequestOptions,
+  ): Promise<PaperSandboxSessionView>;
+  closePaperSandbox(
+    sessionId: string,
+    options?: RequestOptions,
+  ): Promise<PaperSandboxStatus>;
+  onChainDashboard(
+    input: { symbol: string; timeframe: string },
+    options?: RequestOptions,
+  ): Promise<OnChainDashboardView>;
 }
 
 function normalizeBaseUrl(value: string): string {
@@ -121,7 +157,7 @@ export function createStrategyDoctor(
 
   async function request<T>(
     path: string,
-    method: 'GET' | 'POST',
+    method: 'GET' | 'POST' | 'DELETE',
     body: unknown,
     requestOptions: RequestOptions = {},
   ): Promise<T> {
@@ -180,10 +216,7 @@ export function createStrategyDoctor(
         requestOptions,
       );
     },
-    diagnose(
-      input: DiagnoseRequest,
-      requestOptions?: RequestOptions,
-    ) {
+    diagnose(input: DiagnoseRequest, requestOptions?: RequestOptions) {
       return request<DiagnosisView>(
         '/diagnoses',
         'POST',
@@ -231,14 +264,88 @@ export function createStrategyDoctor(
         requestOptions,
       );
     },
-    paperSignal(
-      input: PaperSignalRequest,
-      requestOptions?: RequestOptions,
-    ) {
+    paperSignal(input: PaperSignalRequest, requestOptions?: RequestOptions) {
       return request<PaperSignalView>(
         '/paper/signals',
         'POST',
         input,
+        requestOptions,
+      );
+    },
+    apiCallMonitor(limit?: number, requestOptions?: RequestOptions) {
+      const query = limit === undefined ? '' : `?limit=${encodeURIComponent(
+        String(limit),
+      )}`;
+      return request<ApiCallTelemetry>(
+        `/monitor/api-calls${query}`,
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    createPaperSandbox(
+      input: {
+        strategy: DiagnoseRequest['strategy'];
+        prices?: number[];
+        maxBars?: number;
+      },
+      requestOptions?: RequestOptions,
+    ) {
+      return request<PaperSandboxCreateResponse>(
+        '/paper/sandbox',
+        'POST',
+        input,
+        requestOptions,
+      );
+    },
+    listPaperSandboxes(requestOptions?: RequestOptions) {
+      return request<PaperSandboxListView>(
+        '/paper/sandbox',
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    getPaperSandbox(sessionId: string, requestOptions?: RequestOptions) {
+      return request<PaperSandboxSessionView>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}`,
+        'GET',
+        undefined,
+        requestOptions,
+      );
+    },
+    stepPaperSandbox(
+      sessionId: string,
+      body: { steps?: number },
+      requestOptions?: RequestOptions,
+    ) {
+      return request<PaperSandboxSessionView>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}/step`,
+        'POST',
+        body,
+        requestOptions,
+      );
+    },
+    closePaperSandbox(sessionId: string, requestOptions?: RequestOptions) {
+      return request<PaperSandboxStatus>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}`,
+        'DELETE',
+        undefined,
+        requestOptions,
+      );
+    },
+    onChainDashboard(
+      input: { symbol: string; timeframe: string },
+      requestOptions?: RequestOptions,
+    ) {
+      const query = new URLSearchParams({
+        symbol: input.symbol.toUpperCase(),
+        timeframe: input.timeframe,
+      }).toString();
+      return request<OnChainDashboardView>(
+        `/onchain/dashboard?${query}`,
+        'GET',
+        undefined,
         requestOptions,
       );
     },

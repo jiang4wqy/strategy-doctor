@@ -1,10 +1,21 @@
 import type {
   ApiClient,
   ApiEnvelope,
+  ApiCallTelemetry,
+  FactorLibraryView,
+  MultiFactorFrameworkView,
+  NotebookCatalogView,
   DiagnoseRequest,
   DiagnosisView,
+  OnChainDashboardView,
+  PaperSignalRequest,
+  PaperSignalView,
   StrategyDraft,
   AnyStrategyDefinition,
+  PaperSandboxCreateResponse,
+  PaperSandboxListView,
+  PaperSandboxSessionView,
+  PaperSandboxStatus,
 } from './types.ts';
 
 export class StrategyDoctorWebError extends Error {
@@ -131,6 +142,76 @@ export function createApiClient(
     },
     diagnose(input: DiagnoseRequest) {
       return request<DiagnosisView>('/diagnoses', 'POST', input);
+    },
+    factors() {
+      return request<FactorLibraryView>(
+        '/factors',
+        'GET',
+      );
+    },
+    notebooks() {
+      return request<NotebookCatalogView>(
+        '/notebooks',
+        'GET',
+      );
+    },
+    multiFactorFramework() {
+      return request<MultiFactorFrameworkView>(
+        '/multi-factor-framework',
+        'GET',
+      );
+    },
+    paperSignal(input: PaperSignalRequest) {
+      return request<PaperSignalView>(
+        '/paper/signals',
+        'POST',
+        input,
+      );
+    },
+    apiCallMonitor(limit) {
+      const query = limit === undefined ? '' : `?limit=${encodeURIComponent(
+        String(limit),
+      )}`;
+      return request<ApiCallTelemetry>(`/monitor/api-calls${query}`, 'GET');
+    },
+    createPaperSandbox(input) {
+      return request<PaperSandboxCreateResponse>(
+        '/paper/sandbox',
+        'POST',
+        input,
+      );
+    },
+    listPaperSandboxes() {
+      return request<PaperSandboxListView>('/paper/sandbox', 'GET');
+    },
+    getPaperSandbox(sessionId) {
+      return request<PaperSandboxSessionView>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}`,
+        'GET',
+      );
+    },
+    stepPaperSandbox(sessionId, options) {
+      return request<PaperSandboxSessionView>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}/step`,
+        'POST',
+        options,
+      );
+    },
+    closePaperSandbox(sessionId) {
+      return request<PaperSandboxStatus>(
+        `/paper/sandbox/${encodeURIComponent(sessionId)}`,
+        'DELETE',
+      );
+    },
+    onChainDashboard(input) {
+      const query = new URLSearchParams({
+        symbol: input.symbol.toUpperCase(),
+        timeframe: input.timeframe,
+      }).toString();
+      return request<OnChainDashboardView>(
+        `/onchain/dashboard?${query}`,
+        'GET',
+      );
     },
   };
 }

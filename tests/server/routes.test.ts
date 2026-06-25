@@ -20,6 +20,8 @@ import {
   getNotebookCatalog,
 } from '../../src/research/factor-library.ts';
 import { trackPaperSignal } from '../../src/research/paper-signal.ts';
+import { createOnChainDashboardService } from '../../src/research/onchain-dashboard.ts';
+import { createPaperSandboxService } from '../../src/research/paper-sandbox.ts';
 
 const config = parseServerConfig({
   DOCTOR_API_KEYS: 'test-key',
@@ -47,6 +49,8 @@ const validRequest: DiagnoseRequest = {
 
 async function buildFixture() {
   const app = Fastify();
+  const paperSandbox = createPaperSandboxService();
+  const onChainDashboard = createOnChainDashboardService();
   app.setErrorHandler((error, request, reply) => {
     const mapped = toApiError(error);
     return reply
@@ -68,6 +72,33 @@ async function buildFixture() {
     notebooks: getNotebookCatalog,
     multiFactorFramework: getMultiFactorFramework,
     paperSignal: trackPaperSignal,
+    apiCallMonitor: () => ({
+      windowStart: '2026-01-01T00:00:00.000Z',
+      windowEnd: '2026-01-01T00:05:00.000Z',
+      totalCalls: 10,
+      totalErrors: 0,
+      successRate: 100,
+      topPaths: [
+        {
+          path: '/api/v1/factors',
+          count: 3,
+          errorCount: 0,
+          avgDurationMs: 7,
+          successRate: 100,
+          lastStatus: 200,
+          lastSeen: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+      recent: [],
+    }),
+    paperSandbox: {
+      createSession: request => paperSandbox.createSession(request),
+      listSessions: () => paperSandbox.listSessions(),
+      getSession: id => paperSandbox.getSession(id),
+      stepSession: (id, request) => paperSandbox.stepSession(id, request),
+      closeSession: id => paperSandbox.closeSession(id),
+    },
+    onChainDashboard: request => onChainDashboard.getDashboard(request),
   });
   await app.ready();
   return app;
@@ -146,6 +177,90 @@ test('research routes expose factors, notebooks, framework, and paper signals', 
   });
   assert.equal(signal.statusCode, 200);
   assert.equal(signal.json().data.symbol, 'BTCUSDT');
+});
+
+test('research routes expose api monitoring, paper sandbox, and onchain dashboard', async t => {
+  const app = await buildFixture();
+  t.after(() => app.close());
+
+  const monitor = await app.inject({
+    method: 'GET',
+    url: '/api/v1/monitor/api-calls',
+    headers: {
+      ...bearer,
+    },
+    query: { limit: '5' },
+  });
+  assert.equal(monitor.statusCode, 200);
+  assert.equal(monitor.json().data.totalCalls, 10);
+
+  const created = await app.inject({
+    method: 'POST',
+    url: '/api/v1/paper/sandbox',
+    headers: {
+      ...bearer,
+      'content-type': 'application/json',
+    },
+    payload: {
+      strategy: validRequest.strategy,
+      maxBars: 72,
+    },
+  });
+  assert.equal(created.statusCode, 201);
+  const sessionId = created.json().data.session.id;
+
+  const list = await app.inject({
+    method: 'GET',
+    url: '/api/v1/paper/sandbox',
+    headers: bearer,
+  });
+  assert.equal(list.statusCode, 200);
+  assert.equal(list.json().data.sessions.length, 1);
+
+  const session = await app.inject({
+    method: 'GET',
+    url: `/api/v1/paper/sandbox/${sessionId}`,
+    headers: bearer,
+  });
+  assert.equal(session.statusCode, 200);
+  assert.equal(session.json().data.id, sessionId);
+
+  const step = await app.inject({
+    method: 'POST',
+    url: `/api/v1/paper/sandbox/${sessionId}/step`,
+    headers: {
+      ...bearer,
+      'content-type': 'application/json',
+    },
+    payload: { steps: 3 },
+  });
+  assert.equal(step.statusCode, 200);
+  assert.equal(step.json().data.id, sessionId);
+  assert.equal(
+    typeof step.json().data.currentIndex,
+    'number',
+  );
+
+  const closed = await app.inject({
+    method: 'DELETE',
+    url: `/api/v1/paper/sandbox/${sessionId}`,
+    headers: bearer,
+  });
+  assert.equal(closed.statusCode, 200);
+  assert.equal(closed.json().data.status, 'removed');
+
+  const onchain = await app.inject({
+    method: 'GET',
+    url: '/api/v1/onchain/dashboard',
+    headers: bearer,
+    query: {
+      symbol: 'ETHUSDT',
+      timeframe: '4h',
+    },
+  });
+  assert.equal(onchain.statusCode, 200);
+  assert.equal(onchain.json().data.symbol, 'ETHUSDT');
+  assert.equal(onchain.json().data.timeframe, '4h');
 });
 
 test('diagnosis route returns the shared DiagnosisView envelope', async t => {

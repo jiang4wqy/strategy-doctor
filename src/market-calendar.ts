@@ -6,7 +6,7 @@ export const symbolFirstTradeDate: Readonly<Record<string, string>> = {
   DOGEUSDT: '2013-12-06',
 };
 
-export const FALLBACK_SYMBOL_FIRST_TRADE_DATE = '2010-01-01';
+export const FALLBACK_SYMBOL_FIRST_TRADE_DATE = '2009-01-03';
 
 export function getSymbolFirstTradeDate(symbol: string): string {
   return symbolFirstTradeDate[symbol] ?? FALLBACK_SYMBOL_FIRST_TRADE_DATE;

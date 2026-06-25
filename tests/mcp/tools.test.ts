@@ -21,6 +21,10 @@ import type {
   NotebookCatalogView,
   PaperSignalView,
   PlaybookDiagnosisView,
+  PaperSandboxCreateResponse,
+  PaperSandboxListView,
+  PaperSandboxSessionView,
+  PaperSandboxStatus,
   StrategyDraft,
 } from '../../src/platform/contracts.ts';
 
@@ -95,6 +99,141 @@ function createFakeClient(): StrategyDoctorClient {
           },
         },
       } satisfies PlaybookDiagnosisView;
+    },
+    async apiCallMonitor() {
+      return {
+        windowStart: '2026-06-23T00:00:00.000Z',
+        windowEnd: '2026-06-23T01:00:00.000Z',
+        totalCalls: 0,
+        totalErrors: 0,
+        successRate: 100,
+        topPaths: [],
+        recent: [],
+      };
+    },
+    async createPaperSandbox() {
+      return {
+        session: {
+          id: 'sandbox-000',
+          strategyId: 'parsed-001',
+          strategyName: 'parsed-001',
+          symbol: 'BTCUSDT',
+          timeframe: '1h',
+          status: 'active',
+          createdAt: '2026-06-23T00:00:00.000Z',
+          updatedAt: '2026-06-23T00:00:00.000Z',
+          currentIndex: 0,
+          totalBars: 240,
+          signal: 'hold',
+          position: 'flat',
+          equity: 1,
+          totalTrades: 0,
+          turnoverPct: 0,
+          feeCostPct: 0,
+          slippageCostPct: 0,
+          latestNotes: [],
+          history: [],
+        },
+      } satisfies PaperSandboxCreateResponse;
+    },
+    async listPaperSandboxes() {
+      return {
+        sessions: [
+          {
+            id: 'sandbox-000',
+            strategyId: 'parsed-001',
+            strategyName: 'parsed-001',
+            symbol: 'BTCUSDT',
+            timeframe: '1h',
+            status: 'active',
+            currentIndex: 0,
+            totalBars: 240,
+            lastUpdatedAt: '2026-06-23T00:00:00.000Z',
+            createdAt: '2026-06-23T00:00:00.000Z',
+          },
+        ],
+      } satisfies PaperSandboxListView;
+    },
+    async getPaperSandbox() {
+      return {
+        id: 'sandbox-000',
+        strategyId: 'parsed-001',
+        strategyName: 'parsed-001',
+        symbol: 'BTCUSDT',
+        timeframe: '1h',
+        status: 'active',
+        createdAt: '2026-06-23T00:00:00.000Z',
+        updatedAt: '2026-06-23T00:00:00.000Z',
+        currentIndex: 0,
+        totalBars: 240,
+        signal: 'hold',
+        position: 'flat',
+        equity: 1,
+        totalTrades: 0,
+        turnoverPct: 0,
+        feeCostPct: 0,
+        slippageCostPct: 0,
+        latestNotes: ['mock paper sandbox session'],
+        history: [],
+      } satisfies PaperSandboxSessionView;
+    },
+    async stepPaperSandbox() {
+      return {
+        id: 'sandbox-000',
+        strategyId: 'parsed-001',
+        strategyName: 'parsed-001',
+        symbol: 'BTCUSDT',
+        timeframe: '1h',
+        status: 'active',
+        createdAt: '2026-06-23T00:00:00.000Z',
+        updatedAt: '2026-06-23T00:00:00.000Z',
+        currentIndex: 1,
+        totalBars: 240,
+        signal: 'hold',
+        position: 'flat',
+        equity: 1,
+        totalTrades: 0,
+        turnoverPct: 0,
+        feeCostPct: 0,
+        slippageCostPct: 0,
+        latestNotes: ['mock paper sandbox session'],
+        history: [],
+      } satisfies PaperSandboxSessionView;
+    },
+    async closePaperSandbox() {
+      return {
+        id: 'sandbox-000',
+        status: 'removed',
+      } satisfies PaperSandboxStatus;
+    },
+    async onChainDashboard() {
+      return {
+        symbol: 'BTCUSDT',
+        timeframe: '1h',
+        asOf: '2026-06-23T00:00:00.000Z',
+        metrics: {
+          flowPressure: {
+            symbol: 'BTCUSDT',
+            timeframe: '1h',
+            asOf: '2026-06-23T00:00:00.000Z',
+            onChainFlowUsd: 12_000_000,
+            spotVolumeUsd: 30_000_000,
+            perpsOpenInterestUsd: 120_000_000,
+            fundingRate: 0.001,
+            liquidationsUsd: 1_200_000,
+          },
+          liquidityPressure: {
+            bidAskSpreadBps: 10,
+            whaleOrderDepthUsd: 5_000_000,
+            borrowRate: 0.01,
+          },
+          riskSignals: {
+            squeezeRisk: 42,
+            liquidationRisk: 12,
+            momentumSkew: 60,
+          },
+        },
+      };
     },
     async factors() {
       return {

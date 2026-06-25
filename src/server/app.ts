@@ -9,6 +9,7 @@ import type {
   DiagnoseRequest,
   DiagnosisResult,
 } from '../platform/contracts.ts';
+import type { ApiCallRecord } from '../platform/contracts.ts';
 import { registerAuth } from './auth.ts';
 import {
   isLoopbackHost,
@@ -94,6 +95,24 @@ export async function buildServer(
     multiFactorFramework: options.services?.multiFactorFramework
       ?? defaults.multiFactorFramework,
     paperSignal: options.services?.paperSignal ?? defaults.paperSignal,
+    apiCallMonitorService:
+      options.services?.apiCallMonitorService
+      ?? defaults.apiCallMonitorService,
+    apiCallMonitor: options.services?.apiCallMonitor ?? defaults.apiCallMonitor,
+    paperSandbox: {
+      createSession: options.services?.paperSandbox?.createSession
+        ?? defaults.paperSandbox.createSession,
+      listSessions: options.services?.paperSandbox?.listSessions
+        ?? defaults.paperSandbox.listSessions,
+      getSession: options.services?.paperSandbox?.getSession
+        ?? defaults.paperSandbox.getSession,
+      stepSession: options.services?.paperSandbox?.stepSession
+        ?? defaults.paperSandbox.stepSession,
+      closeSession: options.services?.paperSandbox?.closeSession
+        ?? defaults.paperSandbox.closeSession,
+    },
+    onChainDashboard: options.services?.onChainDashboard
+      ?? defaults.onChainDashboard,
   };
   const app = Fastify({
     bodyLimit: config.bodyLimit,
@@ -159,6 +178,28 @@ export async function buildServer(
     notebooks: services.notebooks,
     multiFactorFramework: services.multiFactorFramework,
     paperSignal: services.paperSignal,
+    apiCallMonitor: services.apiCallMonitor,
+    paperSandbox: services.paperSandbox,
+    onChainDashboard: services.onChainDashboard,
+  });
+
+  const requestStarts = new Map<string, bigint>();
+  app.addHook('onRequest', (request, _reply, done) => {
+    requestStarts.set(request.id, process.hrtime.bigint());
+    done();
+  });
+  app.addHook('onResponse', (request, reply) => {
+    const started = requestStarts.get(request.id) ?? process.hrtime.bigint();
+    requestStarts.delete(request.id);
+    const durationMs = Number(process.hrtime.bigint() - started) / 1_000_000;
+    const method = request.method as ApiCallRecord['method'];
+    services.apiCallMonitorService.record(
+      method,
+      request.url,
+      reply.statusCode,
+      Number.isFinite(durationMs) ? durationMs : 0,
+      request.id,
+    );
   });
 
   app.get('/api/v1/openapi.json', {

@@ -5,9 +5,11 @@ import {
 } from 'react';
 import {
   ArrowLeft,
+  Brain,
   Compass,
-  BookOpen,
   Home,
+  BookOpen,
+  LineChart,
 } from 'lucide-react';
 import { createApiClient } from './api/client.ts';
 import type { ApiClient } from './api/types.ts';
@@ -30,6 +32,10 @@ const DiagnosisWorkspace = lazy(async () => {
   const module = await import('./components/DiagnosisWorkspace.tsx');
   return { default: module.DiagnosisWorkspace };
 });
+const ResearchCenter = lazy(async () => {
+  const module = await import('./components/ResearchCenter.tsx');
+  return { default: module.ResearchCenter };
+});
 
 export interface AppProps {
   client?: ApiClient;
@@ -41,6 +47,7 @@ interface WorkspaceHeaderProps {
   onBack?: () => void;
   onNewStrategy?: () => void;
   onOpenLearn?: () => void;
+  onOpenResearch?: () => void;
 }
 
 function WorkspaceHeader({
@@ -49,6 +56,7 @@ function WorkspaceHeader({
   onBack,
   onNewStrategy,
   onOpenLearn,
+  onOpenResearch,
 }: WorkspaceHeaderProps) {
   return (
     <header className="enterprise-topbar" role="navigation" aria-label="Workspace navigation">
@@ -84,9 +92,19 @@ function WorkspaceHeader({
             Tutorial / QA
           </button>
         ) : null}
+        {onOpenResearch ? (
+          <a className="secondary-action home-link" href="/research">
+            <Brain aria-hidden="true" />
+            Research center
+          </a>
+        ) : null}
         <a className="secondary-action home-link" href="/judge">
           <Home aria-hidden="true" />
           Judge mode
+        </a>
+        <a className="secondary-action home-link" href="/showcase">
+          <LineChart aria-hidden="true" />
+          Back to workspace
         </a>
       </div>
     </header>
@@ -95,13 +113,44 @@ function WorkspaceHeader({
 
 export function App({ client = defaultClient }: AppProps) {
   const [state, dispatch] = useReducer(appReducer, initialAppState);
+  const path = window.location.pathname;
 
-  if (window.location.pathname === '/judge') {
+  if (path === '/judge') {
     return <JudgeMode />;
   }
 
-  if (window.location.pathname === '/learn') {
+  if (path === '/learn') {
     return <LearnMode />;
+  }
+
+  if (path === '/research') {
+    return (
+      <main className="app-shell">
+        <WorkspaceHeader
+          heading="Research center"
+          description="Cross-layer dashboards for API telemetry, paper sandbox sessions, and on-chain signals."
+          onBack={() => {
+            window.location.assign('/showcase');
+          }}
+          onOpenLearn={() => {
+            dispatch({ type: 'learnOpened' });
+          }}
+        />
+        <Suspense fallback={<p aria-live="polite">Loading research cockpit...</p>}>
+          <ResearchCenter
+            client={client}
+            onBack={() => {
+              window.location.assign('/showcase');
+            }}
+          />
+        </Suspense>
+      </main>
+    );
+  }
+
+  if (path === '/showcase') {
+    // keep compatibility with historic routing and direct links.
+    // no-op: render workspace as regular signed-in flow.
   }
 
   if (state.status === 'signedOut') {
@@ -125,6 +174,9 @@ export function App({ client = defaultClient }: AppProps) {
           description="Describe a strategy, pick a sample, or generate one randomly before signing into diagnosis."
           onOpenLearn={() => dispatch({ type: 'learnOpened' })}
           onNewStrategy={() => dispatch({ type: 'newStrategy' })}
+          onOpenResearch={() => {
+            window.location.assign('/research');
+          }}
         />
         <StrategyComposer
           client={client}
@@ -155,6 +207,9 @@ export function App({ client = defaultClient }: AppProps) {
           description="Review assumptions, trading costs and backtest boundaries. Then launch deterministic diagnosis."
           onBack={() => dispatch({ type: 'back' })}
           onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+          onOpenResearch={() => {
+            window.location.assign('/research');
+          }}
         />
         <StrategyConfirmation
           draft={state.draft}
@@ -204,6 +259,9 @@ export function App({ client = defaultClient }: AppProps) {
           description="Adversarial stress suite running. One strategy path remains accessible below when complete."
           onBack={() => dispatch({ type: 'back' })}
           onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+          onOpenResearch={() => {
+            window.location.assign('/research');
+          }}
         />
         <div className="workspace-nav">
           <button
@@ -240,6 +298,9 @@ export function App({ client = defaultClient }: AppProps) {
           heading="Tutorial / QA"
           description="Learn workflow, assumptions and judge handoff process."
           onBack={() => dispatch({ type: 'back' })}
+          onOpenResearch={() => {
+            window.location.assign('/research');
+          }}
         />
         <LearnMode onBack={() => dispatch({ type: 'back' })} />
       </main>
@@ -256,6 +317,9 @@ export function App({ client = defaultClient }: AppProps) {
         onBack={() => dispatch({ type: 'back' })}
         onNewStrategy={() => dispatch({ type: 'newStrategy' })}
         onOpenLearn={() => dispatch({ type: 'learnOpened' })}
+        onOpenResearch={() => {
+          window.location.assign('/research');
+        }}
       />
       <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
