@@ -1,13 +1,15 @@
 import {
   Activity,
   ArrowUpRight,
-  ArrowLeft,
   BookOpen,
   Bot,
   CheckCircle2,
   Cpu,
+  ClipboardCheck,
   FileArchive,
+  FileText,
   Gauge,
+  GitBranch,
   GitCompareArrows,
   Radar,
   ShieldCheck,
@@ -18,6 +20,39 @@ const reproductionCommands = [
   'scripts\\verify-project.cmd',
   'scripts\\build-submission-pack.cmd',
   'scripts\\start-showcase.cmd',
+];
+
+const repositoryUrl = 'https://github.com/jiang4wqy/strategy-doctor';
+
+const githubProofs = [
+  {
+    label: 'Public repository',
+    value: 'jiang4wqy/strategy-doctor',
+    caption: 'Source code, README, scripts, Dockerfile, and deployment config.',
+    href: repositoryUrl,
+    Icon: GitCompareArrows,
+  },
+  {
+    label: 'Review branch',
+    value: 'codex/p1-mcp',
+    caption: 'Current preview branch used for this local judge build.',
+    href: `${repositoryUrl}/tree/codex/p1-mcp`,
+    Icon: GitBranch,
+  },
+  {
+    label: 'README quick start',
+    value: 'README.md',
+    caption: 'Install, run, verify, and generate the evidence pack.',
+    href: `${repositoryUrl}/blob/codex/p1-mcp/README.md`,
+    Icon: FileText,
+  },
+  {
+    label: 'API integration docs',
+    value: 'docs/API.md',
+    caption: 'Agent-facing REST client flow and endpoint examples.',
+    href: `${repositoryUrl}/blob/codex/p1-mcp/docs/API.md`,
+    Icon: ClipboardCheck,
+  },
 ];
 
 const scorecards = [
@@ -105,11 +140,11 @@ export function JudgeMode() {
           </p>
           <div className="judge-actions" aria-label="Demo actions">
             <a className="primary-action" href="/showcase">
-              Back to workspace
-              <ArrowLeft aria-hidden="true" />
+              Start live diagnosis
+              <ArrowUpRight aria-hidden="true" />
             </a>
-            <a href="/showcase">
-              Open private workspace
+            <a href="/research">
+              Open API evidence
               <ArrowUpRight aria-hidden="true" />
             </a>
             <a href="/api/v1/health">
@@ -204,6 +239,29 @@ Authorization: Bearer <preview-or-agent-key>
   "seed": 42,
   "candidates": 6
 }`}</pre>
+      </section>
+
+      <section className="judge-band github-showcase" aria-labelledby="github-title">
+        <div>
+          <p className="eyebrow">GitHub review surface</p>
+          <h2 id="github-title">Open source, reproducible, and ready to inspect</h2>
+          <p>
+            The GitHub surface is framed for reviewers: one public repository,
+            one review branch, copy-ready setup docs, and an Agent API guide.
+            Generated evidence stays reproducible through scripts instead of
+            requiring committed secrets or local-only files.
+          </p>
+        </div>
+        <div className="github-proof-list" aria-label="GitHub review links">
+          {githubProofs.map(({ Icon, ...item }) => (
+            <a key={item.label} href={item.href}>
+              <Icon aria-hidden="true" />
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+              <p>{item.caption}</p>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section className="judge-band" aria-labelledby="reproduce-title">

@@ -48,6 +48,7 @@ interface WorkspaceHeaderProps {
   onNewStrategy?: () => void;
   onOpenLearn?: () => void;
   onOpenResearch?: () => void;
+  showWorkspaceLink?: boolean;
 }
 
 function WorkspaceHeader({
@@ -57,6 +58,7 @@ function WorkspaceHeader({
   onNewStrategy,
   onOpenLearn,
   onOpenResearch,
+  showWorkspaceLink = true,
 }: WorkspaceHeaderProps) {
   return (
     <header className="enterprise-topbar" role="navigation" aria-label="Workspace navigation">
@@ -102,10 +104,12 @@ function WorkspaceHeader({
           <Home aria-hidden="true" />
           Judge mode
         </a>
-        <a className="secondary-action home-link" href="/showcase">
-          <LineChart aria-hidden="true" />
-          Back to workspace
-        </a>
+        {showWorkspaceLink ? (
+          <a className="secondary-action home-link" href="/showcase">
+            <LineChart aria-hidden="true" />
+            Workspace
+          </a>
+        ) : null}
       </div>
     </header>
   );
@@ -177,6 +181,7 @@ export function App({ client = defaultClient }: AppProps) {
           onOpenResearch={() => {
             window.location.assign('/research');
           }}
+          showWorkspaceLink={false}
         />
         <StrategyComposer
           client={client}

@@ -18,6 +18,9 @@ import {
   strategyExamples,
 } from '../strategy-playground.ts';
 
+const judgeDemoDescription =
+  'Build a conservative BTC 4h RSI Bollinger mean reversion strategy. RSI period: 8. Oversold: 25. Overbought: 75. Bollinger period: 20. Use 1.75 standard deviations. Trend filter period: 30. Use 5% threshold, 3x leverage, 5% stop-loss, and 50% position size.';
+
 export interface StrategyComposerProps {
   client: ApiClient;
   description: string;
@@ -73,11 +76,15 @@ export function StrategyComposer({
     }
   }
 
+  function useDescription(nextDescription: string) {
+    setText(nextDescription);
+    onDescriptionChange(nextDescription);
+  }
+
   function useRandomStrategy() {
     const draft = randomStrategyDraft();
     const generatedDescription = asReadableDraft(draft);
-    setText(generatedDescription);
-    onDescriptionChange(generatedDescription);
+    useDescription(generatedDescription);
     onParsed(generatedDescription, draft);
   }
 
@@ -125,15 +132,20 @@ export function StrategyComposer({
           placeholder="BTCUSDT 4h RSI 10 with Bollinger period 14 and trend filter period 30..."
         />
         <div className="composer-examples" aria-label="Supported examples">
+          <button
+            type="button"
+            className="primary-action demo-prompt-action"
+            onClick={() => useDescription(judgeDemoDescription)}
+          >
+            <Sparkles aria-hidden="true" />
+            Judge demo prompt
+          </button>
           {strategyExamples.map(example => (
             <button
               key={example.label}
               type="button"
               className="secondary-action"
-              onClick={() => {
-                setText(example.description);
-                onDescriptionChange(example.description);
-              }}
+              onClick={() => useDescription(example.description)}
             >
               {example.label}
             </button>

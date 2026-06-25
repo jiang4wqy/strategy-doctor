@@ -13,8 +13,16 @@ describe('JudgeMode', () => {
       .toBeTruthy();
     expect(screen.getByText('scripts\\verify-project.cmd')).toBeTruthy();
     const workspaceLink = screen.getByRole('link', {
-      name: 'Open private workspace',
+      name: 'Start live diagnosis',
     });
     expect(workspaceLink.getAttribute('href')).toBe('/showcase');
+    expect(screen.getByRole('link', {
+      name: 'Open API evidence',
+    }).getAttribute('href')).toBe('/research');
+    expect(screen.getByText('GitHub review surface')).toBeTruthy();
+    expect(screen.getByText('jiang4wqy/strategy-doctor').closest('a'))
+      .toHaveProperty('href', 'https://github.com/jiang4wqy/strategy-doctor');
+    expect(screen.getByText('codex/p1-mcp').closest('a'))
+      .toHaveProperty('href', 'https://github.com/jiang4wqy/strategy-doctor/tree/codex/p1-mcp');
   });
 });

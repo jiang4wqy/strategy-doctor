@@ -24,7 +24,6 @@ import {
   isDateBefore,
   todayIsoDate,
 } from '../data/symbol-calendar.ts';
-import { MiniSeriesChart } from './MiniSeriesChart.tsx';
 import { randomStrategyDraft, strategyExamples } from '../strategy-playground.ts';
 
 type ResearchTab =

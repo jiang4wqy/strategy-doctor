@@ -176,4 +176,35 @@ describe('StrategyComposer', () => {
     );
     expect(input.value).toBe('custom grid strategy');
   });
+
+  it('fills the verified judge demo prompt without starting diagnosis', async () => {
+    const user = userEvent.setup();
+    const changed = vi.fn();
+    const parsed = vi.fn();
+    render(
+      <StrategyComposer
+        client={fakeClient(async () => ({
+          apiVersion: 'v1' as const,
+          requestId: 'req-parse',
+          data: draftFixture,
+        }))}
+        description=""
+        onDescriptionChange={changed}
+        onParsed={parsed}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {
+      name: 'Judge demo prompt',
+    }));
+
+    expect(screen.getByLabelText('Strategy description')).toHaveProperty(
+      'value',
+      expect.stringContaining('conservative BTC 4h RSI Bollinger'),
+    );
+    expect(changed).toHaveBeenCalledWith(
+      expect.stringContaining('RSI period: 8'),
+    );
+    expect(parsed).not.toHaveBeenCalled();
+  });
 });
