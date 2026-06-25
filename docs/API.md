@@ -129,7 +129,7 @@ Content-Type: application/json
 The response data is a `StrategyDraft`:
 
 - `strategy`: runtime-validated structured strategy
-- `source`: `rules` or optional `anthropic`
+- `source`: `rules`, optional `anthropic`, optional `qwen`, or optional `deepseek`
 - `confidence`: parser confidence
 - `assumptions`: values inferred from market or registry defaults
 - `warnings`: low-confidence or fallback information
@@ -145,6 +145,16 @@ $env:DOCTOR_NL_MODEL='<available-model-id>'
 ```
 
 CI and the default service do not enable the fallback.
+
+DeepSeek is also supported through its OpenAI-compatible chat endpoint:
+
+```powershell
+$env:DOCTOR_NL_AI_ENABLED='1'
+$env:DOCTOR_NL_PROVIDER='deepseek'
+$env:DOCTOR_NL_DEEPSEEK_ENABLED='1'
+$env:DEEPSEEK_API_KEY='<your-key>'
+$env:DOCTOR_DEEPSEEK_MODEL='deepseek-v4-pro'
+```
 
 ## Run a diagnosis
 

@@ -15,6 +15,16 @@ DOCTOR_SESSION_SECRET=at-least-32-char-random-string
 DOCTOR_API_KEYS=agent-key-1,agent-key-2
 ```
 
+Optional DeepSeek natural-language Agent parsing:
+
+```text
+DOCTOR_NL_AI_ENABLED=1
+DOCTOR_NL_PROVIDER=deepseek
+DOCTOR_NL_DEEPSEEK_ENABLED=1
+DEEPSEEK_API_KEY=your-deepseek-key
+DOCTOR_DEEPSEEK_MODEL=deepseek-v4-pro
+```
+
 5. After deploy, Render provides a fixed URL like:
 
 ```text
@@ -58,4 +68,3 @@ curl -X POST https://your-domain.com/api/v1/auth \
   -H "Content-Type: application/json" \
   -d "{\"accessCode\":\"your-web-access-code\"}"
 ```
-

@@ -11,17 +11,23 @@ import {
   parseWithQwen,
   type QwenParserOptions,
 } from './qwen.ts';
+import {
+  parseWithDeepSeek,
+  type DeepSeekParserOptions,
+} from './deepseek.ts';
 import { DescriptionParseError } from './errors.ts';
 import { parseWithRules } from './rules.ts';
 
-export interface ParseDescriptionOptions extends AnthropicParserOptions {
+export interface ParseDescriptionOptions
+  extends AnthropicParserOptions, QwenParserOptions, DeepSeekParserOptions {
   rules?: typeof parseWithRules;
   anthropic?: typeof parseWithAnthropic;
   validator?: typeof parseWithAnthropic;
   qwen?: typeof parseWithQwen;
+  deepseek?: typeof parseWithDeepSeek;
   validatorModel?: string;
-  provider?: 'anthropic' | 'qwen';
-  validatorProvider?: 'anthropic' | 'qwen';
+  provider?: 'anthropic' | 'qwen' | 'deepseek';
+  validatorProvider?: 'anthropic' | 'qwen' | 'deepseek';
   enableConsensus?: boolean;
 }
 
@@ -72,15 +78,22 @@ function buildConsensus(
   };
 }
 
-type NLProvider = 'anthropic' | 'qwen';
+type NLProvider = 'anthropic' | 'qwen' | 'deepseek';
 
 function getProvider(options: ParseDescriptionOptions): NLProvider {
   const env = options.env ?? process.env;
   if (options.provider) {
     return options.provider;
   }
-  if (env.DOCTOR_NL_PROVIDER === 'qwen' || env.DOCTOR_NL_PROVIDER === 'anthropic') {
+  if (
+    env.DOCTOR_NL_PROVIDER === 'qwen'
+    || env.DOCTOR_NL_PROVIDER === 'anthropic'
+    || env.DOCTOR_NL_PROVIDER === 'deepseek'
+  ) {
     return env.DOCTOR_NL_PROVIDER;
+  }
+  if (env.DOCTOR_NL_DEEPSEEK_ENABLED === '1') {
+    return 'deepseek';
   }
   if (env.DOCTOR_NL_QWEN_ENABLED === '1') {
     return 'qwen';
@@ -93,6 +106,12 @@ function getConfiguredModel(provider: NLProvider, options: ParseDescriptionOptio
   if (provider === 'qwen') {
     return options.model
       ?? env.DOCTOR_QWEN_MODEL
+      ?? env.DOCTOR_NL_MODEL
+      ?? '';
+  }
+  if (provider === 'deepseek') {
+    return options.model
+      ?? env.DOCTOR_DEEPSEEK_MODEL
       ?? env.DOCTOR_NL_MODEL
       ?? '';
   }
@@ -114,14 +133,27 @@ function configuredForProvider(
       && Boolean(env.ANTHROPIC_API_KEY)
       && Boolean(getConfiguredModel(provider, options));
   }
-  if (options.qwen) {
-    return true;
+  if (provider === 'qwen') {
+    if (options.qwen) {
+      return true;
+    }
+    return env.DOCTOR_NL_AI_ENABLED === '1'
+      && (env.DOCTOR_NL_QWEN_ENABLED === '1'
+        || env.DOCTOR_NL_PROVIDER === 'qwen')
+      && Boolean(env.QWEN_API_KEY || env.DOCTOR_QWEN_API_KEY)
+      && Boolean(getConfiguredModel(provider, options));
   }
-  return env.DOCTOR_NL_AI_ENABLED === '1'
-    && (env.DOCTOR_NL_QWEN_ENABLED === '1'
-      || env.DOCTOR_NL_PROVIDER === 'qwen')
-    && Boolean(env.QWEN_API_KEY || env.DOCTOR_QWEN_API_KEY)
-    && Boolean(getConfiguredModel(provider, options));
+  if (provider === 'deepseek') {
+    if (options.deepseek) {
+      return true;
+    }
+    return env.DOCTOR_NL_AI_ENABLED === '1'
+      && (env.DOCTOR_NL_DEEPSEEK_ENABLED === '1'
+        || env.DOCTOR_NL_PROVIDER === 'deepseek')
+      && Boolean(env.DEEPSEEK_API_KEY || env.DOCTOR_DEEPSEEK_API_KEY)
+      && Boolean(getConfiguredModel(provider, options));
+  }
+  return false;
 }
 
 function configuredForAi(options: ParseDescriptionOptions): boolean {
@@ -183,12 +215,17 @@ export async function parseStrategyDescription(
   const provider = getProvider(options);
   const primary = provider === 'qwen'
     ? (options.qwen ?? parseWithQwen)
-    : (options.anthropic ?? parseWithAnthropic);
+    : provider === 'deepseek'
+      ? (options.deepseek ?? parseWithDeepSeek)
+      : (options.anthropic ?? parseWithAnthropic);
   const validatorProvider = options.validatorProvider
     ?? provider;
   const validator = validatorProvider === 'qwen'
     ? (options.validator as unknown as (typeof parseWithQwen) | undefined)
       ?? parseWithQwen
+    : validatorProvider === 'deepseek'
+      ? (options.validator as unknown as (typeof parseWithDeepSeek) | undefined)
+        ?? parseWithDeepSeek
     : (options.validator ?? parseWithAnthropic);
   let localDraft: StrategyDraft | undefined;
   let localError: DescriptionParseError | undefined;

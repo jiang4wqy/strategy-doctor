@@ -50,6 +50,27 @@ const qwenDraft: StrategyDraft = {
   warnings: [],
 };
 
+const deepSeekDraft: StrategyDraft = {
+  strategy: {
+    id: 'ai-ma-deepseek',
+    name: 'AI MA',
+    archetype: 'ma-cross',
+    params: {
+      fastMA: 8,
+      slowMA: 30,
+      leverage: 10,
+      stopLossPct: 0.5,
+      positionPct: 1,
+    },
+    universe: ['BTCUSDT'],
+    timeframe: '4h',
+  },
+  source: 'deepseek',
+  confidence: 0.9,
+  assumptions: [],
+  warnings: [],
+};
+
 test('parseStrategyDescription returns high-confidence local rules without AI', async () => {
   let aiCalls = 0;
   const result = await parseStrategyDescription(
@@ -103,6 +124,29 @@ test('parseStrategyDescription can use Qwen as primary model', async () => {
 
   assert.equal(result, qwenDraft);
   assert.equal(qwenCalls, 1);
+});
+
+test('parseStrategyDescription can use DeepSeek as primary model', async () => {
+  let deepSeekCalls = 0;
+  const result = await parseStrategyDescription(
+    'A conservative strategy that buys market dips',
+    {
+      provider: 'deepseek',
+      env: {
+        DOCTOR_NL_AI_ENABLED: '1',
+        DOCTOR_NL_DEEPSEEK_ENABLED: '1',
+        DEEPSEEK_API_KEY: 'test-key',
+        DOCTOR_DEEPSEEK_MODEL: 'deepseek-test',
+      },
+      deepseek: async () => {
+        deepSeekCalls++;
+        return deepSeekDraft;
+      },
+    },
+  );
+
+  assert.equal(result, deepSeekDraft);
+  assert.equal(deepSeekCalls, 1);
 });
 
 test('parseStrategyDescription never sends forbidden execution requests to AI', async () => {

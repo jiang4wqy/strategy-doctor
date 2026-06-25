@@ -17,6 +17,13 @@ services:
         sync: false
       - key: DOCTOR_API_KEYS
         sync: false
+      - key: DOCTOR_NL_AI_ENABLED
+        value: "0"
+      - key: DOCTOR_NL_PROVIDER
+        value: rules
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DOCTOR_DEEPSEEK_MODEL
+        value: deepseek-v4-pro
       - key: DOCTOR_STATIC_ROOT
         value: web/dist
-

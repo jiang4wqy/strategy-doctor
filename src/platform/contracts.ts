@@ -34,7 +34,7 @@ export interface DraftWarning {
 
 export interface StrategyDraft {
   strategy: Strategy;
-  source: 'rules' | 'anthropic' | 'qwen';
+  source: 'rules' | 'anthropic' | 'qwen' | 'deepseek';
   confidence: number;
   assumptions: DraftAssumption[];
   warnings: DraftWarning[];
