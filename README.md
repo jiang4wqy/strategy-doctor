@@ -1,32 +1,63 @@
 # Strategy Doctor
 
-Strategy Doctor is an AI trading-infra copilot for the Bitget AI Hackathon. It stress-tests a registered strategy across five market-risk dimensions, explains the failure modes, proposes constrained parameter repairs, and verifies the trade-off on independent held-out scenarios.
+**Strategy Doctor is a risk lab for AI-generated trading strategies.**
 
-It is not another strategy generator. It is the safety and evidence layer between "an agent produced a strategy" and "a team is confident enough to evaluate deployment."
+An agent can write a strategy in seconds. Strategy Doctor asks the slower,
+more important questions before anyone trusts it: where does it break, why did
+it fail, what repair is allowed, and what return cost did that repair create?
 
-## Why It Matters
+Built for **Bitget AI Hackathon Track 2: Trading Infra**, it turns natural
+language or strategy JSON into a typed strategy, attacks it across market
+failure modes, and returns reviewer-ready evidence through the Web app, REST
+API, TypeScript client, CLI, and MCP adapter.
 
-Trading agents can create ideas quickly, but teams still need rigorous answers:
+<p align="center">
+  <img src="docs/assets/strategy-doctor-judge-optimized.png" alt="Strategy Doctor judge mode showing the live diagnosis entry point and risk cockpit" width="92%">
+</p>
 
-- Which market regime breaks this strategy?
-- Why did it fail?
-- Which parameters should change?
-- Did the repair improve robustness, and what return cost did it create?
+## What It Does In One Run
+
+1. **Draft** a strategy from natural language or JSON.
+2. **Confirm** every parsed parameter before diagnosis starts.
+3. **Stress-test** the strategy across five market-risk dimensions.
+4. **Explain** the failure mode, drawdown, cost drag, and death causes.
+5. **Repair** parameters with bounded, strategy-owned mutation rules.
+6. **Validate** the repaired strategy on held-out scenarios.
+7. **Export** evidence for judges, teams, and downstream agents.
+
+## Why This Exists
+
+Most trading-agent demos stop at generation: "Here is a strategy." Strategy
+Doctor starts where that demo ends.
+
+It answers the questions a team actually needs before evaluation:
+
+- Which regime breaks this strategy: trend reversal, chop, crash, spread, or liquidity?
+- Was the strategy killed by leverage, stop-loss design, overtrading, or cost drag?
+- Did the proposed repair improve robustness, or only hide risk?
+- What return trade-off did the repair create?
 - Can another agent call the system safely through a stable API?
 
-Strategy Doctor turns those questions into deterministic evidence.
+The result is not a promise of profit. It is a reproducible risk report.
+
+## Demo Screens
+
+| Judge review surface | GitHub submission surface |
+|---|---|
+| ![Judge landing and risk cockpit](docs/assets/strategy-doctor-judge-optimized.png) | ![GitHub review links and evidence checklist](docs/assets/strategy-doctor-github-review-surface.png) |
 
 ## Core Capabilities
 
-- Five-dimension diagnosis: `sentiment`, `macro`, `market-intel`, `news`, and `technical`.
-- Two registered strategies: `ma-cross` and `rsi-bollinger-mean-reversion`.
-- Natural-language strategy drafting with explicit human confirmation.
-- Shared generic backtest engine with strategy adapters.
-- Targeted prescriptions instead of arbitrary strategy rewrites.
-- Independent held-out validation with explicit robustness and return trade-off.
-- Protected Web workspace, REST API, OpenAPI, TypeScript client, CLI, and MCP adapter.
-- Offline deterministic default mode; live Bitget public market data is opt-in and does not require private trading credentials.
-- Reviewer-ready submission evidence pack.
+| Layer | What is included |
+|---|---|
+| Strategy intake | Natural-language drafting, JSON input, explicit parameter confirmation |
+| Strategy registry | `ma-cross` and `rsi-bollinger-mean-reversion` adapters |
+| Diagnosis engine | Five-dimension stress testing: `sentiment`, `macro`, `market-intel`, `news`, `technical` |
+| Repair loop | Targeted prescriptions instead of arbitrary rewrites |
+| Validation | Held-out scenario checks with robustness and return deltas separated |
+| Interfaces | Protected Web workspace, REST API, OpenAPI, TypeScript client, CLI, MCP adapter |
+| Data boundary | Offline deterministic default; Bitget public candles are opt-in |
+| Submission evidence | Deterministic evidence pack, API logs, screenshots, and reproducible scripts |
 
 ```mermaid
 flowchart LR
