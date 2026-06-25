@@ -15,6 +15,7 @@ describe('StrategyConfirmation', () => {
       <StrategyConfirmation
         draft={draftFixture}
         capabilities={capabilityFixture}
+        onBack={() => undefined}
         onConfirm={diagnose}
       />,
     );

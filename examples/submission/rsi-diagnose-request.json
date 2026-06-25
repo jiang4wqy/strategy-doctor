@@ -1,7 +1,7 @@
 {
   "strategy": {
     "id": "rsi-bollinger-001",
-    "name": "RSI Bollinger 趋势过滤均值回归",
+    "name": "RSI Bollinger Trend-Filtered Mean Reversion",
     "archetype": "rsi-bollinger-mean-reversion",
     "params": {
       "rsiPeriod": 10,

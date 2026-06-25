@@ -75,8 +75,8 @@ export function createAnthropicNarrator(
             messages: [{
               role: 'user',
               content: [
-                '请用简洁中文解释以下策略压力测试结果。',
-                '只描述风险机制、指标与场景，不给投资建议，不添加未提供的事实。',
+                'Summarize the following strategy stress scenario concisely.',
+                'Focus on risk mechanism, metrics, and scenario, with no trading advice and no extra facts beyond provided data.',
                 JSON.stringify({
                   scenario: {
                     name: input.scenario.name,

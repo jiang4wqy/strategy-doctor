@@ -1,7 +1,7 @@
 {
   "strategy": {
     "id": "breakout-confirmation-001",
-    "name": "BTC confirmed breakout",
+    "name": "Confirmed Breakout Strategy",
     "archetype": "breakout-confirmation",
     "params": {
       "breakoutLookback": 24,

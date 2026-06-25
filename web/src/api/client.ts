@@ -34,6 +34,12 @@ export class StrategyDoctorWebError extends Error {
 
 export interface CreateApiClientOptions {
   fetch?: typeof globalThis.fetch;
+  retry?: {
+    maxAttempts?: number;
+    baseDelayMs?: number;
+    maxDelayMs?: number;
+    factor?: number;
+  };
 }
 
 function object(value: unknown): Record<string, unknown> | undefined {
@@ -42,43 +48,132 @@ function object(value: unknown): Record<string, unknown> | undefined {
     : undefined;
 }
 
+const DEFAULT_RETRY = {
+  maxAttempts: 3,
+  baseDelayMs: 500,
+  maxDelayMs: 3000,
+  factor: 2,
+} as const;
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+function parseRetryAfterDelay(header: string | null): number | undefined {
+  if (!header) {
+    return undefined;
+  }
+  const trimmed = header.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const seconds = Number(trimmed);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return seconds * 1000;
+  }
+  const timestamp = Date.parse(trimmed);
+  if (!Number.isNaN(timestamp)) {
+    return Math.max(0, timestamp - Date.now());
+  }
+  return undefined;
+}
+
+function buildRetryDelay(
+  attempt: number,
+  options: {
+    baseDelayMs: number;
+    maxDelayMs: number;
+    factor: number;
+  },
+  retryAfterMs: number | undefined,
+): number {
+  if (retryAfterMs !== undefined) {
+    return Math.min(retryAfterMs, options.maxDelayMs);
+  }
+  const exponential = options.baseDelayMs * Math.pow(options.factor, attempt - 1);
+  const jitter = Math.random() * 200;
+  return Math.min(exponential + jitter, options.maxDelayMs);
+}
+
 export function createApiClient(
   options: CreateApiClientOptions = {},
 ): ApiClient {
   const fetchImplementation = options.fetch ?? globalThis.fetch;
+  const retry = {
+    ...DEFAULT_RETRY,
+    ...options.retry,
+  };
 
   async function request<T>(
     path: string,
     method: 'GET' | 'POST' | 'DELETE',
     body?: unknown,
   ): Promise<ApiEnvelope<T>> {
-    const response = await fetchImplementation(`/api/v1${path}`, {
-      method,
-      credentials: 'same-origin',
-      headers: body === undefined
-        ? undefined
-        : { 'content-type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    let payload: unknown;
-    try {
-      payload = await response.json();
-    } catch {
-      throw new StrategyDoctorWebError(
-        response.status,
-        'INVALID_RESPONSE',
-        'Strategy Doctor returned an invalid response.',
-      );
-    }
-    const envelope = object(payload);
-    if (!response.ok) {
-      const error = object(envelope?.error);
+    let attempt = 0;
+    while (true) {
+      const response = await fetchImplementation(`/api/v1${path}`, {
+        method,
+        credentials: 'same-origin',
+        headers: body === undefined
+          ? undefined
+          : { 'content-type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      let payload: unknown;
+      try {
+        payload = await response.json();
+      } catch {
+        throw new StrategyDoctorWebError(
+          response.status,
+          'INVALID_RESPONSE',
+          'Strategy Doctor returned an invalid response.',
+        );
+      }
+
+      const envelope = object(payload);
+      if (!response.ok) {
+        const error = object(envelope?.error);
+        if (
+          response.status === 429
+          && ++attempt < retry.maxAttempts
+          && error?.retryable === true
+        ) {
+          const delayMs = buildRetryDelay(
+            attempt,
+            retry,
+            parseRetryAfterDelay(response.headers.get('retry-after')),
+          );
+          await sleep(delayMs);
+          continue;
+        }
+        if (
+          !envelope
+          || typeof envelope.requestId !== 'string'
+          || !error
+          || typeof error.code !== 'string'
+          || typeof error.message !== 'string'
+        ) {
+          throw new StrategyDoctorWebError(
+            response.status,
+            'INVALID_RESPONSE',
+            'Strategy Doctor returned an invalid response.',
+          );
+        }
+        throw new StrategyDoctorWebError(
+          response.status,
+          error.code,
+          error.message,
+          envelope.requestId,
+          typeof error.field === 'string' ? error.field : undefined,
+          error.retryable === true,
+        );
+      }
       if (
-        !envelope
+        envelope?.apiVersion !== 'v1'
         || typeof envelope.requestId !== 'string'
-        || !error
-        || typeof error.code !== 'string'
-        || typeof error.message !== 'string'
+        || !Object.hasOwn(envelope, 'data')
       ) {
         throw new StrategyDoctorWebError(
           response.status,
@@ -86,27 +181,8 @@ export function createApiClient(
           'Strategy Doctor returned an invalid response.',
         );
       }
-      throw new StrategyDoctorWebError(
-        response.status,
-        error.code,
-        error.message,
-        envelope.requestId,
-        typeof error.field === 'string' ? error.field : undefined,
-        error.retryable === true,
-      );
+      return payload as ApiEnvelope<T>;
     }
-    if (
-      envelope?.apiVersion !== 'v1'
-      || typeof envelope.requestId !== 'string'
-      || !Object.hasOwn(envelope, 'data')
-    ) {
-      throw new StrategyDoctorWebError(
-        response.status,
-        'INVALID_RESPONSE',
-        'Strategy Doctor returned an invalid response.',
-      );
-    }
-    return payload as ApiEnvelope<T>;
   }
 
   return {

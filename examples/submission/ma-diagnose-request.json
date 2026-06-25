@@ -1,7 +1,7 @@
 {
   "strategy": {
     "id": "tf-001",
-    "name": "高杠杆趋势跟随",
+    "name": "High-Leverage Trend Follower",
     "archetype": "ma-cross",
     "params": {
       "fastMA": 8,

@@ -12,7 +12,7 @@ const scenario: Scenario = {
   dimension: 'news',
   sourceSkill: 'news-briefing',
   sourceObservedAt: '2026-06-12T15:17:31Z',
-  narrative: '冻结新闻显示突发跳空风险。',
+  narrative: 'Frozen news indicates a sudden gap risk.',
   severity: 4,
   shock: {
     kind: 'gap',
@@ -62,7 +62,7 @@ test('narrator returns the first Anthropic text block', async () => {
     fetch: async (_url, init) => {
       request = init;
       return new Response(JSON.stringify({
-        content: [{ type: 'text', text: 'LLM 生成的中文风险叙事。' }],
+        content: [{ type: 'text', text: 'LLM generated risk narrative in English.' }],
       }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
@@ -70,7 +70,7 @@ test('narrator returns the first Anthropic text block', async () => {
     },
   });
 
-  assert.equal(await narrator(input), 'LLM 生成的中文风险叙事。');
+  assert.equal(await narrator(input), 'LLM generated risk narrative in English.');
   assert.equal(request?.method, 'POST');
   assert.equal(
     (request?.headers as Record<string, string>)['anthropic-version'],

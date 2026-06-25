@@ -1,9 +1,15 @@
 # redteam
 
-五个 snapshot parser/builder 分别负责 `macro`、`market-intel`、`news`、`sentiment` 和 `technical`。
+There are five snapshot parser/builders, responsible for:
+- `macro`
+- `market-intel`
+- `news`
+- `sentiment`
+- `technical`
 
-- `search.ts`：每维生成 1-50 个确定性候选，并按 damage score 选择最坏场景。
-- `diagnose.ts`：分类 liquidation、drawdown breach、stop-loss bleed 和 survived。
-- `narrate.ts`：默认本地叙事，可选 Anthropic `/v1/messages`，3 秒失败回退。
+- `search.ts`: each dimension creates 1-50 deterministic candidates and picks the worst by `damage` score.
+- `diagnose.ts`: classifies `liquidation`, `drawdown breach`, `stop-loss bleed`, and `survived`.
+- `narrate.ts`: local narrative by default; optional Anthropic `/v1/messages` fallback with a 3-second timeout.
+- `parse*.ts`: validates snapshot shape and converts deterministic stress shock into scenario shape.
 
-候选不会突破维度边界，也不会人为保证策略死亡。
+Candidates never cross dimension boundaries, and they are not forced to make a strategy fail.

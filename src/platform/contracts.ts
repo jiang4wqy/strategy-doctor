@@ -2,6 +2,7 @@ import type {
   AnyStrategyDefinition,
   DeathCause,
   Dimension,
+  ModelConsensus,
   Scorecard,
   Strategy,
   StrategyParamKey,
@@ -27,16 +28,17 @@ export interface DraftAssumption {
 }
 
 export interface DraftWarning {
-  code: 'LOW_CONFIDENCE' | 'AI_FALLBACK_FAILED';
+  code: 'LOW_CONFIDENCE' | 'AI_FALLBACK_FAILED' | 'CONSENSUS_LOW';
   message: string;
 }
 
 export interface StrategyDraft {
   strategy: Strategy;
-  source: 'rules' | 'anthropic';
+  source: 'rules' | 'anthropic' | 'qwen';
   confidence: number;
   assumptions: DraftAssumption[];
   warnings: DraftWarning[];
+  consensus?: ModelConsensus;
 }
 
 export type ApiErrorCode =

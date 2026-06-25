@@ -2,17 +2,18 @@ import {
   lazy,
   Suspense,
   useReducer,
+  type ReactNode,
 } from 'react';
 import { createApiClient } from './api/client.ts';
 import type { ApiClient } from './api/types.ts';
 import { LoginScreen } from './components/LoginScreen.tsx';
 import { StrategyComposer } from './components/StrategyComposer.tsx';
-import {
-  StrategyConfirmation,
-} from './components/StrategyConfirmation.tsx';
+import { StrategyConfirmation } from './components/StrategyConfirmation.tsx';
 import { HistoryPanel } from './components/HistoryPanel.tsx';
+import { TopNavigation } from './components/TopNavigation.tsx';
 import { saveDiagnosis } from './history/storage.ts';
 import { ShowcasePage } from './showcase/ShowcasePage.tsx';
+import { TutorialPage } from './tutorial/TutorialPage.tsx';
 import {
   appReducer,
   initialAppState,
@@ -30,13 +31,23 @@ export interface AppProps {
 
 export function App({ client = defaultClient }: AppProps) {
   const [state, dispatch] = useReducer(appReducer, initialAppState);
+  const currentPath = window.location.pathname;
+  const withNavigation = (content: ReactNode) => (
+    <div className="app-page">
+      <TopNavigation currentPath={currentPath} />
+      {content}
+    </div>
+  );
 
   if (window.location.pathname === '/showcase') {
-    return <ShowcasePage />;
+    return withNavigation(<ShowcasePage />);
+  }
+  if (window.location.pathname === '/tutorial') {
+    return withNavigation(<TutorialPage />);
   }
 
   if (state.status === 'signedOut') {
-    return (
+    return withNavigation(
       <LoginScreen onLogin={async accessCode => {
         await client.login(accessCode);
         const capabilities = await client.capabilities();
@@ -44,16 +55,17 @@ export function App({ client = defaultClient }: AppProps) {
           type: 'authenticated',
           capabilities: capabilities.data,
         });
-      }} />
+      }} />,
     );
   }
 
   if (state.status === 'describing') {
-    return (
+    return withNavigation(
       <main className="app-shell">
         <StrategyComposer
           client={client}
           description={state.description}
+          onBack={() => dispatch({ type: 'startOver' })}
           onDescriptionChange={description => dispatch({
             type: 'descriptionChanged',
             description,
@@ -68,17 +80,24 @@ export function App({ client = defaultClient }: AppProps) {
           type: 'restored',
           record,
         })} />
-      </main>
+      </main>,
     );
   }
 
   if (state.status === 'confirming') {
-    return (
+    return withNavigation(
       <main className="app-shell">
+        {state.comparisonBaseline ? (
+          <p className="status-banner">
+            Compare mode enabled. This run will be measured against baseline
+            diagnosis {state.comparisonBaseline.requestId}.
+          </p>
+        ) : null}
         <StrategyConfirmation
           draft={state.draft}
           capabilities={state.capabilities}
           externalError={state.error}
+          onBack={() => dispatch({ type: 'backToDescribe' })}
           onConfirm={async request => {
             const draft = state.draft;
             dispatch({ type: 'diagnosisStarted', request });
@@ -111,26 +130,45 @@ export function App({ client = defaultClient }: AppProps) {
             }
           }}
         />
-      </main>
+      </main>,
     );
   }
 
   if (state.status === 'diagnosing') {
-    return (
+    return withNavigation(
       <main className="app-shell" aria-live="polite">
-        <p className="eyebrow">Running adversarial scenarios</p>
+        <p className="eyebrow">
+          <button
+            type="button"
+            onClick={() => dispatch({ type: 'backToConfirmation' })}
+          >
+            Back to parameters
+          </button>
+          Running adversarial scenarios
+        </p>
         <h1>Diagnosis in progress</h1>
-      </main>
+      </main>,
     );
   }
 
-  return (
+  return withNavigation(
     <main className="app-shell">
       <Suspense fallback={<p aria-live="polite">Loading visual analysis...</p>}>
         <DiagnosisWorkspace
           request={state.request}
           requestId={state.requestId}
           view={state.view}
+          comparison={state.comparisonBaseline}
+          onReconfigure={() => dispatch({ type: 'backToConfirmation' })}
+          onCompare={() => dispatch({
+            type: 'backToConfirmation',
+            comparisonBaseline: {
+              request: state.request,
+              requestId: state.requestId,
+              view: state.view,
+            },
+          })}
+          onNewStrategy={() => dispatch({ type: 'startOver' })}
         />
       </Suspense>
       {state.error ? <p role="status">{state.error}</p> : null}
@@ -138,6 +176,6 @@ export function App({ client = defaultClient }: AppProps) {
         type: 'restored',
         record,
       })} />
-    </main>
+    </main>,
   );
 }

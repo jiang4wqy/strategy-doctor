@@ -1,8 +1,14 @@
 {
   "id": "tf-001",
-  "name": "高杠杆趋势跟随",
+  "name": "High-Leverage Trend Follower",
   "archetype": "ma-cross",
-  "params": { "fastMA": 8, "slowMA": 30, "leverage": 10, "stopLossPct": 0.5, "positionPct": 1 },
+  "params": {
+    "fastMA": 8,
+    "slowMA": 30,
+    "leverage": 10,
+    "stopLossPct": 0.5,
+    "positionPct": 1
+  },
   "universe": ["BTCUSDT"],
   "timeframe": "1h"
 }

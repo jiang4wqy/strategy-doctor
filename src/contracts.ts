@@ -12,6 +12,20 @@
 export type Dimension = 'sentiment' | 'macro' | 'market-intel' | 'news' | 'technical';
 export type StyleName = 'conservative' | 'aggressive' | 'trend';
 
+export interface ModelVote {
+  model: string;
+  signature: string;
+  confidence: number;
+  agree: boolean;
+}
+
+export interface ModelConsensus {
+  models: string[];
+  score: number;
+  signature: string;
+  votes: ModelVote[];
+}
+
 export interface CommonRiskParams {
   leverage: number;      // 杠杆倍数（≥1）
   stopLossPct: number;   // 止损幅度（0.05 = 5%）
@@ -239,6 +253,7 @@ export interface ScenarioEvaluation {
   cause: DeathCause;
   damageScore: number;
   narrative: string;
+  narrativeConsensus?: ModelConsensus;
 }
 
 export interface StyleScore {
@@ -253,6 +268,7 @@ export interface Prescription {
   changes: ParameterChanges;          // 相对原参数的改动
   rationale: string;                  // 每项改动对应哪条死因
   patchedStrategy: Strategy;
+  consensus?: ModelConsensus;
 }
 
 export interface Tradeoff {

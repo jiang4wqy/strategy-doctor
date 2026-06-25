@@ -105,7 +105,7 @@ export function buildMarketIntelScenario(
     dimension: 'market-intel',
     sourceSkill: 'market-intel',
     sourceObservedAt: snapshot.observedAt,
-    narrative: `加密总市值 24h 变化 ${snapshot.marketCapChange24hPct.toFixed(2)}%，稳定币供应 30 日变化 ${snapshot.stablecoinChange30dPct.toFixed(2)}%，BTC open interest 变化 ${snapshot.openInterestChangePct.toFixed(2)}%，大户多头占比 ${(snapshot.topTraderLongShare * 100).toFixed(1)}%。`,
+    narrative: `Crypto market cap changed ${snapshot.marketCapChange24hPct.toFixed(2)}% over 24h, stablecoin supply changed ${snapshot.stablecoinChange30dPct.toFixed(2)}% over 30d, BTC open interest changed ${snapshot.openInterestChangePct.toFixed(2)}%, and top-trader long share is ${(snapshot.topTraderLongShare * 100).toFixed(1)}%.`,
     severity: 1 + Math.round(risk * 4),
     shock: {
       kind: 'crash',

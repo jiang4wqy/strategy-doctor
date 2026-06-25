@@ -44,4 +44,43 @@ describe('Web API client', () => {
       retryable: true,
     });
   });
+
+  it('retries on retryable rate-limit errors and eventually succeeds', async () => {
+    const responses = [
+      new Response(JSON.stringify({
+        apiVersion: 'v1',
+        requestId: 'req-rate-limited-1',
+        error: {
+          code: 'RATE_LIMITED',
+          message: 'Too many requests.',
+          retryable: true,
+        },
+      }), {
+        status: 429,
+        headers: { 'retry-after': '0.01' },
+      }),
+      new Response(JSON.stringify({
+        apiVersion: 'v1',
+        requestId: 'req-cap',
+        data: [],
+      }), {
+        status: 200,
+      }),
+    ];
+    let call = 0;
+    const client = createApiClient({
+      fetch: async () => responses[call++],
+      retry: {
+        maxAttempts: 3,
+        baseDelayMs: 1,
+        maxDelayMs: 5,
+      },
+    });
+
+    const response = await client.capabilities();
+
+    expect(response.requestId).toBe('req-cap');
+    expect(response.data).toEqual([]);
+    expect(call).toBe(2);
+  });
 });

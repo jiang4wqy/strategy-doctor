@@ -14,16 +14,16 @@ import {
 } from '../indicators.ts';
 
 const PARAM_LABELS: Record<keyof RsiBollingerParams, string> = {
-  rsiPeriod: 'RSI 周期',
-  rsiOversold: 'RSI 超卖阈值',
-  rsiOverbought: 'RSI 超买阈值',
-  bollingerPeriod: '布林带周期',
-  bollingerStdDev: '布林带标准差倍数',
-  trendFilterPeriod: '趋势过滤周期',
-  trendFilterThreshold: '趋势偏离阈值',
-  leverage: '杠杆',
-  stopLossPct: '止损比例',
-  positionPct: '仓位比例',
+  rsiPeriod: 'RSI period',
+  rsiOversold: 'RSI oversold threshold',
+  rsiOverbought: 'RSI overbought threshold',
+  bollingerPeriod: 'Bollinger period',
+  bollingerStdDev: 'Bollinger standard-deviation multiplier',
+  trendFilterPeriod: 'Trend filter period',
+  trendFilterThreshold: 'Trend deviation threshold',
+  leverage: 'Leverage',
+  stopLossPct: 'Stop-loss distance',
+  positionPct: 'Position size',
 };
 
 function fail(message: string): never {
@@ -213,12 +213,12 @@ function targetedPatch(
       params.stopLossPct,
       Number((0.8 / leverage / 2).toFixed(3)),
     );
-    rationale.push('清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内');
+    rationale.push('Liquidation failure -> reduce leverage and move the stop inside half of the liquidation distance');
   }
 
   if (uniqueCauses.has('drawdown-breach')) {
     patch.positionPct = Number((params.positionPct * 0.7).toFixed(2));
-    rationale.push('回撤击穿 → 降低仓位暴露');
+    rationale.push('Drawdown breach -> reduce position exposure');
   }
 
   if (uniqueCauses.has('stop-loss-bleed')) {
@@ -232,9 +232,7 @@ function targetedPatch(
       0.001,
       Number((params.trendFilterThreshold * 0.85).toFixed(4)),
     );
-    rationale.push(
-      '反复止损放血 → 放宽布林带与 RSI 极值，并加强趋势过滤',
-    );
+    rationale.push('Repeated stop-loss bleed -> widen Bollinger and RSI extremes while strengthening the trend filter');
   }
 
   return { patch, rationale };
@@ -436,7 +434,7 @@ const definition = freezeStrategyDefinition({
     ],
     example: {
       id: 'rsi-bollinger-001',
-      name: 'RSI Bollinger 趋势过滤均值回归',
+      name: 'RSI Bollinger Trend-Filtered Mean Reversion',
       archetype: 'rsi-bollinger-mean-reversion',
       params: {
         rsiPeriod: 10,

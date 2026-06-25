@@ -17,18 +17,18 @@ export function targetedPatch(
       params.stopLossPct,
       Number((0.8 / patch.leverage / 2).toFixed(3)),
     );
-    rationale.push('清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内');
+    rationale.push('Liquidation failure -> reduce leverage and move the stop inside half of the liquidation distance');
   }
 
   if (uniqueCauses.has('drawdown-breach')) {
     patch.positionPct = Number((params.positionPct * 0.7).toFixed(2));
-    rationale.push('回撤击穿 → 降低仓位暴露');
+    rationale.push('Drawdown breach -> reduce position exposure');
   }
 
   if (uniqueCauses.has('stop-loss-bleed')) {
     patch.fastMA = Math.round(params.fastMA * 1.5);
     patch.slowMA = Math.round(params.slowMA * 1.5);
-    rationale.push('震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音');
+    rationale.push('Repeated stop-loss bleed -> slow both moving averages by 1.5x to filter noise');
   }
 
   return { patch, rationale };

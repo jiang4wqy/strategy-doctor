@@ -1,0 +1,12 @@
+node_modules
+coverage
+submission-package
+.git
+.github
+.turbo
+.node_modules
+.DS_Store
+*.log
+web/dist/*.map
+web/dist/tsconfig.tsbuildinfo
+

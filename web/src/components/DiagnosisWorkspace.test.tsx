@@ -34,6 +34,9 @@ describe('DiagnosisWorkspace', () => {
         request={requestFixture}
         requestId="req-workspace"
         view={diagnosisFixture}
+        onReconfigure={() => undefined}
+        onCompare={() => undefined}
+        onNewStrategy={() => undefined}
       />,
     );
 
@@ -53,6 +56,9 @@ describe('DiagnosisWorkspace', () => {
       'Lower leverage and tighten the stop loss.',
     )).toBeTruthy();
     expect(screen.getByText('Confirmed Strategy JSON')).toBeTruthy();
+    expect(screen.getByRole('button', {
+      name: 'Compare tuned run',
+    })).toBeTruthy();
     expect(screen.getByText('curl request')).toBeTruthy();
     expect(screen.getByText('TypeScript client example')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'OpenAPI schema' })).toHaveProperty(

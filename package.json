@@ -1,55 +1,55 @@
 {
-  "name": "strategy-doctor",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "description": "AI 策略体检与优化引擎 — Bitget AI Base Camp Hackathon · Track 2 Trading Infra",
-  "engines": {
-    "node": ">=24"
-  },
-  "scripts": {
-    "test:core": "node --test \"tests/**/*.test.ts\"",
-    "test:web": "vitest run --config web/vitest.config.ts",
-    "test": "npm run test:core && npm run test:web",
-    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=90 --test-coverage-branches=80 --test-coverage-functions=95 \"tests/**/*.test.ts\"",
-    "typecheck:core": "tsc",
-    "typecheck:web": "tsc -p web/tsconfig.json",
-    "typecheck": "npm run typecheck:core && npm run typecheck:web",
-    "build:web": "vite build --config web/vite.config.ts",
-    "dev:api": "node --watch src/server/start.ts",
-    "dev:web": "vite --config web/vite.config.ts",
-    "server": "node src/server/start.ts",
-    "web": "npm run build:web && npm run server",
-    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts",
-    "demo": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6",
-    "demo:json": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --format json",
-    "demo:live": "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --backtest bitget",
-    "snapshots:refresh": "node src/scripts/refresh-snapshots.ts",
-    "submission:package": "node scripts/generate-submission-package.mjs",
-    "verify": "npm run test:coverage && npm run typecheck && npm run demo"
-  },
-  "devDependencies": {
-    "@axe-core/playwright": "^4.11.3",
-    "@playwright/test": "^1.60.0",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^24.0.0",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.2",
-    "jsdom": "^29.1.1",
-    "typescript": "^5.7.0",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
-  },
-  "dependencies": {
-    "@fastify/cookie": "^10.0.1",
-    "@fastify/rate-limit": "^11.0.0",
-    "@fastify/static": "^9.1.3",
-    "@fastify/swagger": "^9.7.0",
-    "echarts": "^6.1.0",
-    "fastify": "^5.8.5",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
-  }
+    "name":  "strategy-doctor",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "description":  "AI-powered risk diagnosis and repair engine for trading strategy Agents - Bitget AI Hackathon Track 2 Trading Infra",
+    "engines":  {
+                    "node":  "\u003e=24"
+                },
+    "scripts":  {
+                    "test:core":  "node --test \"tests/**/*.test.ts\"",
+                    "test:web":  "vitest run --config web/vitest.config.ts",
+                    "test":  "npm run test:core \u0026\u0026 npm run test:web",
+                    "test:coverage":  "node --experimental-test-coverage --test --test-coverage-lines=90 --test-coverage-branches=80 --test-coverage-functions=95 \"tests/**/*.test.ts\"",
+                    "typecheck:core":  "tsc",
+                    "typecheck:web":  "tsc -p web/tsconfig.json",
+                    "typecheck":  "npm run typecheck:core \u0026\u0026 npm run typecheck:web",
+                    "build:web":  "vite build --config web/vite.config.ts",
+                    "dev:api":  "node --watch src/server/start.ts",
+                    "dev:web":  "vite --config web/vite.config.ts",
+                    "server":  "node src/server/start.ts",
+                    "web":  "npm run build:web \u0026\u0026 npm run server",
+                    "test:e2e":  "playwright test -c tests/e2e/playwright.config.ts",
+                    "demo":  "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6",
+                    "demo:json":  "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --format json",
+                    "demo:live":  "node src/cli.ts examples/trend-follower.json --style conservative --seed 42 --candidates 6 --backtest bitget",
+                    "snapshots:refresh":  "node src/scripts/refresh-snapshots.ts",
+                    "submission:package":  "node scripts/generate-submission-package.mjs",
+                    "verify":  "npm run test:coverage \u0026\u0026 npm run typecheck \u0026\u0026 npm run demo"
+                },
+    "devDependencies":  {
+                            "@axe-core/playwright":  "^4.11.3",
+                            "@playwright/test":  "^1.60.0",
+                            "@testing-library/react":  "^16.3.2",
+                            "@testing-library/user-event":  "^14.6.1",
+                            "@types/node":  "^24.0.0",
+                            "@types/react":  "^19.2.17",
+                            "@types/react-dom":  "^19.2.3",
+                            "@vitejs/plugin-react":  "^6.0.2",
+                            "jsdom":  "^29.1.1",
+                            "typescript":  "^5.7.0",
+                            "vite":  "^8.0.16",
+                            "vitest":  "^4.1.8"
+                        },
+    "dependencies":  {
+                         "@fastify/cookie":  "^10.0.1",
+                         "@fastify/rate-limit":  "^11.0.0",
+                         "@fastify/static":  "^9.1.3",
+                         "@fastify/swagger":  "^9.7.0",
+                         "echarts":  "^6.1.0",
+                         "fastify":  "^5.8.5",
+                         "react":  "^19.2.7",
+                         "react-dom":  "^19.2.7"
+                     }
 }

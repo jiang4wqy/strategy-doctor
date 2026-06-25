@@ -116,6 +116,16 @@ $env:ANTHROPIC_API_KEY='<your-key>'
 $env:DOCTOR_NL_MODEL='<available-model-id>'
 npm.cmd run web
 ```
+```powershell
+$env:DOCTOR_NL_AI_ENABLED='1'
+$env:DOCTOR_NL_QWEN_ENABLED='1'
+$env:DOCTOR_NL_PROVIDER='qwen'       # 或设为 "anthropic" 强制回退 Anthropic
+$env:QWEN_API_KEY='<your-qwen-key>'
+$env:DOCTOR_QWEN_MODEL='qwen-plus'
+npm.cmd run web
+```
+
+> Qwen 在本地测试阶段只用于策略描述解析，不参与回测逻辑。
 
 缺少任一变量时不会发起请求。不要把 key 写入仓库。默认 CI 不启用此能力。
 

@@ -36,7 +36,11 @@ export function ShowcasePage() {
     <main className="app-shell showcase-page">
       <header className="showcase-hero">
         <div>
-          <p className="eyebrow">Bitget AI Hackathon · Track 2 Trading Infra</p>
+          <div className="workspace-actions">
+            <a href="/">Back to private workspace</a>
+            <a href="/tutorial">Open tutorial</a>
+          </div>
+          <p className="eyebrow">Bitget AI Hackathon Track 2 Trading Infra</p>
           <h1>Strategy Doctor public showcase</h1>
           <p>
             A read-only, no-login evidence view for the submitted strategy
@@ -127,6 +131,9 @@ export function ShowcasePage() {
           request={selected.request}
           requestId={selected.requestId}
           view={selected.view}
+          onReconfigure={() => { location.href = '/'; }}
+          onCompare={() => { location.href = '/'; }}
+          onNewStrategy={() => { location.href = '/'; }}
         />
       </Suspense>
     </main>

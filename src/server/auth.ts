@@ -103,7 +103,7 @@ export async function registerAuth(
   });
 
   app.post('/api/v1/auth', {
-    config: {
+    config: config.authRateLimitDisabled ? {} : {
       rateLimit: {
         max: 5,
         timeWindow: '15 minutes',

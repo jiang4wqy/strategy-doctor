@@ -9,9 +9,63 @@
   padding: clamp(1rem, 3vw, 2.4rem) 0 4rem;
 }
 
+.app-page {
+  min-height: 100vh;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.8rem max(1rem, calc((100vw - 1480px) / 2));
+  border-bottom: 1px solid rgba(74, 112, 139, 0.62);
+  background: rgba(7, 17, 31, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.top-nav-brand,
+.top-nav-links a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.top-nav-brand {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.top-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.top-nav-links a {
+  min-height: 2.3rem;
+  padding: 0.46rem 0.72rem;
+  border: 1px solid rgba(102, 212, 208, 0.32);
+  border-radius: var(--radius-sm);
+  color: var(--ice-soft);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.top-nav-links a:hover {
+  border-color: var(--ice);
+  background: rgba(102, 212, 208, 0.08);
+}
+
 .login-shell {
   display: grid;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   place-items: center;
 }
 
@@ -53,6 +107,7 @@
 .prescription-panel,
 .developer-panel,
 .deployment-panel,
+.comparison-panel,
 .chart-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -80,6 +135,28 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.workspace-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.workspace-actions .text-link,
+.text-link {
+  color: var(--ice-soft);
+  font-size: 0.83rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.workspace-actions .text-link:hover,
+.text-link:hover {
+  text-decoration: underline;
 }
 
 .form-footer,
@@ -146,7 +223,8 @@
 }
 
 .warning,
-.honesty-note {
+.honesty-note,
+.status-banner {
   padding: var(--space-3);
   border-left: 3px solid var(--amber);
   background: rgba(217, 164, 65, 0.09);
@@ -203,6 +281,55 @@
   margin: var(--space-4) 0;
   padding: var(--space-4);
   border-top: 3px solid var(--amber);
+}
+
+.comparison-panel {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.9fr) minmax(22rem, 1.1fr);
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+}
+
+.comparison-panel h2 {
+  margin-bottom: var(--space-2);
+}
+
+.comparison-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.comparison-panel dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.comparison-panel dl div {
+  display: grid;
+  gap: 0.2rem;
+  min-height: 5.4rem;
+  padding: var(--space-3);
+  border: 1px solid rgba(74, 112, 139, 0.58);
+  border-radius: var(--radius-sm);
+  background: rgba(7, 17, 31, 0.66);
+}
+
+.comparison-panel dt {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.comparison-panel dd {
+  margin: 0;
+  color: var(--ice-soft);
+  font-family: var(--mono);
+  font-size: 1.55rem;
+  font-weight: 900;
 }
 
 .deployment-panel h2 {
@@ -583,6 +710,28 @@ th {
   font-weight: 800;
 }
 
+.tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.tutorial-grid section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.tutorial-grid h2 {
+  margin-top: 0;
+  margin-bottom: 0.72rem;
+}
+
+.tutorial-grid ol {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
 @media (max-width: 960px) {
   .summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -596,6 +745,7 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .comparison-panel,
   .judge-summary,
   .strategy-comparison {
     grid-template-columns: 1fr;
@@ -603,6 +753,10 @@ th {
 
   .stress-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tutorial-grid {
+    grid-template-columns: 1fr;
   }
 
   .stress-strip div {
@@ -631,6 +785,7 @@ th {
 
   .summary-grid,
   .deployment-gates,
+  .comparison-panel dl,
   .judge-grid,
   .stress-strip,
   .parameter-grid {

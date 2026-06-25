@@ -124,7 +124,7 @@ export function buildMacroScenario(snapshot: MacroSnapshot, seed: number): Scena
     dimension: 'macro',
     sourceSkill: 'macro-analyst',
     sourceObservedAt: snapshot.observedAt,
-    narrative: `联邦基金利率 ${snapshot.fedFundsLowerPct.toFixed(2)}%-${snapshot.fedFundsUpperPct.toFixed(2)}%，10Y 美债收益率 ${snapshot.treasury10yPct.toFixed(2)}%，高收益债利差 ${snapshot.highYieldSpreadPct.toFixed(2)}%，DXY ${snapshot.dxy.toFixed(2)}，VIX ${snapshot.vix.toFixed(2)}；这些信号映射为确定性的 ${kind} 压力路径。`,
+    narrative: `Fed funds ${snapshot.fedFundsLowerPct.toFixed(2)}%-${snapshot.fedFundsUpperPct.toFixed(2)}%, 10Y Treasury ${snapshot.treasury10yPct.toFixed(2)}%, high-yield spread ${snapshot.highYieldSpreadPct.toFixed(2)}%, DXY ${snapshot.dxy.toFixed(2)}, and VIX ${snapshot.vix.toFixed(2)} map to a deterministic ${kind} stress path.`,
     severity: 1 + Math.round(risk * 4),
     shock: {
       kind,

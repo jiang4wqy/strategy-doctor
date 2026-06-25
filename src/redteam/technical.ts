@@ -109,11 +109,11 @@ export function buildTechnicalScenario(
 
   return {
     id: `technical-${snapshot.symbol.toLowerCase()}-${snapshot.timeframe}-${seed}`,
-    name: '技术震荡·假突破绞肉机',
+    name: 'Technical whipsaw: false-breakout grinder',
     dimension: 'technical',
     sourceSkill: 'technical-analysis',
     sourceObservedAt: snapshot.observedAt,
-    narrative: `ADX ${snapshot.adx.toFixed(1)}，近 20 根 DMI 切换 ${snapshot.dmiCrosses20} 次、RSI 中轴穿越 ${snapshot.rsiCenterCrosses20} 次，布林带宽 ${(snapshot.bollBandwidth * 100).toFixed(1)}%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。`,
+    narrative: `ADX ${snapshot.adx.toFixed(1)}, ${snapshot.dmiCrosses20} DMI switches in the last 20 bars, ${snapshot.rsiCenterCrosses20} RSI centerline crosses, and Bollinger bandwidth ${(snapshot.bollBandwidth * 100).toFixed(1)}%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk.`,
     severity: 1 + Math.round(risk * 4),
     shock: {
       kind: 'whipsaw',

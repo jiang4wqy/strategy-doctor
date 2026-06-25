@@ -1,48 +1,44 @@
-## 目标
+## Goal
 
-<!-- 一个 PR 只描述一个模块目标。 -->
+Describe the single module goal for this PR.
 
-## 修改文件
+## Changed Files
 
-<!-- 列出实际修改路径。 -->
+List the paths changed by this PR.
 
-## 未包含范围
+## Out of Scope
 
-<!-- 明确本 PR 没有顺手修改的模块。 -->
+State what this PR intentionally does not change.
 
-## 公共接口变化
+## Public Interface Changes
 
-- [ ] 无
-- [ ] 有，已说明迁移影响、示例 JSON 和受影响 owner
+- [ ] None
+- [ ] Yes, migration impact, examples, and affected owners are documented
 
-说明：
+Details:
 
-## 跨模块依赖与合并顺序
+## Cross-Module Dependencies and Merge Order
 
-<!-- 写明前置 PR/commit；无依赖时写“无”。 -->
+List prerequisite PRs or commits. Write `None` when there are no dependencies.
 
-## 验证
+## Validation
 
-```text
-npm.cmd ci:
-npm.cmd run verify:
-git diff --check:
-```
+- [ ] `npm.cmd run verify`
+- [ ] `npm.cmd run test:web`
+- [ ] `npm.cmd run build:web`
+- [ ] `git diff --check`
 
-- Tests:
-- Passed:
-- Skipped:
-- Coverage:
+Result summary:
 
-## 安全与兼容检查
+## Safety and Compatibility Checks
 
-- [ ] 默认 demo 和 CI 仍离线
-- [ ] 未加入账户、持仓或下单能力
-- [ ] 未提交 key、secret、passphrase 或私有数据
-- [ ] 未降低 coverage 门槛
-- [ ] 未修改 shock 来强制策略死亡
-- [ ] `ma-cross` 基线无意外变化，或已清楚说明原因
+- [ ] Default demo and CI remain offline
+- [ ] No account, position, balance, or order capability was added
+- [ ] No key, secret, passphrase, or private data was committed
+- [ ] Coverage thresholds were not lowered
+- [ ] Stress scenarios were not changed to force strategy failure
+- [ ] `ma-cross` baseline compatibility is preserved, or the reason is documented
 
-## 已知限制
+## Known Limitations
 
-<!-- 没有时写“无”。 -->
+Write `None` when there are no known limitations.

@@ -7,13 +7,13 @@ export interface ShowcaseDiagnosis {
   view: DiagnosisView;
 }
 
-export const showcaseDiagnoses = [
+const showcaseDiagnosesRaw = [
   {
     "id": "ma",
     "request": {
       "strategy": {
         "id": "tf-001",
-        "name": "高杠杆趋势跟随",
+        "name": "High-Leverage Trend Follower",
         "archetype": "ma-cross",
         "params": {
           "fastMA": 8,
@@ -324,7 +324,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "drawdown-breach",
             "damageScore": -5.55476445284485,
-            "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+            "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
           },
           {
             "scenarioId": "market-intel-42-c4",
@@ -590,7 +590,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "drawdown-breach",
             "damageScore": 110.11165921032864,
-            "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+            "narrative": "Crypto market cap changed -0.35% over 24h, stablecoin supply changed -1.88% over 30d, BTC open interest changed 0.29%, and top-trader long share is 54.1%."
           },
           {
             "scenarioId": "news-42-c1",
@@ -856,11 +856,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "liquidation",
             "damageScore": 1199.8458355344726,
-            "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+            "narrative": "Across 8 frozen news items, negative headlines represent 25.0%, high-impact headlines 75.0%, and regulatory items 25.0%; the scenario models gap risk from sudden catalysts."
           },
           {
             "scenarioId": "sentiment-42-c1",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "dimension": "sentiment",
             "sourceSkill": "sentiment-analyst",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -1122,11 +1122,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "drawdown-breach",
             "damageScore": -894.2786999929282,
-            "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+            "narrative": "long crowding, fear-greed 13, and taker buy share 46.2%. The scenario models an upside bait move followed by a fast selloff to test liquidation risk in leveraged trend strategies."
           },
           {
             "scenarioId": "technical-42-c5",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "dimension": "technical",
             "sourceSkill": "technical-analysis",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -1388,7 +1388,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "liquidation",
             "damageScore": 1189.3547434079874,
-            "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+            "narrative": "ADX 29.3, 1 DMI switches in the last 20 bars, 4 RSI centerline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk."
           }
         ],
         "deaths": [
@@ -1645,7 +1645,7 @@ export const showcaseDiagnoses = [
                 1.5794220251962403
               ]
             },
-            "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+            "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
           },
           {
             "scenarioId": "market-intel-42-c4",
@@ -1900,7 +1900,7 @@ export const showcaseDiagnoses = [
                 0.6465303012394348
               ]
             },
-            "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+            "narrative": "Crypto market cap changed -0.35% over 24h, stablecoin supply changed -1.88% over 30d, BTC open interest changed 0.29%, and top-trader long share is 54.1%."
           },
           {
             "scenarioId": "news-42-c1",
@@ -2155,11 +2155,11 @@ export const showcaseDiagnoses = [
                 0.001
               ]
             },
-            "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+            "narrative": "Across 8 frozen news items, negative headlines represent 25.0%, high-impact headlines 75.0%, and regulatory items 25.0%; the scenario models gap risk from sudden catalysts."
           },
           {
             "scenarioId": "sentiment-42-c1",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "dimension": "sentiment",
             "cause": "drawdown-breach",
             "metrics": {
@@ -2410,11 +2410,11 @@ export const showcaseDiagnoses = [
                 10.746317090582497
               ]
             },
-            "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+            "narrative": "long crowding, fear-greed 13, and taker buy share 46.2%. The scenario models an upside bait move followed by a fast selloff to test liquidation risk in leveraged trend strategies."
           },
           {
             "scenarioId": "technical-42-c5",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "dimension": "technical",
             "cause": "liquidation",
             "metrics": {
@@ -2665,7 +2665,7 @@ export const showcaseDiagnoses = [
                 0.1010804098626776
               ]
             },
-            "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+            "narrative": "ADX 29.3, 1 DMI switches in the last 20 bars, 4 RSI centerline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk."
           }
         ],
         "prescription": {
@@ -2674,10 +2674,10 @@ export const showcaseDiagnoses = [
             "stopLossPct": 0.072,
             "positionPct": 0.6
           },
-          "rationale": "清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内；回撤击穿 → 降低仓位暴露；最终处方：杠杆 10→5，止损比例 0.5→0.072，仓位比例 1→0.6",
+          "rationale": "Liquidation failure -> reduce leverage and move the stop inside half of the liquidation distance; Drawdown breach -> reduce position exposure; final prescription: Leverage 10 -> 5; Stop-loss distance 0.5 -> 0.072; Position size 1 -> 0.6",
           "patchedStrategy": {
             "id": "tf-001-rx",
-            "name": "高杠杆趋势跟随（处方修补版）",
+            "name": "High-Leverage Trend Follower (prescription patch)",
             "archetype": "ma-cross",
             "params": {
               "fastMA": 8,
@@ -6437,19 +6437,19 @@ export const showcaseDiagnoses = [
         "parameterChanges": [
           {
             "key": "leverage",
-            "label": "杠杆",
+            "label": "Leverage",
             "before": 10,
             "after": 5
           },
           {
             "key": "stopLossPct",
-            "label": "止损比例",
+            "label": "Stop-loss distance",
             "before": 0.5,
             "after": 0.072
           },
           {
             "key": "positionPct",
-            "label": "仓位比例",
+            "label": "Position size",
             "before": 1,
             "after": 0.6
           }
@@ -6465,7 +6465,7 @@ export const showcaseDiagnoses = [
           },
           {
             "dimension": "technical",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "damageScore": 1189.3547434079874,
             "cause": "liquidation",
             "pnlPct": -0.8989195901373224,
@@ -6489,7 +6489,7 @@ export const showcaseDiagnoses = [
           },
           {
             "dimension": "sentiment",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "damageScore": -894.2786999929282,
             "cause": "drawdown-breach",
             "pnlPct": 9.746317090582497,
@@ -6504,7 +6504,7 @@ export const showcaseDiagnoses = [
     "request": {
       "strategy": {
         "id": "rsi-bollinger-001",
-        "name": "RSI Bollinger 趋势过滤均值回归",
+        "name": "RSI Bollinger Trend-Filtered Mean Reversion",
         "archetype": "rsi-bollinger-mean-reversion",
         "params": {
           "rsiPeriod": 10,
@@ -6820,7 +6820,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 19.46424080950641,
-            "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+            "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
           },
           {
             "scenarioId": "market-intel-42-c4",
@@ -7086,7 +7086,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 26.029886384303353,
-            "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+            "narrative": "Crypto market cap changed -0.35% over 24h, stablecoin supply changed -1.88% over 30d, BTC open interest changed 0.29%, and top-trader long share is 54.1%."
           },
           {
             "scenarioId": "news-42-c5",
@@ -7352,11 +7352,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 7.234897846244418,
-            "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+            "narrative": "Across 8 frozen news items, negative headlines represent 25.0%, high-impact headlines 75.0%, and regulatory items 25.0%; the scenario models gap risk from sudden catalysts."
           },
           {
             "scenarioId": "sentiment-42-c0",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "dimension": "sentiment",
             "sourceSkill": "sentiment-analyst",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -7618,11 +7618,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 30.608429664124955,
-            "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+            "narrative": "long crowding, fear-greed 13, and taker buy share 46.2%. The scenario models an upside bait move followed by a fast selloff to test liquidation risk in leveraged trend strategies."
           },
           {
             "scenarioId": "technical-42-c4",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "dimension": "technical",
             "sourceSkill": "technical-analysis",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -7884,13 +7884,13 @@ export const showcaseDiagnoses = [
             },
             "cause": "stop-loss-bleed",
             "damageScore": 47.193172535381436,
-            "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+            "narrative": "ADX 29.3, 1 DMI switches in the last 20 bars, 4 RSI centerline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk."
           }
         ],
         "deaths": [
           {
             "scenarioId": "technical-42-c4",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "dimension": "technical",
             "cause": "stop-loss-bleed",
             "metrics": {
@@ -8141,7 +8141,7 @@ export const showcaseDiagnoses = [
                 0.7836639446293641
               ]
             },
-            "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+            "narrative": "ADX 29.3, 1 DMI switches in the last 20 bars, 4 RSI centerline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk."
           }
         ],
         "prescription": {
@@ -8151,10 +8151,10 @@ export const showcaseDiagnoses = [
             "bollingerStdDev": 2.012,
             "trendFilterThreshold": 0.0425
           },
-          "rationale": "反复止损放血 → 放宽布林带与 RSI 极值，并加强趋势过滤；最终处方：RSI 超卖阈值 30→27，RSI 超买阈值 70→73，布林带标准差倍数 1.75→2.012，趋势偏离阈值 0.05→0.0425",
+          "rationale": "Repeated stop-loss bleed -> widen Bollinger and RSI extremes while strengthening the trend filter; final prescription: RSI oversold threshold 30 -> 27; RSI overbought threshold 70 -> 73; Bollinger standard-deviation multiplier 1.75 -> 2.012; Trend deviation threshold 0.05 -> 0.0425",
           "patchedStrategy": {
             "id": "rsi-bollinger-001-rx",
-            "name": "RSI Bollinger 趋势过滤均值回归（处方修补版）",
+            "name": "RSI Bollinger Trend-Filtered Mean Reversion (prescription patch)",
             "archetype": "rsi-bollinger-mean-reversion",
             "params": {
               "rsiPeriod": 10,
@@ -11915,25 +11915,25 @@ export const showcaseDiagnoses = [
         "parameterChanges": [
           {
             "key": "rsiOversold",
-            "label": "RSI 超卖阈值",
+            "label": "RSI oversold threshold",
             "before": 30,
             "after": 27
           },
           {
             "key": "rsiOverbought",
-            "label": "RSI 超买阈值",
+            "label": "RSI overbought threshold",
             "before": 70,
             "after": 73
           },
           {
             "key": "bollingerStdDev",
-            "label": "布林带标准差倍数",
+            "label": "Bollinger standard-deviation multiplier",
             "before": 1.75,
             "after": 2.012
           },
           {
             "key": "trendFilterThreshold",
-            "label": "趋势偏离阈值",
+            "label": "Trend deviation threshold",
             "before": 0.05,
             "after": 0.0425
           }
@@ -11941,7 +11941,7 @@ export const showcaseDiagnoses = [
         "scenarioTimeline": [
           {
             "dimension": "technical",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "damageScore": 47.193172535381436,
             "cause": "stop-loss-bleed",
             "pnlPct": -0.21633605537063594,
@@ -11949,7 +11949,7 @@ export const showcaseDiagnoses = [
           },
           {
             "dimension": "sentiment",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "damageScore": 30.608429664124955,
             "cause": "survived",
             "pnlPct": -0.10763976098178452,
@@ -11988,7 +11988,7 @@ export const showcaseDiagnoses = [
     "request": {
       "strategy": {
         "id": "breakout-confirmation-001",
-        "name": "BTC confirmed breakout",
+        "name": "Confirmed Breakout Strategy",
         "archetype": "breakout-confirmation",
         "params": {
           "breakoutLookback": 24,
@@ -12303,7 +12303,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 10.49012768599129,
-            "narrative": "联邦基金利率 3.50%-3.75%，10Y 美债收益率 4.45%，高收益债利差 2.78%，DXY 99.75，VIX 17.68；这些信号映射为确定性的 grind 压力路径。"
+            "narrative": "Fed funds 3.50%-3.75%, 10Y Treasury 4.45%, high-yield spread 2.78%, DXY 99.75, and VIX 17.68 map to a deterministic grind stress path."
           },
           {
             "scenarioId": "market-intel-42-c1",
@@ -12569,7 +12569,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 2.062875959229261,
-            "narrative": "加密总市值 24h 变化 -0.35%，稳定币供应 30 日变化 -1.88%，BTC open interest 变化 0.29%，大户多头占比 54.1%。"
+            "narrative": "Crypto market cap changed -0.35% over 24h, stablecoin supply changed -1.88% over 30d, BTC open interest changed 0.29%, and top-trader long share is 54.1%."
           },
           {
             "scenarioId": "news-42-c1",
@@ -12835,11 +12835,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": 23.76063170992371,
-            "narrative": "8 条冻结新闻中，负面占比 25.0%，高影响占比 75.0%，监管相关占比 25.0%；场景模拟突发消息形成的跳空风险。"
+            "narrative": "Across 8 frozen news items, negative headlines represent 25.0%, high-impact headlines 75.0%, and regulatory items 25.0%; the scenario models gap risk from sudden catalysts."
           },
           {
             "scenarioId": "sentiment-42-c4",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "dimension": "sentiment",
             "sourceSkill": "sentiment-analyst",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -13101,11 +13101,11 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": -22.341561212079004,
-            "narrative": "多头拥挤，恐惧贪婪指数 13，主动买方占比 46.2%。场景模拟先上冲诱多，随后快速下杀，检验高杠杆趋势策略的清算风险。"
+            "narrative": "long crowding, fear-greed 13, and taker buy share 46.2%. The scenario models an upside bait move followed by a fast selloff to test liquidation risk in leveraged trend strategies."
           },
           {
             "scenarioId": "technical-42-c2",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "dimension": "technical",
             "sourceSkill": "technical-analysis",
             "sourceObservedAt": "2026-06-13T04:15:45.396Z",
@@ -13367,7 +13367,7 @@ export const showcaseDiagnoses = [
             },
             "cause": "survived",
             "damageScore": -5.885406464908943,
-            "narrative": "ADX 29.3，近 20 根 DMI 切换 1 次、RSI 中轴穿越 4 次，布林带宽 5.4%。场景构造反复假突破，检验均线趋势策略的追涨杀跌与止损放血风险。"
+            "narrative": "ADX 29.3, 1 DMI switches in the last 20 bars, 4 RSI centerline crosses, and Bollinger bandwidth 5.4%. The scenario creates repeated false breakouts to test chasing and stop-loss bleed risk."
           }
         ],
         "deaths": [],
@@ -13376,7 +13376,7 @@ export const showcaseDiagnoses = [
           "rationale": "",
           "patchedStrategy": {
             "id": "breakout-confirmation-001",
-            "name": "BTC confirmed breakout",
+            "name": "Confirmed Breakout Strategy",
             "archetype": "breakout-confirmation",
             "params": {
               "breakoutLookback": 24,
@@ -17161,7 +17161,7 @@ export const showcaseDiagnoses = [
           },
           {
             "dimension": "technical",
-            "scenarioName": "技术震荡·假突破绞肉机",
+            "scenarioName": "Technical whipsaw: false-breakout grinder",
             "damageScore": -5.885406464908943,
             "cause": "survived",
             "pnlPct": 0.220476337580777,
@@ -17169,7 +17169,7 @@ export const showcaseDiagnoses = [
           },
           {
             "dimension": "sentiment",
-            "scenarioName": "情绪挤压·多头拥挤",
+            "scenarioName": "Sentiment squeeze: long crowding",
             "damageScore": -22.341561212079004,
             "cause": "survived",
             "pnlPct": 0.41881837656015297,
@@ -17179,4 +17179,6 @@ export const showcaseDiagnoses = [
       }
     }
   }
-] satisfies ShowcaseDiagnosis[];
+];
+
+export const showcaseDiagnoses = showcaseDiagnosesRaw as unknown as ShowcaseDiagnosis[];

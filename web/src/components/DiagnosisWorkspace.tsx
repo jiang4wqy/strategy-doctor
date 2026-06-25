@@ -11,9 +11,7 @@ import {
   exportDiagnosisJson,
   renderDiagnosisMarkdown,
 } from '../export/report.ts';
-import {
-  DeploymentReadinessPanel,
-} from './DeploymentReadinessPanel.tsx';
+import { DeploymentReadinessPanel } from './DeploymentReadinessPanel.tsx';
 import { DeveloperPanel } from './DeveloperPanel.tsx';
 import { ScenarioTable } from './ScenarioTable.tsx';
 import { SummaryCards } from './SummaryCards.tsx';
@@ -22,19 +20,52 @@ export interface DiagnosisWorkspaceProps {
   request: DiagnoseRequest;
   requestId: string;
   view: DiagnosisView;
+  comparison?: {
+    request: DiagnoseRequest;
+    requestId: string;
+    view: DiagnosisView;
+  };
+  onReconfigure: () => void;
+  onCompare: () => void;
+  onNewStrategy: () => void;
 }
 
 export function DiagnosisWorkspace({
   request,
   requestId,
   view,
+  comparison,
+  onCompare,
+  onReconfigure,
+  onNewStrategy,
 }: DiagnosisWorkspaceProps) {
   const filename = `strategy-doctor-${request.strategy.id}`;
+  const riskDelta = comparison
+    ? view.summary.riskScore - comparison.view.summary.riskScore
+    : 0;
+  const returnDelta = comparison
+    ? view.summary.returnDelta - comparison.view.summary.returnDelta
+    : 0;
+  const drawdownDelta = comparison
+    ? view.summary.worstDrawdownPct - comparison.view.summary.worstDrawdownPct
+    : 0;
   return (
     <div className="diagnosis-workspace">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">03 · Adversarial diagnosis</p>
+          <div className="workspace-actions">
+            <button type="button" onClick={onReconfigure}>
+              Edit parameters
+            </button>
+            <button type="button" onClick={onCompare}>
+              Compare tuned run
+            </button>
+            <button type="button" onClick={onNewStrategy}>
+              New strategy
+            </button>
+            <a href="/tutorial">Open tutorial</a>
+          </div>
+          <p className="eyebrow">03 - Adversarial diagnosis</p>
           <h1>{request.strategy.name}</h1>
           <p>
             Treatment failures, targeted repair, and independent held-out
@@ -66,6 +97,39 @@ export function DiagnosisWorkspace({
       </header>
 
       <SummaryCards summary={view.summary} />
+
+      {comparison ? (
+        <section className="comparison-panel" aria-label="Baseline comparison">
+          <div>
+            <p className="eyebrow">Baseline comparison</p>
+            <h2>Current run vs {comparison.requestId}</h2>
+            <p>
+              Compare mode keeps the previous diagnosis as an audit baseline
+              while you tune parameters and rerun the same strategy.
+            </p>
+          </div>
+          <dl>
+            <div>
+              <dt>Risk score</dt>
+              <dd>{riskDelta >= 0 ? '+' : ''}{riskDelta}</dd>
+            </div>
+            <div>
+              <dt>Return delta</dt>
+              <dd>
+                {returnDelta >= 0 ? '+' : ''}
+                {(returnDelta * 100).toFixed(1)}%
+              </dd>
+            </div>
+            <div>
+              <dt>Drawdown</dt>
+              <dd>
+                {drawdownDelta >= 0 ? '+' : ''}
+                {(drawdownDelta * 100).toFixed(1)}%
+              </dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
 
       <DeploymentReadinessPanel deployment={view.deployment} />
 

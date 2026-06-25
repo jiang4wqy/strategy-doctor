@@ -9,6 +9,7 @@ export interface ServerConfig {
   sessionTtlSeconds: number;
   bodyLimit: number;
   staticRoot: string;
+  authRateLimitDisabled: boolean;
 }
 
 function positiveInteger(
@@ -70,6 +71,7 @@ export function parseServerConfig(
     accessCode,
     sessionSecret,
     apiKeys,
+    authRateLimitDisabled: env.DOCTOR_AUTH_RATE_LIMIT_DISABLED === '1',
     sessionTtlSeconds: positiveInteger(
       env.DOCTOR_SESSION_TTL_SECONDS,
       12 * 60 * 60,

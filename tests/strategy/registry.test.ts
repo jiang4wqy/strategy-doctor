@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+﻿import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../../src/backtest/path.ts';
 import type {
@@ -204,11 +204,11 @@ test('moving-average adapter exposes its prescription policy', () => {
     slowMA: 5,
   });
   assert.deepEqual(combined.rationale, [
-    '清算死因 → 降低杠杆并将止损收紧到爆仓线一半以内',
-    '回撤击穿 → 降低仓位暴露',
-    '震荡反复止损放血 → 均线周期放慢 1.5 倍过滤噪音',
+    'Liquidation failure -> reduce leverage and move the stop inside half of the liquidation distance',
+    'Drawdown breach -> reduce position exposure',
+    'Repeated stop-loss bleed -> slow both moving averages by 1.5x to filter noise',
   ]);
-  assert.equal(maCrossAdapter.paramLabel('fastMA'), '快均线');
+  assert.equal(maCrossAdapter.paramLabel('fastMA'), 'Fast MA');
 
   const first = maCrossAdapter.jitterParams(
     params,

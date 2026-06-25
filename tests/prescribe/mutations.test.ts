@@ -21,7 +21,7 @@ test('liquidation halves leverage and moves stop loss inside half the liquidatio
 
   assert.equal(patch.leverage, 5);
   assert.ok(patch.stopLossPct! <= 0.8 / 5 / 2);
-  assert.ok(rationale.some(reason => reason.includes('杠杆')));
+  assert.ok(rationale.some(reason => reason.includes('leverage')));
 });
 
 test('drawdown breach reduces position size by thirty percent', () => {

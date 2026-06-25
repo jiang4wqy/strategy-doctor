@@ -22,7 +22,7 @@ function fakeClient(parse: ApiClient['parse']): ApiClient {
 }
 
 describe('StrategyComposer', () => {
-  it('parses a Chinese description without starting diagnosis', async () => {
+  it('parses a strategy description without starting diagnosis', async () => {
     const parse = vi.fn(async () => ({
       apiVersion: 'v1' as const,
       requestId: 'req-parse',
@@ -34,12 +34,13 @@ describe('StrategyComposer', () => {
       <StrategyComposer
         client={fakeClient(parse)}
         description=""
+        onBack={() => undefined}
         onDescriptionChange={() => undefined}
         onParsed={parsed}
       />,
     );
 
-    const description = 'BTC 四小时 RSI 10 配合布林带 14';
+    const description = 'BTC 4h RSI 10 with Bollinger 14, oversold 30, overbought 70.';
     await user.type(screen.getByLabelText('Strategy description'), description);
     await user.click(screen.getByRole('button', { name: 'Parse strategy' }));
 
@@ -55,6 +56,7 @@ describe('StrategyComposer', () => {
           throw new Error('Only MA or RSI Bollinger is supported.');
         })}
         description=""
+        onBack={() => undefined}
         onDescriptionChange={() => undefined}
         onParsed={() => undefined}
       />,

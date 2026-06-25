@@ -54,9 +54,9 @@ function summarizeChanges(
   const updated = parameterRecord(changes);
   return (Object.keys(changes) as StrategyParamKey[])
     .map(key => (
-      `${adapter.paramLabel(key as never)} ${previous[key]}→${updated[key]}`
+      `${adapter.paramLabel(key as never)} ${previous[key]} -> ${updated[key]}`
     ))
-    .join('，');
+    .join('; ');
 }
 
 function preservesTargetedIntent(
@@ -245,11 +245,11 @@ export async function prescribe(
   const summary = summarizeChanges(strategy.params, changes, adapter);
   return {
     changes,
-    rationale: `${rationale.join('；')}；最终处方：${summary}`,
+    rationale: `${rationale.join('; ')}; final prescription: ${summary}`,
     patchedStrategy: {
       ...strategy,
       id: `${strategy.id}-rx`,
-      name: `${strategy.name}（处方修补版）`,
+      name: `${strategy.name} (prescription patch)`,
       params: bestParams,
     } as Strategy,
   };

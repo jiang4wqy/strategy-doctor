@@ -29,6 +29,27 @@ const aiDraft: StrategyDraft = {
   warnings: [],
 };
 
+const qwenDraft: StrategyDraft = {
+  strategy: {
+    id: 'ai-ma-qwen',
+    name: 'AI MA',
+    archetype: 'ma-cross',
+    params: {
+      fastMA: 8,
+      slowMA: 30,
+      leverage: 10,
+      stopLossPct: 0.5,
+      positionPct: 1,
+    },
+    universe: ['BTCUSDT'],
+    timeframe: '4h',
+  },
+  source: 'qwen',
+  confidence: 0.88,
+  assumptions: [],
+  warnings: [],
+};
+
 test('parseStrategyDescription returns high-confidence local rules without AI', async () => {
   let aiCalls = 0;
   const result = await parseStrategyDescription(
@@ -59,6 +80,29 @@ test('parseStrategyDescription uses AI for an eligible unrecognized description'
 
   assert.equal(result, aiDraft);
   assert.equal(aiCalls, 1);
+});
+
+test('parseStrategyDescription can use Qwen as primary model', async () => {
+  let qwenCalls = 0;
+  const result = await parseStrategyDescription(
+    'A conservative strategy that buys market dips',
+    {
+      provider: 'qwen',
+      env: {
+        DOCTOR_NL_AI_ENABLED: '1',
+        DOCTOR_NL_QWEN_ENABLED: '1',
+        QWEN_API_KEY: 'test-key',
+        DOCTOR_QWEN_MODEL: 'qwen-test',
+      },
+      qwen: async () => {
+        qwenCalls++;
+        return qwenDraft;
+      },
+    },
+  );
+
+  assert.equal(result, qwenDraft);
+  assert.equal(qwenCalls, 1);
 });
 
 test('parseStrategyDescription never sends forbidden execution requests to AI', async () => {

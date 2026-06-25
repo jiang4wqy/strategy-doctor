@@ -10,6 +10,7 @@ export interface StrategyConfirmationProps {
   draft: StrategyDraft;
   capabilities: readonly AnyStrategyDefinition[];
   externalError?: string;
+  onBack: () => void;
   onConfirm(request: DiagnoseRequest): Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export function StrategyConfirmation({
   draft,
   capabilities,
   externalError,
+  onBack,
   onConfirm,
 }: StrategyConfirmationProps) {
   const definition = capabilities.find(
@@ -103,7 +105,15 @@ export function StrategyConfirmation({
 
   return (
     <section className="confirmation-panel" aria-labelledby="confirm-title">
-      <p className="eyebrow">02 · Confirmation boundary</p>
+      <div className="workspace-actions">
+        <button type="button" onClick={onBack}>
+          Back to input
+        </button>
+        <a href="/tutorial" className="text-link">
+          Learn how this editor works
+        </a>
+      </div>
+      <p className="eyebrow">02 - Confirmation boundary</p>
       <h2 id="confirm-title">{definition.displayName}</h2>
       <p>{definition.description}</p>
       <div className="draft-meta">
@@ -159,7 +169,7 @@ export function StrategyConfirmation({
           <p role="alert">{error ?? externalError}</p>
         ) : null}
         <button type="submit" disabled={loading}>
-          {loading ? 'Running diagnosis…' : 'Confirm and diagnose'}
+          {loading ? 'Running diagnosis...' : 'Confirm and diagnose'}
         </button>
       </form>
     </section>

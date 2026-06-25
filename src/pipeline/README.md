@@ -1,11 +1,11 @@
 # pipeline
 
-`runDoctor(strategy, backtest, options)` 完成：
+`runDoctor(strategy, backtest, options)` runs the full diagnosis flow:
 
-1. 校验 ID、维度、Skill、shock 和 treatment/held-out seed。
-2. 回测选中场景并生成全部 `evaluations`。
-3. 生成三风格评分和 deaths 子集。
-4. 生成死因定向处方。
-5. 在独立 held-out 场景上计算风险分和收益变化。
+1. Validate strategy id, dimension, skill bindings, shock selection, and treatment/held-out seeds.
+2. Backtest selected scenarios and produce all `evaluations`.
+3. Build three-style scores and a `deaths` subset.
+4. Build a targeted prescription.
+5. Compute risk score and held-out trade-off.
 
-即使没有 death，也返回零改动处方和零 trade-off。
+If there are no deaths, it still returns a zero-change patch and a zero trade-off.

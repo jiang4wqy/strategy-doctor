@@ -45,8 +45,11 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           />
           {error ? <p role="alert">{error}</p> : null}
           <button type="submit" disabled={loading || accessCode.length === 0}>
-            {loading ? 'Checking access…' : 'Enter workspace'}
+            {loading ? 'Checking access...' : 'Enter workspace'}
           </button>
+          <a href="/tutorial" className="text-link">
+            Open quickstart guide
+          </a>
         </form>
       </section>
     </main>

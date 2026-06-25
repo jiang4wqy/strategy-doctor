@@ -112,8 +112,8 @@ test('prescribe lowers leverage and does not reduce treatment risk score', async
     prescription.patchedStrategy.params.slowMA,
     fragile.params.slowMA,
   );
-  assert.ok(prescription.rationale.includes('杠杆'));
-  assert.ok(prescription.rationale.includes('最终处方'));
+  assert.ok(prescription.rationale.includes('leverage'));
+  assert.ok(prescription.rationale.includes('final prescription'));
   assert.ok(
     prescription.rationale.includes(
       String(prescription.patchedStrategy.params.leverage),

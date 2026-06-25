@@ -2,13 +2,15 @@ import type { DraftAssumption, StrategyDraft } from '../platform/contracts.ts';
 import { parseStrategy } from '../strategy/parse.ts';
 import { strategyRegistry } from '../strategy/registry.ts';
 
-const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
+const QWEN_CHAT_COMPLETIONS_URL =
+  'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
-export interface AnthropicParserOptions {
+export interface QwenParserOptions {
   model?: string;
   env?: Record<string, string | undefined>;
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
+  baseUrl?: string;
 }
 
 function object(value: unknown): Record<string, unknown> | undefined {
@@ -17,23 +19,42 @@ function object(value: unknown): Record<string, unknown> | undefined {
     : undefined;
 }
 
+function extractJson(text: string): unknown {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (trimmed.startsWith('```')) {
+    const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+    if (fenced && fenced[1]) {
+      return objectParse(fenced[1].trim());
+    }
+  }
+  return objectParse(trimmed);
+}
+
+function objectParse(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
 function parseModelPayload(value: unknown): {
   strategy: unknown;
   explicitFields: string[];
 } | undefined {
   const response = object(value);
-  if (!response || !Array.isArray(response.content)) {
+  if (!response || !Array.isArray(response.choices)) {
     return undefined;
   }
-  const firstBlock = object(response.content[0]);
-  if (
-    !firstBlock
-    || firstBlock.type !== 'text'
-    || typeof firstBlock.text !== 'string'
-  ) {
+  const firstChoice = object(response.choices[0]);
+  const message = object(firstChoice?.message);
+  if (!message || typeof message.content !== 'string') {
     return undefined;
   }
-  const parsed = object(JSON.parse(firstBlock.text));
+  const parsed = object(extractJson(message.content));
   if (
     !parsed
     || !Array.isArray(parsed.explicitFields)
@@ -105,14 +126,24 @@ function validateDefaults(
   return assumptions;
 }
 
-export async function parseWithAnthropic(
+export async function parseWithQwen(
   description: string,
-  options: AnthropicParserOptions = {},
+  options: QwenParserOptions = {},
 ): Promise<StrategyDraft | undefined> {
   const env = options.env ?? process.env;
-  const apiKey = env.ANTHROPIC_API_KEY;
-  const model = options.model ?? env.DOCTOR_NL_MODEL;
-  if (env.DOCTOR_NL_AI_ENABLED !== '1' || !apiKey || !model) {
+  const apiKey = env.QWEN_API_KEY
+    ?? env.DOCTOR_QWEN_API_KEY
+    ?? env.BITGET_QWEN_API_KEY;
+  const model = options.model
+    ?? env.DOCTOR_QWEN_MODEL
+    ?? env.DOCTOR_NL_MODEL
+    ?? env.QWEN_MODEL
+    ?? 'qwen-plus';
+  if (
+    (env.DOCTOR_NL_AI_ENABLED !== '1' && env.DOCTOR_NL_QWEN_ENABLED !== '1')
+    || !apiKey
+    || !model
+  ) {
     return undefined;
   }
 
@@ -123,29 +154,33 @@ export async function parseWithAnthropic(
   );
   try {
     const response = await (options.fetch ?? globalThis.fetch)(
-      ANTHROPIC_MESSAGES_URL,
+      options.baseUrl ?? QWEN_CHAT_COMPLETIONS_URL,
       {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'anthropic-version': '2023-06-01',
-          'x-api-key': apiKey,
+          authorization: `Bearer ${apiKey}`,
         },
         signal: controller.signal,
         body: JSON.stringify({
           model,
           max_tokens: 1200,
           temperature: 0,
-          system: [
-            'Return JSON only with keys strategy and explicitFields.',
-            'Do not generate source code or execution logic.',
-            'Use exactly one of these capability definitions:',
-            JSON.stringify(strategyRegistry.listDefinitions()),
-          ].join('\n'),
-          messages: [{
-            role: 'user',
-            content: description,
-          }],
+          messages: [
+            {
+              role: 'system',
+              content: [
+                'Return JSON only with keys strategy and explicitFields.',
+                'Do not generate source code or execution logic.',
+                'Use exactly one of these capability definitions:',
+                JSON.stringify(strategyRegistry.listDefinitions()),
+              ].join('\n'),
+            },
+            {
+              role: 'user',
+              content: description,
+            },
+          ],
         }),
       },
     );
@@ -166,7 +201,7 @@ export async function parseWithAnthropic(
     }
     return {
       strategy,
-      source: 'anthropic',
+      source: 'qwen',
       confidence: Math.min(
         0.95,
         0.75 + payload.explicitFields.length * 0.02,
